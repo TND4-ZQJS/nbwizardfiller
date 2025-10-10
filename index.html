@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PDF Wizard Form Filler</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ---------- APPLE-STYLE CSS ---------- -->
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --accent:#007aff; --muted:#666;
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  display:flex; justify-content:center; align-items:center;
+  min-height:100vh; margin:0; padding:20px;
+}
+.wizard{
+  background:var(--card);
+  padding:30px; border-radius:16px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
+  width:100%; max-width:420px;
+}
+h1{ text-align:center; color:var(--accent); margin-bottom:20px; }
+.step{ display:none; animation:fade .3s ease-in-out; }
+.step.active{ display:block; }
+@keyframes fade{ from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+label{ display:block; margin-top:12px; font-weight:500; color:#333; }
+input, select, textarea{
+  width:100%; padding:10px; margin-top:4px;
+  border:1px solid #ccc; border-radius:8px;
+  font-size:15px;
+}
+button{
+  background:var(--accent); color:#fff; border:none;
+  padding:10px 16px; border-radius:8px; cursor:pointer;
+  margin-top:20px;
+}
+button:hover{ background:#006ae6; }
+nav{
+  text-align:center; margin-top:10px; color:var(--muted);
+}
+</style>
+</head>
+
+<body>
+<div class="wizard">
+  <h1>Form Filler Wizard</h1>
+
+  <form id="wizardForm">
+    <!-- STEP 1 -->
+    <div class="step active" id="step1">
+      <h2>Step 1: Policy Info</h2>
+      <label>Policy No:</label>
+      <input id="PolicyNo1" required>
+      <label>Insured Name:</label>
+      <input id="Insured1" required>
+      <label>Relationship:</label>
+      <select id="Relationship1_spouse">
+        <option value="">-- Select --</option>
+        <option>OWNSELF</option>
+        <option>SPOUSE</option>
+        <option>CHILDREN</option>
+        <option>PARENT</option>
+        <option>GRANDPARENT</option>
+        <option>SIBLING</option>
+        <option>COMPANY</option>
+      </select>
+      <button type="button" onclick="nextStep(2)">Next →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+      <h2>Step 2: Contact Info</h2>
+      <label>Phone:</label>
+      <input id="Phone1">
+      <label>Address:</label>
+      <textarea id="Address1"></textarea>
+      <button type="button" onclick="prevStep(1)">← Back</button>
+      <button type="button" onclick="nextStep(3)">Next →</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+      <h2>Step 3: Payment & Review</h2>
+      <label>Payment Method:</label>
+      <input id="PaymentMethod">
+      <label>Amount:</label>
+      <input id="Amount" type="number">
+      <label>Sign Date:</label>
+      <input id="SignDate" type="date">
+      <button type="button" onclick="prevStep(2)">← Back</button>
+      <button type="button" onclick="generatePDFs()">Generate PDFs</button>
+    </div>
+  </form>
+
+  <nav>v1.0 — All-in-one prototype</nav>
+</div>
+
+<!-- ---------- JS SECTION ---------- -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script>
+function nextStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+}
+function prevStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step'+n).classList.add('active');
+}
+
+async function generatePDFs(){
+  const fieldIDs = [
+    "PolicyNo1",
+    "Insured1",
+    "Relationship1_spouse",
+    "Phone1",
+    "Address1",
+    "PaymentMethod",
+    "Amount",
+    "SignDate"
+  ];
+
+  const data = {};
+  fieldIDs.forEach(id=>{
+    data[id] = document.getElementById(id)?.value || "";
+  });
+
+  const pdfPaths = [
+    "pdf/form1.pdf",
+    "pdf/form2.pdf",
+    "pdf/form3.pdf"
+  ];
+
+  for(const path of pdfPaths){
+    const bytes = await fetch(path).then(r=>r.arrayBuffer());
+    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
+
+    for(const key of fieldIDs){
+      try{
+        const field = form.getField(key);
+        if(field.constructor.name==="PDFTextField") field.setText(data[key]);
+        else if(field.constructor.name==="PDFDropdown") field.select(data[key]);
+        else if(field.constructor.name==="PDFCheckBox" && data[key]) field.check();
+      }catch{ /* ignore missing fields */ }
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], {type:"application/pdf"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = path.split("/").pop().replace(".pdf","_filled.pdf");
+    a.click();
+  }
+
+  alert("✅ All 3 PDFs generated successfully!");
+}
+</script>
+</body>
+</html>
