@@ -2,289 +2,194 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>PDF Wizard Form Filler</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
+<title>Zero Interest EPP Wizard Prototype</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-:root{
-  --bg:#f5f6fa;
-  --card:#ffffff;
-  --accent:#007aff;
-  --accent-light:#e7f0ff;
-  --muted:#777;
-  --radius:14px;
-  --transition:all .25s ease;
-}
-*{box-sizing:border-box;}
+  :root {
+    --bg:#f6f7f9; 
+    --card:#fff;
+    --accent:#007aff;
+    --muted:#666;
+  }
 
-body{
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:var(--bg);
-  display:flex; justify-content:center; align-items:center;
-  min-height:100vh; margin:0; padding:20px;
-}
+  * { box-sizing:border-box; }
+  body {
+    font-family:system-ui, sans-serif;
+    background:var(--bg);
+    margin:0;
+    padding:20px;
+  }
 
-.wizard{
-  background:var(--card);
-  padding:30px 28px;
-  border-radius:var(--radius);
-  box-shadow:0 8px 30px rgba(0,0,0,0.08);
-  width:100%; max-width:440px;
-  position:relative;
-  overflow:hidden;
-}
+  h2 { margin-top:0; color:var(--accent); }
 
-h1{
-  text-align:center;
-  color:#222;
-  font-size:1.6em;
-  margin-bottom:10px;
-}
-h2{
-  color:var(--accent);
-  font-size:1.2em;
-  margin-bottom:10px;
-}
+  .step { display:none; background:var(--card); padding:20px; border-radius:16px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+  .step.active { display:block; animation:fade .3s ease-in; }
+  @keyframes fade { from {opacity:0; transform:translateY(5px);} to {opacity:1; transform:translateY(0);} }
 
-.progress{
-  background:#eee;
-  border-radius:var(--radius);
-  height:8px;
-  overflow:hidden;
-  margin-bottom:20px;
-}
-.progress-bar{
-  height:100%;
-  width:33.3%;
-  background:var(--accent);
-  transition:width .3s ease;
-}
+  label { display:block; margin:12px 0 4px; font-weight:500; }
+  input, select, textarea {
+    width:100%;
+    padding:8px 10px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:1rem;
+  }
 
-.step{display:none; animation:fade .3s ease-in-out;}
-.step.active{display:block;}
+  .btns { margin-top:20px; display:flex; justify-content:space-between; }
+  button {
+    background:var(--accent);
+    border:none;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:1rem;
+  }
+  button[disabled] { opacity:0.5; cursor:not-allowed; }
 
-@keyframes fade{from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+  .progress {
+    display:flex; gap:4px; margin-bottom:16px;
+  }
+  .dot {
+    flex:1; height:6px; border-radius:4px; background:#ccc;
+  }
+  .dot.active { background:var(--accent); }
 
-label{
-  display:block;
-  margin-top:14px;
-  font-weight:500;
-  color:#333;
-  font-size:0.95em;
-}
-input, select, textarea{
-  width:100%;
-  padding:10px 12px;
-  margin-top:6px;
-  border:1px solid #ccc;
-  border-radius:8px;
-  font-size:15px;
-  transition:var(--transition);
-}
-input:focus, select:focus, textarea:focus{
-  border-color:var(--accent);
-  outline:none;
-  box-shadow:0 0 0 3px var(--accent-light);
-}
-
-button{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  padding:12px 18px;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:15px;
-  transition:var(--transition);
-}
-button:hover{
-  background:#006ae6;
-  transform:translateY(-1px);
-}
-
-.buttons{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  margin-top:24px;
-}
-
-nav{
-  text-align:center;
-  margin-top:15px;
-  color:var(--muted);
-  font-size:0.85em;
-}
-
-/* ---- Saved Status ---- */
-#saveStatus{
-  position:fixed;
-  top:12px;
-  right:12px;
-  background:var(--accent);
-  color:#fff;
-  padding:6px 10px;
-  border-radius:8px;
-  font-size:0.85rem;
-  opacity:0;
-  transition:opacity .25s;
-  z-index:1000;
-}
-#saveStatus.show{
-  opacity:1;
-}
+  #saveStatus {
+    position:fixed; top:12px; right:12px;
+    background:var(--accent); color:#fff;
+    padding:6px 10px; border-radius:8px;
+    font-size:0.85rem; opacity:0;
+    transition:opacity .25s;
+  }
+  #saveStatus.show { opacity:1; }
 </style>
 </head>
-
 <body>
-<div class="wizard">
-  <h1>Form Filler Wizard</h1>
-  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
-  <!-- Saved indicator -->
-  <div id="saveStatus">Saved</div>
+<div id="wizard">
 
-  <form id="wizardForm">
-    <!-- STEP 1 -->
-    <div class="step active" id="step1">
-      <h2>Step 1: Policy Info</h2>
-      <label>Policy No:</label>
-      <input id="PolicyNo1" required>
+  <div class="progress" id="progressDots"></div>
 
-      <label>Insured Name:</label>
-      <input id="Insured1" required>
-
-      <label>Relationship:</label>
-      <select id="Relationship1_spouse">
-        <option value="">-- Select --</option>
-        <option>OWNSELF</option>
-        <option>SPOUSE</option>
-        <option>CHILDREN</option>
-        <option>PARENT</option>
-        <option>GRANDPARENT</option>
-        <option>SIBLING</option>
-        <option>COMPANY</option>
-      </select>
-
-      <div class="buttons">
-        <span></span>
-        <button type="button" onclick="nextStep(2)">Next →</button>
-      </div>
+  <!-- Step 1a -->
+  <div class="step active" data-step="1a">
+    <h2>Step 1a — Basic Information (Insured)</h2>
+    <label>Full Name</label><input id="InsuredName">
+    <label>Date of Birth</label><input id="InsuredDOB" type="date">
+    <label>NRIC / Passport No.</label><input id="InsuredID">
+    <div class="btns">
+      <button disabled>← Back</button>
+      <button onclick="nextStep()">Next →</button>
     </div>
+  </div>
 
-    <!-- STEP 2 -->
-    <div class="step" id="step2">
-      <h2>Step 2: Contact Info</h2>
-      <label>Phone:</label>
-      <input id="Phone1">
-
-      <label>Address:</label>
-      <textarea id="Address1" rows="3"></textarea>
-
-      <div class="buttons">
-        <button type="button" onclick="prevStep(1)">← Back</button>
-        <button type="button" onclick="nextStep(3)">Next →</button>
-      </div>
+  <!-- Step 1b -->
+  <div class="step" data-step="1b">
+    <h2>Step 1b — Basic Information (Policy Owner)</h2>
+    <label>Full Name</label><input id="OwnerName">
+    <label>Relationship to Insured</label><input id="OwnerRelation">
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
     </div>
+  </div>
 
-    <!-- STEP 3 -->
-    <div class="step" id="step3">
-      <h2>Step 3: Payment & Review</h2>
-      <label>Payment Method:</label>
-      <input id="PaymentMethod">
-
-      <label>Amount:</label>
-      <input id="Amount" type="number">
-
-      <label>Sign Date:</label>
-      <input id="SignDate" type="date">
-
-      <div class="buttons">
-        <button type="button" onclick="prevStep(2)">← Back</button>
-        <button type="button" onclick="generatePDFs()">Generate PDFs</button>
-      </div>
+  <!-- Step 1c -->
+  <div class="step" data-step="1c">
+    <h2>Step 1c — Basic Information (3rd Party Payor)</h2>
+    <label>Payor Name</label><input id="PayorName">
+    <label>Relationship</label><input id="PayorRelation">
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
     </div>
-  </form>
+  </div>
 
-  <nav id="navStatus">Step 1 of 3</nav>
+  <!-- Step 2a -->
+  <div class="step" data-step="2a">
+    <h2>Step 2a — Credit Card Information</h2>
+    <label>Cardholder Name</label><input id="CardName">
+    <label>Card Number</label><input id="CardNumber">
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 2b -->
+  <div class="step" data-step="2b">
+    <h2>Step 2b — EPP Options</h2>
+    <label>Installment Plan</label>
+    <select id="EPPPlan">
+      <option value="">Select...</option>
+      <option value="6">6 months</option>
+      <option value="12">12 months</option>
+    </select>
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step" data-step="3">
+    <h2>Step 3 — Signature</h2>
+    <p>(Signature pad placeholder)</p>
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step" data-step="4">
+    <h2>Step 4 — Download PDF</h2>
+    <button>⬇ Download PDF (Coming Soon)</button>
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button disabled>Finish</button>
+    </div>
+  </div>
+
 </div>
 
-<!-- ---------- JS SECTION ---------- -->
-<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<div id="saveStatus">✅ Saved</div>
+
 <script>
-const fieldIDs = [
-  "PolicyNo1","Insured1","Relationship1_spouse",
-  "Phone1","Address1","PaymentMethod","Amount","SignDate"
-];
-const saveStatus = document.getElementById("saveStatus");
+const steps = Array.from(document.querySelectorAll('.step'));
+let currentStep = 0;
+const dots = document.getElementById('progressDots');
 
-// ---- Step Navigation ----
-function nextStep(n){
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.getElementById('step'+n).classList.add('active');
-  document.getElementById('progressBar').style.width = (n*33.3)+'%';
-  document.getElementById('navStatus').textContent = `Step ${n} of 3`;
-}
-function prevStep(n){ nextStep(n); }
-
-// ---- Auto-Save & Feedback ----
-window.addEventListener("DOMContentLoaded", ()=>{
-  // Restore
-  fieldIDs.forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    const saved=localStorage.getItem("wizard_"+id);
-    if(saved!==null) el.value=saved;
-  });
-
-  // Watch for input changes
-  fieldIDs.forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.addEventListener("input", ()=>{
-      localStorage.setItem("wizard_"+id, el.value);
-      showSavedStatus();
-    });
-  });
+// Build progress dots
+steps.forEach((_,i)=>{
+  const dot=document.createElement('div');
+  dot.className='dot';
+  dots.appendChild(dot);
 });
+updateProgress();
 
-// ---- Show Saved Status ----
-let saveTimer;
-function showSavedStatus(){
-  saveStatus.classList.add("show");
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>saveStatus.classList.remove("show"),1200);
+function nextStep(){
+  if(currentStep < steps.length-1){
+    steps[currentStep].classList.remove('active');
+    currentStep++;
+    steps[currentStep].classList.add('active');
+    updateProgress();
+  }
+}
+function prevStep(){
+  if(currentStep>0){
+    steps[currentStep].classList.remove('active');
+    currentStep--;
+    steps[currentStep].classList.add('active');
+    updateProgress();
+  }
 }
 
-// ---- Generate PDFs ----
-async function generatePDFs(){
-  const data={};
-  fieldIDs.forEach(id=>data[id]=localStorage.getItem("wizard_"+id)||"");
-
-  const pdfPaths=["pdf/form1.pdf","pdf/form2.pdf","pdf/form3.pdf"];
-  for(const path of pdfPaths){
-    const bytes=await fetch(path).then(r=>r.arrayBuffer());
-    const pdfDoc=await PDFLib.PDFDocument.load(bytes);
-    const form=pdfDoc.getForm();
-
-    for(const key of fieldIDs){
-      try{
-        const field=form.getField(key);
-        if(field.constructor.name==="PDFTextField") field.setText(data[key]);
-        else if(field.constructor.name==="PDFDropdown") field.select(data[key]);
-        else if(field.constructor.name==="PDFCheckBox" && data[key]) field.check();
-      }catch{}
-    }
-
-    const pdfBytes=await pdfDoc.save();
-    const blob=new Blob([pdfBytes],{type:"application/pdf"});
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=path.split("/").pop().replace(".pdf","_filled.pdf");
-    a.click();
-  }
-  alert("✅ All 3 PDFs generated successfully using saved data!");
+function updateProgress(){
+  const allDots = dots.querySelectorAll('.dot');
+  allDots.forEach((d,i)=>d.classList.toggle('active', i<=currentStep));
 }
 </script>
+
 </body>
 </html>
