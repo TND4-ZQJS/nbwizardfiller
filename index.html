@@ -118,13 +118,17 @@ nav{
 
 /* ---- Saved Status ---- */
 #saveStatus{
-  position:absolute;
-  top:10px;
-  right:16px;
-  font-size:0.85em;
-  color:var(--accent);
+  position:fixed;
+  top:12px;
+  right:12px;
+  background:var(--accent);
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:0.85rem;
   opacity:0;
-  transition:opacity .4s ease;
+  transition:opacity .25s;
+  z-index:1000;
 }
 #saveStatus.show{
   opacity:1;
@@ -138,7 +142,7 @@ nav{
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
   <!-- Saved indicator -->
-  <div id="saveStatus">✅ Saved</div>
+  <div id="saveStatus">Saved</div>
 
   <form id="wizardForm">
     <!-- STEP 1 -->
