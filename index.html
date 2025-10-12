@@ -4,181 +4,136 @@
 <meta charset="utf-8">
 <title>Zero Interest EPP Wizard Prototype</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <style>
-  :root {
-    --bg:#f6f7f9; 
-    --card:#fff;
-    --accent:#007aff;
-    --muted:#666;
-  }
-
-  * { box-sizing:border-box; }
-  body {
-    font-family:system-ui, sans-serif;
-    background:var(--bg);
-    margin:0;
-    padding:20px;
-  }
-
-  h2 { margin-top:0; color:var(--accent); }
-
-  .step { display:none; background:var(--card); padding:20px; border-radius:16px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
-  .step.active { display:block; animation:fade .3s ease-in; }
-  @keyframes fade { from {opacity:0; transform:translateY(5px);} to {opacity:1; transform:translateY(0);} }
-
-  label { display:block; margin:12px 0 4px; font-weight:500; }
-  input, select, textarea {
-    width:100%;
-    padding:8px 10px;
-    border:1px solid #ccc;
-    border-radius:8px;
-    font-size:1rem;
-  }
-
-  .btns { margin-top:20px; display:flex; justify-content:space-between; }
-  button {
-    background:var(--accent);
-    border:none;
-    color:#fff;
-    padding:10px 18px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:1rem;
-  }
-  button[disabled] { opacity:0.5; cursor:not-allowed; }
-
-  .progress {
-    display:flex; gap:4px; margin-bottom:16px;
-  }
-  .dot {
-    flex:1; height:6px; border-radius:4px; background:#ccc;
-  }
-  .dot.active { background:var(--accent); }
-
-  .pdf-list{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin:20px 0;
+:root{
+  --bg:#f6f7f9; 
+  --card:#fff; 
+  --accent:#007aff; 
+  --muted:#666;
 }
+*{box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);
+  margin:0; padding:20px;
+  color:#333;
+}
+h2{margin-top:0; color:var(--accent);}
+.step{
+  display:none; background:var(--card); padding:24px;
+  border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.step.active{display:block; animation:fade .3s ease-in;}
+@keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+
+/* Floating Label Style */
+.floating-label{position:relative;margin-top:18px;}
+.floating-label input,
+.floating-label select,
+.floating-label textarea{
+  width:100%; padding:12px 10px;
+  font-size:16px; border:1px solid #ccc;
+  border-radius:8px; background:transparent; outline:none;
+}
+.floating-label label{
+  position:absolute; left:12px; top:12px;
+  color:#777; pointer-events:none;
+  transition:all 0.2s ease; background:white;
+  padding:0 4px;
+}
+.floating-label input:focus + label,
+.floating-label input:not(:placeholder-shown) + label,
+.floating-label select:focus + label,
+.floating-label select:not([value=""]) + label,
+.floating-label textarea:focus + label,
+.floating-label textarea:not(:placeholder-shown) + label{
+  top:-8px; left:10px; font-size:12px; color:var(--accent);
+}
+
+/* Buttons */
+.btns{margin-top:24px;display:flex;justify-content:space-between;}
+button{
+  background:var(--accent);color:#fff;border:none;
+  padding:10px 18px;border-radius:10px;
+  cursor:pointer;font-size:1rem;
+}
+button[disabled]{opacity:0.5;cursor:not-allowed;}
+button:hover{background:#006ae6;}
+
+/* Progress Bar */
+.progress{display:flex;gap:4px;margin-bottom:16px;}
+.dot{flex:1;height:6px;border-radius:4px;background:#ccc;}
+.dot.active{background:var(--accent);}
+
+/* PDF list for Step 4 */
+.pdf-list{display:flex;flex-direction:column;gap:12px;margin:20px 0;}
 .pdf-card{
-  background:#f8f9fa;
-  border-radius:12px;
-  padding:14px 16px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  background:#f8f9fa;border-radius:12px;padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;
   box-shadow:0 1px 4px rgba(0,0,0,0.06);
 }
-.pdf-info{ display:flex; align-items:center; gap:10px; }
-.pdf-icon{ font-size:1.5rem; }
-.pdf-name{ font-weight:500; color:#333; }
-
-.pdf-actions{
-  display:flex; align-items:center; gap:8px;
-}
+.pdf-info{display:flex;align-items:center;gap:10px;}
+.pdf-icon{font-size:1.5rem;}
+.pdf-name{font-weight:500;color:#333;}
+.pdf-actions{display:flex;align-items:center;gap:8px;}
 .spinner{
-  width:18px; height:18px;
-  border:2px solid #ddd;
-  border-top-color:var(--accent);
-  border-radius:50%;
+  width:18px;height:18px;border:2px solid #ddd;
+  border-top-color:var(--accent);border-radius:50%;
   animation:spin 0.8s linear infinite;
 }
-@keyframes spin{ to{ transform:rotate(360deg);} }
-.hidden{ display:none; }
-
- .floating-label {
-  position: relative;
-  margin-top: 18px;
-}
-
-.floating-label input {
-  width: 100%;
-  padding: 12px 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: transparent;
-  outline: none;
-}
-
-.floating-label label {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  color: #777;
-  pointer-events: none;
-  transition: all 0.2s ease;
-  background: white; /* ensures the text is readable on border line */
-  padding: 0 4px;
-}
-
-/* when input is focused or filled */
-.floating-label input:focus + label,
-.floating-label input:not(:placeholder-shown) + label {
-  top: -8px;
-  left: 10px;
-  font-size: 12px;
-  color: var(--accent);
-} 
-  
+@keyframes spin{to{transform:rotate(360deg);}}
+.hidden{display:none;}
 .btn-download{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  padding:6px 12px;
-  border-radius:8px;
-  cursor:pointer;
+  background:var(--accent);color:#fff;border:none;
+  padding:6px 12px;border-radius:8px;cursor:pointer;
   transition:background .25s;
 }
-.btn-download:hover{ background:#006ae6; }
-.btn-download[disabled]{
-  background:#ccc;
-  cursor:default;
-}
+.btn-download:hover{background:#006ae6;}
+.btn-download[disabled]{background:#ccc;cursor:default;}
 
-.actions{
-  text-align:center;
-  margin-top:20px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
+.actions{text-align:center;margin-top:20px;display:flex;flex-direction:column;gap:10px;}
 #btnGenerateAll{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  padding:12px;
-  border-radius:10px;
-  font-size:1rem;
-  cursor:pointer;
+  background:var(--accent);color:#fff;border:none;
+  padding:12px;border-radius:10px;font-size:1rem;cursor:pointer;
   transition:background .25s;
 }
-#btnGenerateAll:hover{ background:#006ae6; }
+#btnGenerateAll:hover{background:#006ae6;}
 
-
-  #saveStatus {
-    position:fixed; top:12px; right:12px;
-    background:var(--accent); color:#fff;
-    padding:6px 10px; border-radius:8px;
-    font-size:0.85rem; opacity:0;
-    transition:opacity .25s;
-  }
-  #saveStatus.show { opacity:1; }
+/* Save Status */
+#saveStatus{
+  position:fixed;top:12px;right:12px;
+  background:var(--accent);color:#fff;
+  padding:6px 10px;border-radius:8px;
+  font-size:0.85rem;opacity:0;transition:opacity .25s;
+}
+#saveStatus.show{opacity:1;}
 </style>
 </head>
 <body>
 
 <div id="wizard">
-
   <div class="progress" id="progressDots"></div>
 
   <!-- Step 1a -->
   <div class="step active" data-step="1a">
-    <h2>Step 1a — Basic Information (Policy Owner)</h2>
-    <label>Full Name</label><input id="Wiz_PO_Name" type="text">
-    <label>NRIC / Passport No.</label><input id="Wiz_PO_Insured_Name" type="text">
-    
+    <h2>Step 1a — Basic Information (Insured)</h2>
+
+    <div class="floating-label">
+      <input id="InsuredName" type="text" placeholder=" " required>
+      <label for="InsuredName">Insured Full Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="InsuredNRIC" type="text" placeholder=" " required>
+      <label for="InsuredNRIC">NRIC / Passport No.</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="InsuredDOB" type="date" placeholder=" " required>
+      <label for="InsuredDOB">Date of Birth</label>
+    </div>
+
     <div class="btns">
       <button disabled>← Back</button>
       <button onclick="nextStep()">Next →</button>
@@ -188,8 +143,17 @@
   <!-- Step 1b -->
   <div class="step" data-step="1b">
     <h2>Step 1b — Basic Information (Policy Owner)</h2>
-    <label>Full Name</label><input id="OwnerName">
-    <label>Relationship to Insured</label><input id="OwnerRelation">
+
+    <div class="floating-label">
+      <input id="OwnerName" type="text" placeholder=" " required>
+      <label for="OwnerName">Owner Full Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="OwnerRelation" type="text" placeholder=" " required>
+      <label for="OwnerRelation">Relationship to Insured</label>
+    </div>
+
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
@@ -199,10 +163,17 @@
   <!-- Step 1c -->
   <div class="step" data-step="1c">
     <h2>Step 1c — Basic Information (3rd Party Payor)</h2>
+
     <div class="floating-label">
-  <input type="text" id="insuredName" required>
-  <label for="insuredName">Insured Name</label>
-</div>
+      <input id="PayorName" type="text" placeholder=" ">
+      <label for="PayorName">Payor Full Name (if any)</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="PayorRelation" type="text" placeholder=" ">
+      <label for="PayorRelation">Relation to Policy Owner</label>
+    </div>
+
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
@@ -212,8 +183,22 @@
   <!-- Step 2a -->
   <div class="step" data-step="2a">
     <h2>Step 2a — Credit Card Information</h2>
-    <label>Cardholder Name</label><input id="CardName">
-    <label>Card Number</label><input id="CardNumber">
+
+    <div class="floating-label">
+      <input id="CardName" type="text" placeholder=" ">
+      <label for="CardName">Cardholder Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="CardNumber" type="text" placeholder=" ">
+      <label for="CardNumber">Card Number</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="ExpiryDate" type="month" placeholder=" ">
+      <label for="ExpiryDate">Expiry Date</label>
+    </div>
+
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
@@ -223,12 +208,16 @@
   <!-- Step 2b -->
   <div class="step" data-step="2b">
     <h2>Step 2b — EPP Options</h2>
-    <label>Installment Plan</label>
-    <select id="EPPPlan">
-      <option value="">Select...</option>
-      <option value="6">6 months</option>
-      <option value="12">12 months</option>
-    </select>
+
+    <div class="floating-label">
+      <select id="EPPPlan" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="6">6 months</option>
+        <option value="12">12 months</option>
+      </select>
+      <label for="EPPPlan">Installment Plan</label>
+    </div>
+
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
@@ -239,59 +228,38 @@
   <div class="step" data-step="3">
     <h2>Step 3 — Signature</h2>
     <p>(Signature pad placeholder)</p>
+
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
     </div>
   </div>
 
-  <!-- STEP 4 -->
-<div class="step" id="step4">
-  <h2>Step 4: Generate & Download</h2>
-  <p>Your data will be applied to all 3 forms below.</p>
+  <!-- Step 4 -->
+  <div class="step" data-step="4">
+    <h2>Step 4 — Generate & Download</h2>
+    <p>Your data will be applied to all 3 forms below.</p>
 
-  <div class="pdf-list">
-    <div class="pdf-card">
-      <div class="pdf-info">
-        <div class="pdf-icon">📄</div>
-        <div class="pdf-name">Form 1 – EPP Application</div>
+    <div class="pdf-list">
+      <div class="pdf-card">
+        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 1 – EPP Application</div></div>
+        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
       </div>
-      <div class="pdf-actions">
-        <div class="spinner hidden"></div>
-        <button class="btn-download" disabled>Waiting to generate…</button>
+      <div class="pdf-card">
+        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 2 – Credit Card Authorization</div></div>
+        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
+      </div>
+      <div class="pdf-card">
+        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 3 – EPP Declaration</div></div>
+        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
       </div>
     </div>
 
-    <div class="pdf-card">
-      <div class="pdf-info">
-        <div class="pdf-icon">📄</div>
-        <div class="pdf-name">Form 2 – Credit Card Authorization</div>
-      </div>
-      <div class="pdf-actions">
-        <div class="spinner hidden"></div>
-        <button class="btn-download" disabled>Waiting to generate…</button>
-      </div>
-    </div>
-
-    <div class="pdf-card">
-      <div class="pdf-info">
-        <div class="pdf-icon">📄</div>
-        <div class="pdf-name">Form 3 – EPP Declaration</div>
-      </div>
-      <div class="pdf-actions">
-        <div class="spinner hidden"></div>
-        <button class="btn-download" disabled>Waiting to generate…</button>
-      </div>
+    <div class="actions">
+      <button id="btnGenerateAll">⚙ Generate All 3 PDFs</button>
+      <button type="button" onclick="prevStep()">← Back to Signatures</button>
     </div>
   </div>
-
-  <div class="actions">
-    <button id="btnGenerateAll">⚙ Generate All 3 PDFs</button>
-    <button type="button" onclick="prevStep(3)">← Back to Signatures</button>
-  </div>
-</div>
-
-
 </div>
 
 <div id="saveStatus">✅ Saved</div>
@@ -301,16 +269,12 @@ const steps = Array.from(document.querySelectorAll('.step'));
 let currentStep = 0;
 const dots = document.getElementById('progressDots');
 
-// Build progress dots
-steps.forEach((_,i)=>{
-  const dot=document.createElement('div');
-  dot.className='dot';
-  dots.appendChild(dot);
-});
+// Progress dots
+steps.forEach(()=>{ const dot=document.createElement('div'); dot.className='dot'; dots.appendChild(dot); });
 updateProgress();
 
 function nextStep(){
-  if(currentStep < steps.length-1){
+  if(currentStep<steps.length-1){
     steps[currentStep].classList.remove('active');
     currentStep++;
     steps[currentStep].classList.add('active');
@@ -325,37 +289,31 @@ function prevStep(){
     updateProgress();
   }
 }
-
 function updateProgress(){
-  const allDots = dots.querySelectorAll('.dot');
-  allDots.forEach((d,i)=>d.classList.toggle('active', i<=currentStep));
+  const allDots=dots.querySelectorAll('.dot');
+  allDots.forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
 }
 
-const btnGenerateAll = document.getElementById("btnGenerateAll");
-btnGenerateAll.addEventListener("click", async ()=>{
-  const cards = document.querySelectorAll(".pdf-card");
-  btnGenerateAll.disabled = true;
-  btnGenerateAll.textContent = "Generating PDFs…";
-
+// Simulated PDF Generation
+const btnGenerateAll=document.getElementById("btnGenerateAll");
+btnGenerateAll.addEventListener("click",async()=>{
+  const cards=document.querySelectorAll(".pdf-card");
+  btnGenerateAll.disabled=true;
+  btnGenerateAll.textContent="Generating PDFs…";
   for(let i=0;i<cards.length;i++){
-    const spinner = cards[i].querySelector(".spinner");
-    const btn = cards[i].querySelector(".btn-download");
+    const spinner=cards[i].querySelector(".spinner");
+    const btn=cards[i].querySelector(".btn-download");
     spinner.classList.remove("hidden");
-    btn.disabled = true;
-    btn.textContent = "Generating…";
-
-    // simulate delay for each PDF
-    await new Promise(res=>setTimeout(res,1200));
-
+    btn.disabled=true;
+    btn.textContent="Generating…";
+    await new Promise(res=>setTimeout(res,1000));
     spinner.classList.add("hidden");
-    btn.disabled = false;
-    btn.textContent = `⬇ Download Form ${i+1}`;
+    btn.disabled=false;
+    btn.textContent=`⬇ Download Form ${i+1}`;
   }
-
-  btnGenerateAll.textContent = "✅ All PDFs Ready!";
-  btnGenerateAll.disabled = false;
+  btnGenerateAll.textContent="✅ All PDFs Ready!";
+  btnGenerateAll.disabled=false;
 });
-
 </script>
 
 </body>
