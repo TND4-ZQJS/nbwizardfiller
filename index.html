@@ -276,14 +276,14 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="2a">
     <h2>Step 2a — Credit Card Information</h2>
 
-<div class="floating-label">
-    <label for="wzepp_Card_Name">Card Holder Name</label>
-    <select id="wzepp_Card_Name" required>
-      <option value="" disabled selected>Select Card Holder</option>
-      <option value="wzepp_PO_Name">Policy Owner</option>
-      <option value="wzepp_ThirdPP_Name">3rd Party Payor</option>
-    </select>
-  </div>
+  <div class="floating-label">
+      <select id="wzepp_Card_Name" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="6">6 months</option>
+        <option value="12">12 months</option>
+      </select>
+      <label for="EPPPlan">Installment Plan</label>
+    </div>
 
     <div class="floating-label">
       <input id="ExpiryDate" type="month" placeholder=" ">
