@@ -24,6 +24,7 @@ h2{margin-top:0; color:var(--accent);}
   display:none; background:var(--card); padding:24px;
   border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
+.muted{color:var(--muted);font-size:0.85rem}
 .step.active{display:block; animation:fade .3s ease-in;}
 @keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
 
@@ -160,7 +161,7 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="1b">
     <h2>Step 1b — Basic Information (Insured)</h2>
 
-    <input id="wzepp_Insured_Checkbox" type="checkbox"><label>Policy Owner and Insured is same person ?</label>
+    <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here is Policy Owner and Insured is same person</small>
     <div class="floating-label">
       <input id="wzepp_Insured_Name" type="text" placeholder=" " required>
       <label for="wzepp_Insured_Name">Insured Name</label>
