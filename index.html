@@ -238,28 +238,28 @@ button:hover{background:#006ae6;}
 
     <div class="checkbox-line">
       <input id="wzepp_ThirdPP_Address" type="checkbox">
-      <small class="muted">Address: Tick here if same as Policy Owner</small>
+      <small class="muted">Correspondence Address: Tick here if same as Policy Owner</small>
     </div>
 
     <div id="ThirdPP_Address_Sec">
     <div class="floating-label">
       <input id="wzepp_ThirdPP_Address1" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address1">3rd Party Payor Address Line 1</label>
+      <label for="wzepp_ThirdPP_Address1">3rd Party Payor Address: Line 1</label>
     </div>
 
     <div class="floating-label">
       <input id="wzepp_ThirdPP_Address2" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address2">3rd Party Payor Address Line 2</label>
+      <label for="wzepp_ThirdPP_Address2">3rd Party Payor Address: Line 2</label>
     </div>
 
     <div class="floating-label">
       <input id="wzepp_ThirdPP_Address_Postcode" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address_Postcode">3rd Party Payor Address Postcode</label>
+      <label for="wzepp_ThirdPP_Address_Postcode">3rd Party Payor Address: Postcode</label>
     </div>
 
      <div class="floating-label">
       <input id="wzepp_ThirdPP_Address_Country" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address_Country">3rd Party Payor Address Country</label>
+      <label for="wzepp_ThirdPP_Address_Country">3rd Party Payor Address: Country</label>
     </div>
     </div>
       </div>
@@ -275,9 +275,13 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="2a">
     <h2>Step 2a — Credit Card Information</h2>
 
-    <div class="floating-label">
-      <input id="CardName" type="text" placeholder=" ">
-      <label for="CardName">Cardholder Name</label>
+   <div class="floating-label">
+      <select id="wzepp_Card_Name" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="wzepp_PO_Name">Policy Owner</option>
+        <option value="wzepp_ThirdPP_Name">3rd Party Payor</option>
+      </select>
+      <label for="wzepp_Card_Name">Card Holer Name</label>
     </div>
 
     <div class="floating-label">
