@@ -186,8 +186,11 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="1b">
     <h2>Step 1b — Basic Information (Insured)</h2>
 
+    <div class="checkbox-line">
     <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here if Policy Owner and Insured is same person</small>
-    <div class="floating-label">
+    </div>
+    
+      <div class="floating-label">
       <input id="wzepp_Insured_Name" type="text" placeholder=" " required>
       <label for="wzepp_Insured_Name">Insured Name</label>
     </div>
@@ -207,7 +210,11 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="1c">
     <h2>Step 1c — Basic Information (3rd Party Payor)</h2>
 
-    <input id="wzepp_ThirdPP_Checkbox" type="checkbox"><small class="muted">Tick here if there is a 3rd Party Payor</small>
+    <div class="checkbox-line">
+    <input id="wzepp_ThirdPP_Checkbox" type="checkbox">
+    <small class="muted">Tick here ONLY if there is a 3rd Party Payor</small>
+    </div>
+                                                    
     <div class="floating-label">
       <div class="floating-label">
       <input id="wzepp_ThirdPP_Name" type="text" placeholder=" " required>
