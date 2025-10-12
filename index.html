@@ -150,6 +150,16 @@ button:hover{background:#006ae6;}
       <label for="wzepp_PO_Address2">Policy Owner Address Line 2</label>
     </div>
 
+    <div class="floating-label">
+      <input id="wzepp_PO_Address_Postcode" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address_Postcode">Policy Owner Address Postcode</label>
+    </div>
+
+     <div class="floating-label">
+      <input id="wzepp_PO_Address_Country" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address_Country">Policy Owner Address Country</label>
+    </div>
+
 
     <div class="btns">
       <button disabled>← Back</button>
@@ -161,7 +171,7 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="1b">
     <h2>Step 1b — Basic Information (Insured)</h2>
 
-    <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here is Policy Owner and Insured is same person</small>
+    <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here if Policy Owner and Insured is same person</small>
     <div class="floating-label">
       <input id="wzepp_Insured_Name" type="text" placeholder=" " required>
       <label for="wzepp_Insured_Name">Insured Name</label>
@@ -182,16 +192,47 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="1c">
     <h2>Step 1c — Basic Information (3rd Party Payor)</h2>
 
+    <input id="wzepp_ThirdPP_Checkbox" type="checkbox"><small class="muted">Tick here if there is a 3rd Party Payor</small>
     <div class="floating-label">
-      <input id="PayorName" type="text" placeholder=" ">
-      <label for="PayorName">Payor Full Name (if any)</label>
+      <div class="floating-label">
+      <input id="wzepp_ThirdPP_Name" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Name">3rd Party Payor Name</label>
     </div>
 
     <div class="floating-label">
-      <input id="PayorRelation" type="text" placeholder=" ">
-      <label for="PayorRelation">Relation to Policy Owner</label>
+      <input id="wzepp_ThirdPP_NIRC" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_NIRC">3rd Party Payor NRIC/Passport No.</label>
     </div>
 
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Mobile" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Mobile">Policy Owner Mobile No.</label>
+    </div>
+
+    <input id="wzepp_ThirdPP_Address" type="checkbox"><small class="muted">Tick here if same as Policy Owner</small>
+    <div id="ThirdPP_Address_Sec">
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address1" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address1">Policy Owner Address Line 1</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address2" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address2">Policy Owner Address Line 2</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address_Postcode" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address_Postcode">Policy Owner Address Postcode</label>
+    </div>
+
+     <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address_Country" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address_Country">Policy Owner Address Country</label>
+    </div>
+    </div>
+
+      
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
