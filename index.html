@@ -55,6 +55,73 @@
   }
   .dot.active { background:var(--accent); }
 
+  .pdf-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin:20px 0;
+}
+.pdf-card{
+  background:#f8f9fa;
+  border-radius:12px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,0.06);
+}
+.pdf-info{ display:flex; align-items:center; gap:10px; }
+.pdf-icon{ font-size:1.5rem; }
+.pdf-name{ font-weight:500; color:#333; }
+
+.pdf-actions{
+  display:flex; align-items:center; gap:8px;
+}
+.spinner{
+  width:18px; height:18px;
+  border:2px solid #ddd;
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg);} }
+.hidden{ display:none; }
+
+.btn-download{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:6px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  transition:background .25s;
+}
+.btn-download:hover{ background:#006ae6; }
+.btn-download[disabled]{
+  background:#ccc;
+  cursor:default;
+}
+
+.actions{
+  text-align:center;
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+#btnGenerateAll{
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  padding:12px;
+  border-radius:10px;
+  font-size:1rem;
+  cursor:pointer;
+  transition:background .25s;
+}
+#btnGenerateAll:hover{ background:#006ae6; }
+
+
   #saveStatus {
     position:fixed; top:12px; right:12px;
     background:var(--accent); color:#fff;
@@ -141,15 +208,52 @@
     </div>
   </div>
 
-  <!-- Step 4 -->
-  <div class="step" data-step="4">
-    <h2>Step 4 — Download PDF</h2>
-    <button>⬇ Download PDF (Coming Soon)</button>
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button disabled>Finish</button>
+  <!-- STEP 4 -->
+<div class="step" id="step4">
+  <h2>Step 4: Generate & Download</h2>
+  <p>Your data will be applied to all 3 forms below.</p>
+
+  <div class="pdf-list">
+    <div class="pdf-card">
+      <div class="pdf-info">
+        <div class="pdf-icon">📄</div>
+        <div class="pdf-name">Form 1 – EPP Application</div>
+      </div>
+      <div class="pdf-actions">
+        <div class="spinner hidden"></div>
+        <button class="btn-download" disabled>Waiting to generate…</button>
+      </div>
+    </div>
+
+    <div class="pdf-card">
+      <div class="pdf-info">
+        <div class="pdf-icon">📄</div>
+        <div class="pdf-name">Form 2 – Credit Card Authorization</div>
+      </div>
+      <div class="pdf-actions">
+        <div class="spinner hidden"></div>
+        <button class="btn-download" disabled>Waiting to generate…</button>
+      </div>
+    </div>
+
+    <div class="pdf-card">
+      <div class="pdf-info">
+        <div class="pdf-icon">📄</div>
+        <div class="pdf-name">Form 3 – EPP Declaration</div>
+      </div>
+      <div class="pdf-actions">
+        <div class="spinner hidden"></div>
+        <button class="btn-download" disabled>Waiting to generate…</button>
+      </div>
     </div>
   </div>
+
+  <div class="actions">
+    <button id="btnGenerateAll">⚙ Generate All 3 PDFs</button>
+    <button type="button" onclick="prevStep(3)">← Back to Signatures</button>
+  </div>
+</div>
+
 
 </div>
 
@@ -189,6 +293,32 @@ function updateProgress(){
   const allDots = dots.querySelectorAll('.dot');
   allDots.forEach((d,i)=>d.classList.toggle('active', i<=currentStep));
 }
+
+const btnGenerateAll = document.getElementById("btnGenerateAll");
+btnGenerateAll.addEventListener("click", async ()=>{
+  const cards = document.querySelectorAll(".pdf-card");
+  btnGenerateAll.disabled = true;
+  btnGenerateAll.textContent = "Generating PDFs…";
+
+  for(let i=0;i<cards.length;i++){
+    const spinner = cards[i].querySelector(".spinner");
+    const btn = cards[i].querySelector(".btn-download");
+    spinner.classList.remove("hidden");
+    btn.disabled = true;
+    btn.textContent = "Generating…";
+
+    // simulate delay for each PDF
+    await new Promise(res=>setTimeout(res,1200));
+
+    spinner.classList.add("hidden");
+    btn.disabled = false;
+    btn.textContent = `⬇ Download Form ${i+1}`;
+  }
+
+  btnGenerateAll.textContent = "✅ All PDFs Ready!";
+  btnGenerateAll.disabled = false;
+});
+
 </script>
 
 </body>
