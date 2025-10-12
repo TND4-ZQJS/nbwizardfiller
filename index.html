@@ -68,55 +68,45 @@ h2{margin-top:0; color:var(--accent);}
 }
 
 /* Card Number Block */
+.card-number-block {
+  margin-top: 18px;
+}
+
 .card-number-block label {
   display: block;
   font-size: 14px;
   font-weight: 500;
   color: var(--accent);
   margin-bottom: 6px;
-  text-transform: uppercase;
   letter-spacing: 0.05em;
-  opacity: 0.8;
-}  
-  
-.card-number-block {
-  margin-top: 20px;
-}
-
-.card-number-block label {
-  display: block;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 8px;
-  font-size: 15px;
 }
 
 .card-number-inputs {
   display: flex;
   gap: 8px;
-  justify-content: space-between;
 }
 
-.card-digit {
-  flex: 1;
-  padding: 12px 10px;
+.card-number-inputs .card-digit {
+  width: 60px;              /* just enough for 4 digits */
+  padding: 10px;
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background: #fff;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.card-digit:focus {
+.card-number-inputs .card-digit:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(0,122,255,0.15);
-  outline: none;
+  box-shadow: 0 0 4px rgba(0, 122, 255, 0.2);
 }
 
 .card-number-block small {
   display: block;
   margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
 }
 
 
