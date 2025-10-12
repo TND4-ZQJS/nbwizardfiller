@@ -326,12 +326,21 @@ button:hover{background:#006ae6;}
      <div class="card-number-block">
       <label>Card Number</label>
       <div class="card-number-inputs">
-        <input class="card-digit" id="CardNo_1" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="CardNo_2" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="CardNo_3" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="CardNo_4" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_1" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_2" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_3" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_4" maxlength="4" inputmode="numeric" pattern="\d*">
       </div>
       <small class="muted">Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
+    </div>
+
+     <div class="floating-label">
+      <select id="wzepp_Card_Bank" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="wzepp_Card_MBB">MAYBANK</option>
+        <option value="wzepp_Card_PBB">PUBLIC BANK</option>
+      </select>
+      <label for="EPPPlan">Bank Name</label>
     </div>
     
     <div class="floating-label">
