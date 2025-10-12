@@ -61,11 +61,12 @@ h2{margin-top:0; color:var(--accent);}
 .floating-label input:focus + label,
 .floating-label input:not(:placeholder-shown) + label,
 .floating-label select:focus + label,
-.floating-label select:not([value=""]) + label,
+.floating-label select:valid + label,
 .floating-label textarea:focus + label,
 .floating-label textarea:not(:placeholder-shown) + label{
   top:-8px; left:10px; font-size:12px; color:var(--accent);
 }
+
 
 /* Buttons */
 .btns{margin-top:24px;display:flex;justify-content:space-between;}
@@ -276,13 +277,20 @@ button:hover{background:#006ae6;}
     <h2>Step 2a — Credit Card Information</h2>
 
    <div class="floating-label">
-      <select id="wzepp_Card_Name" value="">
-        <option value="" disabled selected hidden></option>
-        <option value="wzepp_PO_Name">Policy Owner</option>
-        <option value="wzepp_ThirdPP_Name">3rd Party Payor</option>
-      </select>
-      <label for="wzepp_Card_Name">Card Holer Name</label>
-    </div>
+  <select id="wzepp_Card_Name_Select" required>
+    <option value="" disabled selected hidden>Select Card Holder</option>
+    <option value="Insured">Insured</option>
+    <option value="PolicyOwner">Policy Owner</option>
+    <option value="ThirdPartyPayor">3rd Party Payor</option>
+  </select>
+  <label for="wzepp_Card_Name_Select">Card Holder</label>
+</div>
+
+<div class="floating-label">
+  <input id="wzepp_Card_Name" placeholder="Card Holder Name">
+  <label for="wzepp_Card_Name">Card Holder Name</label>
+</div>
+
 
     <div class="floating-label">
       <input id="CardNumber" type="text" placeholder=" ">
