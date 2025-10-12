@@ -67,6 +67,10 @@ h2{margin-top:0; color:var(--accent);}
   top:-8px; left:10px; font-size:12px; color:var(--accent);
 }
 
+.card-number-block .card-number-inputs{display:flex;gap:8px;margin-top:8px}
+  .card-digit{width:80px;padding:8px;border-radius:10px;border:1px solid #ddd;text-align:center;font-size:1.05rem;background:#fff}
+  .card-digit:focus{outline:2px solid rgba(0,122,255,0.15)}
+
 
 /* Buttons */
 .btns{margin-top:24px;display:flex;justify-content:space-between;}
@@ -276,17 +280,24 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="2a">
     <h2>Step 2a — Credit Card Information</h2>
 
-  <div class="floating-label">
-      <select id="wzepp_Card_Name" value="">
-        <option value="" disabled selected hidden></option>
-        <option value="6">Policy Owner</option>
-        <option value="12">3rd Party Payor</option>
-      </select>
-      <label for="EPPPlan">Card Holder Name</label>
+    <div class="floating-label">
+      <input id="wzepp_Card_Name" type="text" placeholder=" " required>
+      <label for="wzepp_Card_Name"">Card Holder Name</label>
     </div>
 
+     <div class="card-number-block">
+      <label>Card Number</label>
+      <div class="card-number-inputs">
+        <input class="card-digit" id="CardNo_1" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="CardNo_2" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="CardNo_3" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="CardNo_4" maxlength="4" inputmode="numeric" pattern="\d*">
+      </div>
+      <small class="muted">Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
+    </div>
+    
     <div class="floating-label">
-      <input id="ExpiryDate" type="month" placeholder=" ">
+      <input id="wzepp_Card_Name" type="month" placeholder=" ">
       <label for="ExpiryDate">Expiry Date</label>
     </div>
 
