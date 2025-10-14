@@ -518,13 +518,21 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
   <!-- Step 3 -->
   <div class="step" data-step="3">
     <h2>Step 3 — Signature</h2>
- <div class="sig-preview" id="preview_simple_owner" onclick="openSig('simple_owner')">
-      <span>Tap to Sign (Policyowner)</span>
+
+ <div class="sig-preview" id="preview_wzepp_cardholder" onclick="openSig('simple_cardholder')">
+      <span>Tap to Sign (Card Holder)</span>
     </div>
     <div class="row">
-      <button id="clearPreview_Simple_Owner" class="secondary" type="button">Clear Signature</button>
+      <button id="clearPreview_wzepp_Cardholder" class="secondary" type="button">Clear Signature</button>
     </div>
 
+   <div class="sig-preview" id="preview_wzepp_cardholder" onclick="openSig('simple_cardholder')">
+      <span>Tap to Sign (Card Holder)</span>
+    </div>
+    <div class="row">
+      <button id="clearPreview_wzepp_Cardholder" class="secondary" type="button">Clear Signature</button>
+    </div>
+    
  <div id="sigModal" class="sig-modal" aria-hidden="true">
   <div class="box">
     <h3 id="sigModalTitle">Draw Signature</h3>
