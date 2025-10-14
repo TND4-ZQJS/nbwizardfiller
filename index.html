@@ -24,7 +24,7 @@ h2{margin-top:0; color:var(--accent);}
   display:none; background:var(--card); padding:24px;
   border-radius:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
-.muted{color:var(--muted);font-size:0.85rem}
+.muted{color:var(--muted);font-size:0.50rem}
 .step.active{display:block; animation:fade .3s ease-in;}
 @keyframes fade{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
 
@@ -377,13 +377,13 @@ button:hover{background:#006ae6;}
 
      <div class="card-number-block">
       <label>Card Number</label>
+      <small class="muted">Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
       <div class="card-number-inputs">
         <input class="card-digit" id="wzepp_Card_No_1" maxlength="4" inputmode="numeric" pattern="\d*">
         <input class="card-digit" id="wzepp_Card_No_2" maxlength="4" inputmode="numeric" pattern="\d*">
         <input class="card-digit" id="wzepp_Card_No_3" maxlength="4" inputmode="numeric" pattern="\d*">
         <input class="card-digit" id="wzepp_Card_No_4" maxlength="4" inputmode="numeric" pattern="\d*">
       </div>
-      <small class="muted">Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
     </div>
 
      <div class="expiry-field">
