@@ -162,6 +162,32 @@ h2{margin-top:0; color:var(--accent);}
   box-shadow: 0 0 4px rgba(0, 122, 255, 0.2);
 }
 
+  /* Signature preview tiles */
+  .sig-preview{
+    width:100%; height:150px; border:1px dashed #bbb; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;
+  }
+  .sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
+  .sig-preview span{ color:#999; }
+
+  /* Signature Modal */
+  .sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
+  .sig-modal .box{
+    width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px;
+    box-shadow:0 18px 50px rgba(0,0,0,.25)
+  }
+  .sig-modal h3{ margin:0 0 8px 0; }
+  /* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
+  #sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
+  .sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+
+  /* Hidden signature XY tuning inputs (owner/witness) */
+  .hidden-inputs {display: none;}
+
+  /* Preview pane */
+  .preview{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px}
+  .preview canvas{width:100%;height:auto;border-radius:8px}
+
 /* Buttons */
 .btns{margin-top:24px;display:flex;justify-content:space-between;}
 button{
@@ -488,8 +514,26 @@ button:hover{background:#006ae6;}
   <!-- Step 3 -->
   <div class="step" data-step="3">
     <h2>Step 3 — Signature</h2>
-    <p>(Signature pad placeholder)</p>
+ <div class="sig-preview" id="preview_simple_owner" onclick="openSig('simple_owner')">
+      <span>Tap to Sign (Policyowner)</span>
+    </div>
+    <div class="row">
+      <button id="clearPreview_Simple_Owner" class="secondary" type="button">Clear Signature</button>
+    </div>
 
+ <div id="sigModal" class="sig-modal" aria-hidden="true">
+  <div class="box">
+    <h3 id="sigModalTitle">Draw Signature</h3>
+    <!-- Responsive canvas: internal pixels are set in JS for crispness -->
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-actions">
+      <button id="sigDone" type="button">Done</button>
+      <button id="sigClear" type="button" class="ghost">Clear</button>
+      <button id="sigCancel" type="button" class="secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+    
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
       <button onclick="nextStep()">Next →</button>
