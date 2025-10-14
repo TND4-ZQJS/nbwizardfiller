@@ -406,6 +406,14 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
       <label for="wzepp_Card_Name"">Card Holder Name</label>
     </div>
 
+        <div class="expiry-field">
+      <select id="wzepp_Card_Type" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="wzepp_Card_MBB">VISA</option>
+        <option value="wzepp_Card_PBB">MASTER</option>
+      </select>
+      <label for="wzepp_Card_Type">Card Type</label>
+    </div>
      
      <div class="card-number-block">
       <label>Card Number</label>
@@ -431,7 +439,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
         <option value="wzepp_Card_MBB">ALLIANCE BANK</option>
         <option value="wzepp_Card_PBB">STANDARD CHARTERED</option>
       </select>
-      <label for="EPPPlan">Bank Name</label>
+      <label for="EPPPlan">Card Issuing Bank</label>
     </div>
     
 <div class="expiry-row">
