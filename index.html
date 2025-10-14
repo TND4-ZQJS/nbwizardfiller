@@ -406,7 +406,7 @@ button:hover{background:#006ae6;}
     
 <div class="expiry-row">
   <div class="expiry-field">
-    <select id="expMonth" value="">
+    <select id="wzepp_Card_ExpMonth" value="">
       <option value="" disabled selected></option>
       <option value="01">01</option>
       <option value="02">02</option>
@@ -425,14 +425,19 @@ button:hover{background:#006ae6;}
   </div>
 
   <div class="expiry-field">
-    <select id="expYear" value="">
+    <select id="wzepp_Card_ExpYear" value="">
       <option value="" disabled selected></option>
       <option value="2025">2025</option>
       <option value="2026">2026</option>
       <option value="2027">2027</option>
       <option value="2028">2028</option>
       <option value="2029">2029</option>
-      <option value="2030">2030</option>
+      <option value="2030">2030</option>  
+      <option value="2027">2031</option>
+      <option value="2028">2032</option>
+      <option value="2029">2033</option>
+      <option value="2030">2034</option>
+       <option value="2030">2035</option>
     </select>
     <label for="expYear">Expiry Year</label>
   </div>
@@ -448,14 +453,26 @@ button:hover{background:#006ae6;}
   <div class="step" data-step="2b">
     <h2>Step 2b — EPP Options</h2>
 
-    <div class="floating-label">
-      <select id="EPPPlan" value="">
-        <option value="" disabled selected hidden></option>
-        <option value="6">6 months</option>
-        <option value="12">12 months</option>
-      </select>
-      <label for="EPPPlan">Installment Plan</label>
-    </div>
+  <div class="expiry-field">
+    <select id="wzepp_Card_EppOption" value="">
+      <option value="" disabled selected></option>
+      <option value="2025">6 MONTHS</option>
+      <option value="2026">12 MONTHS</option>
+    </select>
+    <label for="wzepp_Card_EppOption">EPP  Options</label>
+  </div>
+
+      <div class="expiry-field">
+    <select id="wzepp_Card_PaymentMode" value="">
+      <option value="" disabled selected></option>
+      <option value="2025">MONTHLY</option>
+      <option value="2026">QUARTERLY</option>
+       <option value="2025">HALF-YEARLY</option>
+      <option value="2026">YEARLY</option>
+    </select>
+    <label for="wzepp_Card_PaymentMode">Payment Frequency after EPP Ended</label>
+    <small>Follow payment fequency in PI</small>
+  </div>
 
     <div class="btns">
       <button onclick="prevStep()">← Back</button>
