@@ -657,6 +657,115 @@ btnGenerateAll.addEventListener("click",async()=>{
   btnGenerateAll.textContent="✅ All PDFs Ready!";
   btnGenerateAll.disabled=false;
 });
+
+  /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
+const saveStatusEl = document.getElementById("saveStatus");
+
+function showSaveStatus(){
+  saveStatusEl.style.opacity = 1;
+  clearTimeout(saveStatusEl._timer);
+  saveStatusEl._timer = setTimeout(()=> saveStatusEl.style.opacity = 0, 1200);
+}
+
+function saveElValue(el){
+  localStorage.setItem(el.id, el.value);
+  showSaveStatus();
+}
+
+function autoBindSave(el) {
+  const saved = localStorage.getItem(el.id);
+
+  // Restore
+  if (el.type === "checkbox") {
+    if (saved !== null) el.checked = (saved === "true");
+  } else if (el.type === "radio") {
+    const savedRadioValue = localStorage.getItem(el.name);
+    if (savedRadioValue) {
+      el.checked = (el.id === savedRadioValue);
+    }
+  } else if (saved !== null) {
+    el.value = saved;
+  }
+
+  // Bind save
+  if (el.tagName === "SELECT") {
+    el.addEventListener("change", () => saveElValue(el));
+  } else if (el.type === "checkbox") {
+    el.addEventListener("change", () => {
+      localStorage.setItem(el.id, el.checked);
+      showSaveStatus();
+    });
+  } else if (el.type === "radio") {
+    el.addEventListener("change", () => {
+      if (el.checked) {
+        localStorage.setItem(el.name, el.id); // store under group name
+        showSaveStatus();
+      }
+    });
+} else {
+  el.addEventListener("input", () => {
+    if (el.id !== "wzepp_ThirdPP_Email") { //except Email
+      el.value = el.value.toUpperCase();   // update textbox itself
+    }
+    localStorage.setItem(el.id, el.value);
+    showSaveStatus();
+  });
+}
+}
+
+  
+/* ---------- UNIVERSAL HELPER FUNCTION ---------- */
+
+  //Detect input type - text/dropdown/checkbox/radio
+function safeSetField(form, fieldName, value) {
+  if (value === null || value === undefined) return;
+
+  try {
+    let field;
+
+    // text or textarea, then force Uppercase
+    try {
+      field = form.getTextField(fieldName);
+      // Keep original case for email
+      if (fieldName === "MHSE_Info_POEmail") {
+        field.setText(value);
+      } else {
+        field.setText(value.toUpperCase());
+      }
+      return;
+    } catch (e) {}
+
+    // dropdown
+    try {
+      field = form.getDropdown(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
+
+    // checkbox
+    try {
+      field = form.getCheckBox(fieldName);
+      if (value === true || value === "true" || value === "on" || value === "checked") {
+        field.check();
+      } else {
+        field.uncheck();
+      }
+      return;
+    } catch (e) {}
+    
+    // radio
+    try {
+      field = form.getRadioGroup(fieldName);
+      field.select(value);
+      return;
+    } catch (e) {}
+
+    console.warn(`Field ${fieldName} not found in PDF`);
+  } catch (err) {
+    console.error(`Error setting field ${fieldName}`, err);
+  }
+}
+  
 </script>
 
 </body>
