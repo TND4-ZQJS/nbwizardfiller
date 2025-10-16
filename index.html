@@ -727,7 +727,7 @@ function safeSetField(form, fieldName, value) {
     try {
       field = form.getTextField(fieldName);
       // Keep original case for email
-      if (fieldName === "MHSE_Info_POEmail") {
+      if (fieldName === "wzepp_ThirdPP_Email") {
         field.setText(value);
       } else {
         field.setText(value.toUpperCase());
