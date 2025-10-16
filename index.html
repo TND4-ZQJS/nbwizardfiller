@@ -433,12 +433,12 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
         <option value="" disabled selected hidden></option>
         <option value="wzepp_Card_MBB">MAYBANK</option>
         <option value="wzepp_Card_PBB">PUBLIC BANK</option>
-        <option value="wzepp_Card_MBB">UOB</option>
-        <option value="wzepp_Card_PBB">CIMB</option>
-        <option value="wzepp_Card_MBB">HONG LEONG BANK</option>
-        <option value="wzepp_Card_PBB">HSBC</option>
-        <option value="wzepp_Card_MBB">ALLIANCE BANK</option>
-        <option value="wzepp_Card_PBB">STANDARD CHARTERED</option>
+        <option value="wzepp_Card_UOB">UOB</option>
+        <option value="wzepp_Card_CIMB">CIMB</option>
+        <option value="wzepp_Card_HLB">HONG LEONG BANK</option>
+        <option value="wzepp_Card_HSBC">HSBC</option>
+        <option value="wzepp_Card_ALLIANCE">ALLIANCE BANK</option>
+        <option value="wzepp_Card_STANDCHART">STANDARD CHARTERED</option>
       </select>
       <label for="EPPPlan">Card Issuing Bank</label>
     </div>
@@ -472,13 +472,13 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
       <option value="2028">2028</option>
       <option value="2029">2029</option>
       <option value="2030">2030</option>  
-      <option value="2027">2031</option>
-      <option value="2028">2032</option>
-      <option value="2029">2033</option>
-      <option value="2030">2034</option>
-       <option value="2030">2035</option>
+      <option value="2031">2031</option>
+      <option value="2032">2032</option>
+      <option value="2033">2033</option>
+      <option value="2034">2034</option>
+       <option value="2035">2035</option>
     </select>
-    <label for="expYear">Expiry Year</label>
+    <label for="wzepp_Card_ExpYear">Expiry Year</label>
   </div>
 </div>
 
@@ -765,6 +765,11 @@ function safeSetField(form, fieldName, value) {
     console.error(`Error setting field ${fieldName}`, err);
   }
 }
+
+// Add this line to the bottom of your <script> block
+// (after all function definitions and before the final closing tag)
+document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
+
   
 </script>
 
