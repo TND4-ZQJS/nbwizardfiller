@@ -747,83 +747,65 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 <div id="saveStatus">Saved</div>
 
 <script>
-const steps = Array.from(document.querySelectorAll('.step'));
-let currentStep = 0;
+/* ------------------ WIZARD NAV LOGIC (Integrated) ------------------ */
+(function initWizard(){
+  const steps = Array.from(document.querySelectorAll("#wizard .step")); // your step pages
+  const stepIndicators = Array.from(document.querySelectorAll("#stickySteps .step-header")); // your circles
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
 
+  let current = 0;
+  const total = steps.length;
 
-function nextStep(){
-  if(currentStep<steps.length-1){
-    steps[currentStep].classList.remove('active');
-    currentStep++;
-    steps[currentStep].classList.add('active');
-    updateProgress();
-  }
-}
-function prevStep(){
-  if(currentStep>0){
-    steps[currentStep].classList.remove('active');
-    currentStep--;
-    steps[currentStep].classList.add('active');
-    updateProgress();
-  }
-}
-function updateProgress() {
-  updateStickyHeader();
-}
+  function updateUI(){
+    // Activate correct wizard section
+    steps.forEach((s, i)=> {
+      s.classList.toggle("active", i === current);
+    });
 
-function updateStickyHeader() {
-  const headers = document.querySelectorAll(".step-header");
-  const bars = document.querySelectorAll(".progress-bar");
+    // Highlight step circles
+    stepIndicators.forEach((si, i)=> {
+      si.classList.toggle("active", i === current);
+      si.classList.toggle("completed", i < current);
+    });
 
-  headers.forEach((h, i) => {
-    h.classList.toggle("active", i <= currentStep);
-  });
+    // Prev/Next button states
+    if(prevBtn) prevBtn.disabled = (current === 0);
 
-  bars.forEach((b, i) => {
-    b.classList.toggle("active", i < currentStep);
-  });
-}
-
-document.querySelectorAll('.step-circle').forEach(circle => {
-  circle.addEventListener('click', () => {
-    const targetId = circle.dataset.target;
-    const targetEl = document.getElementById(targetId);
-
-    if (targetEl) {
-      targetEl.scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-      });
+    if(current === total - 1) {
+      if(nextBtn) nextBtn.style.display = "none"; // hide next on last step
+    } else {
+      if(nextBtn) {
+        nextBtn.style.display = "inline-block";
+        nextBtn.textContent = "Next";
+      }
     }
-  });
-});
 
-// Make sticky header circles clickable
-document.querySelectorAll("#stickySteps .step-header").forEach(header => {
-  header.addEventListener("click", () => {
-    const index = parseInt(header.dataset.index);
-    jumpToStep(index);
-  });
-});
+    // Smooth scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
-// Function to activate selected step
-function jumpToStep(index) {
-  const steps = document.querySelectorAll("#wizard .step");
-  const headers = document.querySelectorAll("#stickySteps .step-header");
+  function goToStep(n){
+    if(n < 0) n = 0;
+    if(n >= total) n = total - 1;
+    current = n;
+    updateUI();
+  }
 
-  // Activate correct wizard step
-  steps.forEach((step, i) => {
-    step.classList.toggle("active", i === index);
+  // Back/Next buttons
+  if(prevBtn) prevBtn.addEventListener("click", ()=> goToStep(current - 1));
+  if(nextBtn) nextBtn.addEventListener("click", ()=> {
+    if(current < total - 1) goToStep(current + 1);
   });
 
-  // Highlight sticky header bubble
-  headers.forEach((h, i) => {
-    h.classList.toggle("active", i === index);
+  // Clickable sticky circles
+  stepIndicators.forEach((si, idx)=> {
+    si.addEventListener("click", ()=> goToStep(idx));
   });
 
-  // Scroll user to top for clean jump
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+  // Initialize
+  goToStep(0);
+})();
 
 
 // Simulated PDF Generation
