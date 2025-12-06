@@ -807,6 +807,36 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
   goToStep(0);
 })();
 
+const steps = Array.from(document.querySelectorAll('.step'));
+let currentStep = 0;
+const dots = document.getElementById('progressDots');
+
+// Progress dots
+steps.forEach(()=>{ const dot=document.createElement('div'); dot.className='dot'; dots.appendChild(dot); });
+updateProgress();
+
+function nextStep(){
+  if(currentStep<steps.length-1){
+    steps[currentStep].classList.remove('active');
+    currentStep++;
+    steps[currentStep].classList.add('active');
+    updateProgress();
+  }
+}
+function prevStep(){
+  if(currentStep>0){
+    steps[currentStep].classList.remove('active');
+    currentStep--;
+    steps[currentStep].classList.add('active');
+    updateProgress();
+  }
+}
+function updateProgress(){
+  const allDots=dots.querySelectorAll('.dot');
+  allDots.forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
+}
+
+
 
 // Simulated PDF Generation
 const btnGenerateAll=document.getElementById("btnGenerateAll");
