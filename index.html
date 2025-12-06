@@ -790,6 +790,21 @@ function updateStickyHeader() {
   });
 }
 
+document.querySelectorAll('.step-circle').forEach(circle => {
+  circle.addEventListener('click', () => {
+    const targetId = circle.dataset.target;
+    const targetEl = document.getElementById(targetId);
+
+    if (targetEl) {
+      targetEl.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  });
+});
+
+
 
 
 // Simulated PDF Generation
