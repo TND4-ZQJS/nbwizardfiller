@@ -798,7 +798,32 @@ document.querySelectorAll('.step-circle').forEach(circle => {
   });
 });
 
+// Make sticky header circles clickable
+document.querySelectorAll("#stickySteps .step-header").forEach(header => {
+  header.addEventListener("click", () => {
+    const index = parseInt(header.dataset.index);
+    jumpToStep(index);
+  });
+});
 
+// Function to activate selected step
+function jumpToStep(index) {
+  const steps = document.querySelectorAll("#wizard .step");
+  const headers = document.querySelectorAll("#stickySteps .step-header");
+
+  // Activate correct wizard step
+  steps.forEach((step, i) => {
+    step.classList.toggle("active", i === index);
+  });
+
+  // Highlight sticky header bubble
+  headers.forEach((h, i) => {
+    h.classList.toggle("active", i === index);
+  });
+
+  // Scroll user to top for clean jump
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 
 // Simulated PDF Generation
