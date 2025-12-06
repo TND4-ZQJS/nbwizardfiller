@@ -11,6 +11,9 @@
   --card:#fff; 
   --accent:#007aff; 
   --muted:#666;
+  --step-active:#0066ff;
+  --step-inactive:#d4e1f5;
+  --step-text:#123456;
 }
 *{box-sizing:border-box;}
 body{
@@ -163,7 +166,79 @@ h2{margin-top:0; color:var(--accent);}
   box-shadow: 0 0 4px rgba(0, 122, 255, 0.2);
 }
 
-  /* Signature preview tiles */
+/* Sticky header */
+#stickySteps {
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#fff;
+  padding:10px 0 14px 0;
+  border-bottom:1px solid #e5edf9;
+}
+
+/* Row of steps */
+.steps {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  padding:4px 12px;
+  scrollbar-width:none;
+}
+.steps::-webkit-scrollbar { display:none; }
+
+/* Each step block */
+.step-header {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  min-width:70px;
+  text-align:center;
+}
+
+/* Round bubble */
+.step-header .bubble {
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--step-inactive);
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 6px 18px rgba(7,50,100,0.06);
+  transition:transform .24s, background .24s;
+}
+
+/* Active bubble */
+.step-header.active .bubble {
+  background: linear-gradient(135deg, var(--step-active), #4aa5ff);
+  transform:scale(1.06);
+}
+
+.step-header .label {
+  font-size:0.80rem;
+  color:var(--step-text);
+  max-width:120px;
+}
+
+/* Bars between bubbles */
+.progress-bar {
+  width:50px;
+  height:6px;
+  background:var(--step-inactive);
+  border-radius:6px;
+  transition:background .24s;
+}
+.progress-bar.active {
+  background:var(--step-active);
+}
+
+  
+/* Signature preview tiles */
   .sig-preview{
     width:100%; height:150px; border:1px dashed #bbb; border-radius:10px;
     display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;
@@ -255,7 +330,57 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 <body>
 
 <div id="wizard">
-  <div class="progress" id="progressDots"></div>
+  <div id="stickySteps">
+  <div class="steps">
+    <div class="step-header" data-index="0">
+      <div class="bubble">1</div>
+      <div class="label">PO Info</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="1">
+      <div class="bubble">2</div>
+      <div class="label">Insured</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="2">
+      <div class="bubble">3</div>
+      <div class="label">3rd Payor</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="3">
+      <div class="bubble">4</div>
+      <div class="label">Witness</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="4">
+      <div class="bubble">5</div>
+      <div class="label">Payment</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="5">
+      <div class="bubble">6</div>
+      <div class="label">Sign</div>
+    </div>
+
+    <div class="progress-bar"></div>
+
+    <div class="step-header" data-index="6">
+      <div class="bubble">7</div>
+      <div class="label">Generate</div>
+    </div>
+  </div>
+</div>
+
 
   <!-- Step 1a -->
   <div class="step active" data-step="1a">
@@ -630,11 +755,7 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 <script>
 const steps = Array.from(document.querySelectorAll('.step'));
 let currentStep = 0;
-const dots = document.getElementById('progressDots');
 
-// Progress dots
-steps.forEach(()=>{ const dot=document.createElement('div'); dot.className='dot'; dots.appendChild(dot); });
-updateProgress();
 
 function nextStep(){
   if(currentStep<steps.length-1){
@@ -652,10 +773,24 @@ function prevStep(){
     updateProgress();
   }
 }
-function updateProgress(){
-  const allDots=dots.querySelectorAll('.dot');
-  allDots.forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
+function updateProgress() {
+  updateStickyHeader();
 }
+
+function updateStickyHeader() {
+  const headers = document.querySelectorAll(".step-header");
+  const bars = document.querySelectorAll(".progress-bar");
+
+  headers.forEach((h, i) => {
+    h.classList.toggle("active", i <= currentStep);
+  });
+
+  bars.forEach((b, i) => {
+    b.classList.toggle("active", i < currentStep);
+  });
+}
+
+
 
 // Simulated PDF Generation
 const btnGenerateAll=document.getElementById("btnGenerateAll");
