@@ -136,378 +136,51 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 </head>
 <body>
 
-<div id="wizard">
-  <div class="progress" id="progressDots"></div>
-
-  <!-- Step 1a -->
-  <div class="step active" data-step="1a">
-    <h2>Step 1a — Basic Information (Policy Owner)</h2>
-
-    <div class="floating-label">
-      <input id="wzepp_PolicyNo" type="text" placeholder=" " required>
-      <label for="wzepp_PolicyNo">Policy Number</label>
-    </div>
-    
-    <div class="floating-label">
-      <input id="wzepp_PO_Name" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Name">Policy Owner Name</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_PO_NIRC" type="text" placeholder=" " required>
-      <label for="wzepp_PO_NIRC">Policy Owner NRIC/Passport No.</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_PO_Mobile" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Mobile">Policy Owner Mobile No.</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_PO_Address1" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Address1">Policy Owner Address: Line 1</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_PO_Address2" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Address2">Policy Owner Address: Line 2</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_PO_Address_Postcode" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Address_Postcode">Policy Owner Address: Postcode</label>
-    </div>
-
-     <div class="floating-label">
-      <input id="wzepp_PO_Address_Country" type="text" placeholder=" " required>
-      <label for="wzepp_PO_Address_Country">Policy Owner Address: Country</label>
-    </div>
-
-
-    <div class="btns">
-      <button disabled>← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 1b -->
-  <div class="step" data-step="1b">
-    <h2>Step 1b — Basic Information (Insured)</h2>
-
-    <div class="checkbox-line">
-    <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here if Policy Owner and Insured is same person</small>
-    </div>
-    
-      <div class="floating-label">
-      <input id="wzepp_Insured_Name" type="text" placeholder=" " required>
-      <label for="wzepp_Insured_Name">Insured Name</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_Insured_NIRC" type="text" placeholder=" " required>
-      <label for="wzepp_Insured_NIRC">Insured NRIC/Passport No.</label>
-    </div>
-
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 1c -->
-  <div class="step" data-step="1c">
-    <h2>Step 1c — Basic Information (3rd Party Payor)</h2>
-
-    <div class="checkbox-line">
-    <input id="wzepp_ThirdPP_Checkbox" type="checkbox">
-    <small class="muted">Tick here ONLY if there is a 3rd Party Payor</small>
-    </div>
-
-    <div id="ThirdPP_Info_Sec">
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Name" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Name">3rd Party Payor Name</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_NIRC" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_NIRC">3rd Party Payor NRIC/Passport No.</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Mobile" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Mobile">3rd Party Payor Mobile No.</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Email" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Email">3rd Party Payor Email</label>
-    </div>
-
-    <div class="checkbox-line">
-      <input id="wzepp_ThirdPP_Address" type="checkbox">
-      <small class="muted">Correspondence Address: Tick here if same as Policy Owner</small>
-    </div>
-
-    <div id="ThirdPP_Address_Sec">
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Address1" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address1">3rd Party Payor Address: Line 1</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Address2" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address2">3rd Party Payor Address: Line 2</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_ThirdPP_Address_Postcode" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address_Postcode">3rd Party Payor Address: Postcode</label>
-    </div>
-
-     <div class="floating-label">
-      <input id="wzepp_ThirdPP_Address_Country" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Address_Country">3rd Party Payor Address: Country</label>
-    </div>
-    </div>
+<!-- Wizard top -->
+  <div class="wizard-top">
+    <div class="progress">
+      <div class="steps" id="wizardSteps">
+        <div class="step" data-step="0">
+          <div class="bubble">1</div>
+          <div class="label">Policy Owner</div>
+        </div>
+        <div class="step" data-step="1">
+          <div class="bubble">2</div>
+          <div class="label">Insured</div>
+        </div>
+        <div class="step" data-step="2">
+          <div class="bubble">3</div>
+          <div class="label">3rd Party</div>
+        </div>
+        <div class="step" data-step="3">
+          <div class="bubble">4</div>
+          <div class="label">Witness</div>
+        </div>
+        <div class="step" data-step="4">
+          <div class="bubble">5</div>
+          <div class="label">Credit Card</div>
+        </div>
+        <div class="step" data-step="5">
+          <div class="bubble">6</div>
+          <div class="label">EPP</div>
+        </div>
+        <div class="step" data-step="6">
+          <div class="bubble">7</div>
+        <div class="label"Signature</div>
+        </div>
+        <div class="step" data-step="7">
+          <div class="bubble">8</div>
+        <div class="label">Generate</div>
+        </div>  
       </div>
 
-      
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 1d -->
-  <div class="step" data-step="1d">
-    <h2>Step 1d — Witness Information (Agent)</h2>
-    
-      <div class="floating-label">
-      <input id="wzepp_Agent_Name" type="text" placeholder=" " required>
-      <label for="wzepp_Agent_Name">Agent Name</label>
-    </div>
-
-    <div class="floating-label">
-      <input id="wzepp_Agent_NIRC" type="text" placeholder=" " required>
-      <label for="wzepp_Agent_NIRC">Agent NRIC/Passport No.</label>
-    </div>
-
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-  
-  <!-- Step 2a -->
-  <div class="step" data-step="2a">
-    <h2>Step 2a — Credit Card Information</h2>
-
-    <div class="floating-label">
-      <input id="wzepp_Card_Name" type="text" placeholder=" " required>
-      <label for="wzepp_Card_Name"">Card Holder Name</label>
-    </div>
-
-      <div class="row"></div>
-        <div class="expiry-field">
-      <select id="wzepp_Card_Type" value="">
-        <option value="" disabled selected hidden></option>
-        <option value="wzepp_Card_MBB">VISA</option>
-        <option value="wzepp_Card_PBB">MASTER</option>
-      </select>
-      <label for="wzepp_Card_Type">Card Type</label>
-    </div>
-     
-     <div class="card-number-block">
-      <label>Card Number</label>
-      <small>Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
-      <div class="card-number-inputs">
-        <input class="card-digit" id="wzepp_Card_No_1" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_2" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_3" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_4" maxlength="4" inputmode="numeric" pattern="\d*">
+      <div class="progress-bar" aria-hidden="true">
+        <div class="fill" id="progressFill"></div>
       </div>
     </div>
-    
-
-     <div class="expiry-field">
-      <select id="wzepp_Card_Bank" value="">
-        <option value="" disabled selected hidden></option>
-        <option value="wzepp_Card_MBB">MAYBANK</option>
-        <option value="wzepp_Card_PBB">PUBLIC BANK</option>
-        <option value="wzepp_Card_UOB">UOB</option>
-        <option value="wzepp_Card_CIMB">CIMB</option>
-        <option value="wzepp_Card_HLB">HONG LEONG BANK</option>
-        <option value="wzepp_Card_HSBC">HSBC</option>
-        <option value="wzepp_Card_ALLIANCE">ALLIANCE BANK</option>
-        <option value="wzepp_Card_STANDCHART">STANDARD CHARTERED</option>
-      </select>
-      <label for="EPPPlan">Card Issuing Bank</label>
-    </div>
-    
-<div class="expiry-row">
-  <div class="expiry-field">
-    <select id="wzepp_Card_ExpMonth" value="">
-      <option value="" disabled selected></option>
-      <option value="01">01</option>
-      <option value="02">02</option>
-      <option value="03">03</option>
-      <option value="04">04</option>
-      <option value="05">05</option>
-      <option value="06">06</option>
-      <option value="07">07</option>
-      <option value="08">08</option>
-      <option value="09">09</option>
-      <option value="10">10</option>
-      <option value="11">11</option>
-      <option value="12">12</option>
-    </select>
-    <label for="expMonth">Expiry Month</label>
+    <div class="muted-inline">Step <span id="currentStepLabel">1</span> of 5</div>
   </div>
 
-  <div class="expiry-field">
-    <select id="wzepp_Card_ExpYear" value="">
-      <option value="" disabled selected></option>
-      <option value="2025">2025</option>
-      <option value="2026">2026</option>
-      <option value="2027">2027</option>
-      <option value="2028">2028</option>
-      <option value="2029">2029</option>
-      <option value="2030">2030</option>  
-      <option value="2031">2031</option>
-      <option value="2032">2032</option>
-      <option value="2033">2033</option>
-      <option value="2034">2034</option>
-       <option value="2035">2035</option>
-    </select>
-    <label for="wzepp_Card_ExpYear">Expiry Year</label>
-  </div>
-</div>
-
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 2b -->
-  <div class="step" data-step="2b">
-    <h2>Step 2b — EPP Options</h2>
-
-  <div class="expiry-row">
-    <div class="expiry-field">
-    <select id="wzepp_Card_EppOption" value="">
-      <option value="" disabled selected></option>
-      <option value="2025">6 MONTHS</option>
-      <option value="2026">12 MONTHS</option>
-    </select>
-    <label for="wzepp_Card_EppOption">EPP  Options</label>
-  </div>
-  </div>
-
-     <div class="expiry-row">
-    <div class="expiry-field">
-    <select id="wzepp_Card_PaymentMode" value="">
-      <option value="" disabled selected></option>
-      <option value="2025">MONTHLY</option>
-      <option value="2026">QUARTERLY</option>
-       <option value="2025">HALF-YEARLY</option>
-      <option value="2026">YEARLY</option>
-    </select>
-    <label for="wzepp_Card_PaymentMode">Payment Frequency after EPP Ended</label>
-    <small class="muted">Follow payment fequency in PI</small>
-  </div>
-     </div>
-
-  
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 3 -->
-  <div class="step" data-step="3">
-    <h2>Step 3 — Signature</h2>
-
- <div class="sig-preview" id="preview_wzepp_cardholder" onclick="openSig('simple_cardholder')">
-      <span>Tap to Sign (Card Holder)</span>
-    </div>
-    <div class="row">
-      <button id="clearPreview_wzepp_Cardholder" class="secondary" type="button">Clear Signature</button>
-    </div>
-
-    
-     <div class="row"></div>
-   <div class="sig-preview" id="preview_wzepp_owner" onclick="openSig('simple_owner')">
-      <span>Tap to Sign (Policy Owner)</span>
-    </div>
-    <div class="row">
-      <button id="clearPreview_wzepp_Owner" class="secondary" type="button">Clear Signature</button>
-    </div>
-
-       <div class="row"></div>
-   <div class="sig-preview" id="preview_wzepp_witness" onclick="openSig('simple_witness')">
-      <span>Tap to Sign (Witness)</span>
-    </div>
-    <div class="row">
-      <button id="clearPreview_wzepp_Witness" class="secondary" type="button">Clear Signature</button>
-    </div>
-    
- <div id="sigModal" class="sig-modal" aria-hidden="true">
-  <div class="box">
-    <h3 id="sigModalTitle">Draw Signature</h3>
-    <!-- Responsive canvas: internal pixels are set in JS for crispness -->
-    <canvas id="sigCanvas"></canvas>
-    <div class="sig-actions">
-      <button id="sigDone" type="button">Done</button>
-      <button id="sigClear" type="button" class="ghost">Clear</button>
-      <button id="sigCancel" type="button" class="secondary">Cancel</button>
-    </div>
-  </div>
-</div>
-    
-    <div class="btns">
-      <button onclick="prevStep()">← Back</button>
-      <button onclick="nextStep()">Next →</button>
-    </div>
-  </div>
-
-  <!-- Step 4 -->
-  <div class="step" data-step="4">
-    <h2>Step 4 — Generate & Download</h2>
-    <p>Your data will be applied to all 3 forms below.</p>
-
-      <div class="checkbox-line">
-    <input id="wzepp_PDPA_Checkbox" type="checkbox"><small class="muted">I have read the Company’s Notice on Personal Data and Privacy and hereby consent to the processing of my personal data in
-accordance with the Company’s Notice on Personal Data and Privacy as set out in the Company’s website
-(https://www.manulife.com.my/en/individual/privacy-policy.html). </small>
-    </div>
-    
-
-    <div class="pdf-list">
-      <div class="pdf-card">
-        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 1 – EPP Application</div></div>
-        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
-      </div>
-      <div class="pdf-card">
-        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 2 – Credit Card Authorization</div></div>
-        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
-      </div>
-      <div class="pdf-card">
-        <div class="pdf-info"><div class="pdf-icon">📄</div><div class="pdf-name">Form 3 – EPP Declaration</div></div>
-        <div class="pdf-actions"><div class="spinner hidden"></div><button class="btn-download" disabled>Waiting…</button></div>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="btnGenerateAll">⚙ Generate All 3 PDFs</button>
-      <button type="button" onclick="prevStep()">← Back to Signatures</button>
-    </div>
-  </div>
-</div>
-
-<div id="saveStatus">Saved</div>
 
 <script>
 const steps = Array.from(document.querySelectorAll('.step'));
