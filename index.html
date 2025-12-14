@@ -135,6 +135,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 
 </head>
 <body>
+<main>
 
 <!-- Wizard top -->
   <div class="wizard-top">
@@ -182,35 +183,87 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
   </div>
 
 
+<!-- Wizard container -->
+<div id="wizard">    
+    <!-- STEP 1: (Policy Owner) -->
+    <div class="wizard-step" data-step="0">
+      <div class="floating-label">
+      <input id="wzepp_PolicyNo" type="text" placeholder=" " required>
+      <label for="wzepp_PolicyNo">Policy Number</label>
+      </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_Name" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Name">Policy Owner Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_NIRC" type="text" placeholder=" " required>
+      <label for="wzepp_PO_NIRC">Policy Owner NRIC/Passport No.</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_Mobile" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Mobile">Policy Owner Mobile No.</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_Address1" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address1">Policy Owner Address: Line 1</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_Address2" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address2">Policy Owner Address: Line 2</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_PO_Address_Postcode" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address_Postcode">Policy Owner Address: Postcode</label>
+    </div>
+
+     <div class="floating-label">
+      <input id="wzepp_PO_Address_Country" type="text" placeholder=" " required>
+      <label for="wzepp_PO_Address_Country">Policy Owner Address: Country</label>
+    </div>
+  
+</div>
+
+      
+</div> <!-- end wizard -->
+
+<!-- Global nav -->
+  <div class="wizard-nav" aria-hidden="false">
+    <div class="left">
+      <button id="prevBtn" class="ghost" type="button">Back</button>
+    </div>
+    <div class="right">
+      <button id="nextBtn" type="button">Next</button>
+    </div>
+  </div>
+</main>
+
+<!-- Signature Modal -->
+<div id="sigModal" class="sig-modal" aria-hidden="true">
+  <div class="box">
+    <h3 id="sigModalTitle">Draw Signature</h3>
+    <canvas id="sigCanvas"></canvas>
+    <div class="sig-actions">
+      <button id="sigDone" type="button">Done</button>
+      <button id="sigClear" type="button" class="ghost">Clear</button>
+      <button id="sigCancel" type="button" class="secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="saveStatus">Saved</div>  
+  
+
+<!-- external libs -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.2.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>  
+
 <script>
-const steps = Array.from(document.querySelectorAll('.step'));
-let currentStep = 0;
-const dots = document.getElementById('progressDots');
-
-// Progress dots
-steps.forEach(()=>{ const dot=document.createElement('div'); dot.className='dot'; dots.appendChild(dot); });
-updateProgress();
-
-function nextStep(){
-  if(currentStep<steps.length-1){
-    steps[currentStep].classList.remove('active');
-    currentStep++;
-    steps[currentStep].classList.add('active');
-    updateProgress();
-  }
-}
-function prevStep(){
-  if(currentStep>0){
-    steps[currentStep].classList.remove('active');
-    currentStep--;
-    steps[currentStep].classList.add('active');
-    updateProgress();
-  }
-}
-function updateProgress(){
-  const allDots=dots.querySelectorAll('.dot');
-  allDots.forEach((d,i)=>d.classList.toggle('active',i<=currentStep));
-}
 
 // Simulated PDF Generation
 const btnGenerateAll=document.getElementById("btnGenerateAll");
@@ -345,7 +398,69 @@ function safeSetField(form, fieldName, value) {
 // (after all function definitions and before the final closing tag)
 document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
 
-  
+
+/* ------------------ WIZARD NAV LOGIC ------------------ */
+(function initWizard(){
+  const steps = Array.from(document.querySelectorAll(".wizard-step"));
+  const stepIndicators = Array.from(document.querySelectorAll(".steps .step"));
+  const fillEl = $("progressFill");
+  const currentStepLabel = $("currentStepLabel");
+  const prevBtn = $("prevBtn");
+  const nextBtn = $("nextBtn");
+  let current = 0;
+  const total = steps.length;
+
+  function updateUI(){
+    steps.forEach((s, i)=> {
+      if(i === current) { s.classList.add("active"); } else { s.classList.remove("active"); }
+    });
+    stepIndicators.forEach((si, i)=>{
+      if(i <= current) si.classList.add("active"); else si.classList.remove("active");
+    });
+    const pct = (current) / Math.max(1, total-1) * 100;
+    if(fillEl) fillEl.style.width = pct + "%";
+    if(currentStepLabel) currentStepLabel.textContent = (current + 1);
+
+    // Prev/Next button states
+    if(prevBtn) prevBtn.disabled = (current === 0);
+    if(nextBtn) nextBtn.disabled = false;
+
+    // last step: show Generate + Reset inside the step (they already exist in DOM)
+    // We hide global next button when on last step and show nothing (or disable)
+    if(current === total - 1){
+      if(nextBtn) nextBtn.style.display = "none";
+    } else {
+      if(nextBtn) nextBtn.style.display = "inline-block";
+      if(nextBtn) nextBtn.textContent = "Next";
+    }
+
+    // Scroll into view for better UX
+    const active = steps[current];
+    if(active) active.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Navigation functions
+  function goToStep(n){
+    if(n < 0) n = 0;
+    if(n >= total) n = total - 1;
+    current = n;
+    updateUI();
+  }
+  if(prevBtn) prevBtn.addEventListener("click", ()=> goToStep(current - 1));
+  if(nextBtn) nextBtn.addEventListener("click", ()=> {
+    if(current < total - 1) goToStep(current + 1);
+  });
+
+  // click on step indicator to jump (optional)
+  stepIndicators.forEach((si, idx)=> {
+    si.addEventListener("click", ()=> {
+      goToStep(idx);
+    });
+  });
+
+  // Initialize
+  goToStep(0);
+})();  
 </script>
 
 </body>
