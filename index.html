@@ -47,90 +47,36 @@ h2{margin-top:0; color:var(--accent);}
 .card-number-block small {display: block; margin-top: 6px; color: var(--muted); font-size: 0.8rem;}
 
 /* ======= UPDATED EXPIRY FIELD (floating-label style) ======= */
-.expiry-row {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  margin-top: 20px;
-}
-
-.expiry-field {
-  flex: 1;
-  position: relative;
-}
-
-.expiry-field select {
-  width: 100%;
-  padding: 14px 12px 10px 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: white;
-  outline: none;
-  appearance: none;
-  transition: all 0.2s ease;
-}
-
-.expiry-field label {
-  position: absolute;
-  left: 12px;
-  top: 14px;
-  color: #777;
-  font-size: 15px;
-  pointer-events: none;
-  transition: all 0.2s ease;
-  background: white;
-  padding: 0 4px;
-}
+.expiry-row {display: flex; gap: 12px; align-items: flex-start; margin-top: 20px;}
+.expiry-field {flex: 1; position: relative;}
+.expiry-field select {width: 100%; padding: 14px 12px 10px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 8px; background: white; outline: none; appearance: none; transition: all 0.2s ease;}
+.expiry-field label {position: absolute; left: 12px; top: 14px; color: #777; font-size: 15px; pointer-events: none; transition: all 0.2s ease; background: white; padding: 0 4px;}
 
 /* Floating effect trigger */
 .expiry-field select:focus + label,
-.expiry-field select:valid + label {
-  top: -8px;
-  left: 10px;
-  font-size: 12px;
-  color: var(--accent);
-  background: white;
-}
-
-.expiry-field select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 4px rgba(0, 122, 255, 0.2);
-}
+.expiry-field select:valid + label {top: -8px; left: 10px; font-size: 12px; color: var(--accent); background: white;}
+.expiry-field select:focus {border-color: var(--accent); box-shadow: 0 0 4px rgba(0, 122, 255, 0.2);}
 
   /* Signature preview tiles */
-  .sig-preview{
-    width:100%; height:150px; border:1px dashed #bbb; border-radius:10px;
-    display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;
-  }
-  .sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
-  .sig-preview span{ color:#999; }
+.sig-preview{width:100%; height:150px; border:1px dashed #bbb; border-radius:10px; display:flex; align-items:center; justify-content:center; background:#fff; cursor:pointer; position:relative;}
+.sig-preview img{ max-width:100%; max-height:100%; object-fit:contain; }
+.sig-preview span{ color:#999; }
 
   /* Signature Modal */
-  .sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
-  .sig-modal .box{
-    width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px;
-    box-shadow:0 18px 50px rgba(0,0,0,.25)
-  }
-  .sig-modal h3{ margin:0 0 8px 0; }
+.sig-modal{ display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
+.sig-modal .box{width:min(560px, 92vw); background:#fff; margin:6vh auto; padding:14px; border-radius:12px; box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.sig-modal h3{ margin:0 0 8px 0; }
   /* NOTE: canvas is responsive via CSS; internal pixels are set in JS for crispness */
-  #sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
-  .sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
-
-  /* Hidden signature XY tuning inputs (owner/witness) */
-  .hidden-inputs {display: none;}
+#sigCanvas{ width:100%; height:220px; background:#fff; border:1px solid #ddd; border-radius:10px; touch-action:none }
+.sig-actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
 
   /* Preview pane */
-  .preview{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px}
-  .preview canvas{width:100%;height:auto;border-radius:8px}
+.preview{background:#fff;border:1px solid #eee;border-radius:10px;padding:10px}
+.preview canvas{width:100%;height:auto;border-radius:8px}
 
 /* Buttons */
 .btns{margin-top:24px;display:flex;justify-content:space-between;}
-button{
-  background:var(--accent);color:#fff;border:none;
-  padding:10px 18px;border-radius:10px;
-  cursor:pointer;font-size:1rem;
-}
+button{background:var(--accent);color:#fff;border:none; padding:10px 18px;border-radius:10px; cursor:pointer;font-size:1rem;}
 button[disabled]{opacity:0.5;cursor:not-allowed;}
 button:hover{background:#006ae6;}
 button.secondary{background:#999}
@@ -144,46 +90,47 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 
 /* PDF list for Step 4 */
 .pdf-list{display:flex;flex-direction:column;gap:12px;margin:20px 0;}
-.pdf-card{
-  background:#f8f9fa;border-radius:12px;padding:14px 16px;
-  display:flex;align-items:center;justify-content:space-between;
-  box-shadow:0 1px 4px rgba(0,0,0,0.06);
-}
+.pdf-card{background:#f8f9fa;border-radius:12px;padding:14px 16px; display:flex;align-items:center;justify-content:space-between; box-shadow:0 1px 4px rgba(0,0,0,0.06);}
 .pdf-info{display:flex;align-items:center;gap:10px;}
 .pdf-icon{font-size:1.5rem;}
 .pdf-name{font-weight:500;color:#333;}
 .pdf-actions{display:flex;align-items:center;gap:8px;}
-.spinner{
-  width:18px;height:18px;border:2px solid #ddd;
-  border-top-color:var(--accent);border-radius:50%;
-  animation:spin 0.8s linear infinite;
-}
+.spinner{width:18px;height:18px;border:2px solid #ddd; border-top-color:var(--accent);border-radius:50%; animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .hidden{display:none;}
-.btn-download{
-  background:var(--accent);color:#fff;border:none;
-  padding:6px 12px;border-radius:8px;cursor:pointer;
-  transition:background .25s;
-}
+.btn-download{background:var(--accent);color:#fff;border:none; padding:6px 12px;border-radius:8px;cursor:pointer; transition:background .25s;}
 .btn-download:hover{background:#006ae6;}
 .btn-download[disabled]{background:#ccc;cursor:default;}
 
 .actions{text-align:center;margin-top:20px;display:flex;flex-direction:column;gap:10px;}
-#btnGenerateAll{
-  background:var(--accent);color:#fff;border:none;
-  padding:12px;border-radius:10px;font-size:1rem;cursor:pointer;
-  transition:background .25s;
-}
+#btnGenerateAll{background:var(--accent);color:#fff;border:none; padding:12px;border-radius:10px;font-size:1rem;cursor:pointer; transition:background .25s;}
 #btnGenerateAll:hover{background:#006ae6;}
 
 /* Save Status */
-#saveStatus{
-  position:fixed;top:12px;right:12px;
-  background:var(--accent);color:#fff;
-  padding:6px 10px;border-radius:8px;
-  font-size:0.85rem;opacity:0;transition:opacity .25s;
-}
+#saveStatus{position:fixed;top:12px;right:12px; background:var(--accent);color:#fff; padding:6px 10px;border-radius:8px; font-size:0.85rem;opacity:0;transition:opacity .25s;}
 #saveStatus.show{opacity:1;}
+
+ /* --- WIZARD UI --- */
+.wizard-top{display:flex;flex-direction:column;gap:12px;margin-bottom:10px;}
+.progress{display:flex;align-items:center;gap:12px;justify-content:space-between;}
+.steps{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:80px;text-align:center;}
+.step .bubble{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center; background:var(--step-inactive);color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(7,50,100,0.06); transition:transform .24s, background .24s;}
+.step.active .bubble{ background: linear-gradient(135deg,var(--step-active), #4aa5ff); transform:scale(1.06); }
+.step .label{ font-size:0.80rem; color:var(--step-text); max-width:120px; }
+.progress-bar{height:6px;background:var(--step-inactive);border-radius:6px;flex:1;position:relative;overflow:hidden;margin-left:10px;margin-right:10px;}
+.progress-bar .fill{position:absolute;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,var(--step-active), #4aa5ff);transition:width .32s ease-in-out;}
+.wizard-step{ display:none; opacity:0; transform:translateY(8px); transition: opacity .28s ease, transform .28s ease; }
+.wizard-step.active{ display:block; opacity:1; transform:translateY(0); }
+
+.wizard-nav{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;}
+.wizard-nav .left, .wizard-nav .right{ display:flex; gap:10px; align-items:center; }
+.wizard-nav button{ min-width:90px; }
+
+  /* small helpers */
+.muted-inline{ color:var(--muted); font-size:0.9rem; }
+.kbd{ background:#f1f5fb;border-radius:6px;padding:6px 8px;font-size:0.85rem;border:1px solid var(--line); }
+
 </style>
 
 </head>
