@@ -271,27 +271,6 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 
 <script>
 
-// Simulated PDF Generation
-const btnGenerateAll=document.getElementById("btnGenerateAll");
-btnGenerateAll.addEventListener("click",async()=>{
-  const cards=document.querySelectorAll(".pdf-card");
-  btnGenerateAll.disabled=true;
-  btnGenerateAll.textContent="Generating PDFs…";
-  for(let i=0;i<cards.length;i++){
-    const spinner=cards[i].querySelector(".spinner");
-    const btn=cards[i].querySelector(".btn-download");
-    spinner.classList.remove("hidden");
-    btn.disabled=true;
-    btn.textContent="Generating…";
-    await new Promise(res=>setTimeout(res,1000));
-    spinner.classList.add("hidden");
-    btn.disabled=false;
-    btn.textContent=`⬇ Download Form ${i+1}`;
-  }
-  btnGenerateAll.textContent="✅ All PDFs Ready!";
-  btnGenerateAll.disabled=false;
-});
-
   /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
 const saveStatusEl = document.getElementById("saveStatus");
 
