@@ -181,9 +181,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
         </div>  
       </div>
 
-      <div class="progress-bar" aria-hidden="true">
-        <div class="fill" id="progressFill"></div>
-      </div>
+  
     </div>
     <div class="muted-inline">Step <span id="currentStepLabel">1</span> of 5</div>
   </div>
@@ -411,7 +409,6 @@ document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
 (function initWizard(){
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
   const stepIndicators = Array.from(document.querySelectorAll(".steps .step"));
-  const fillEl = document.getElementById("progressFill");
   const currentStepLabel = document.getElementById("currentStepLabel");
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
@@ -425,8 +422,6 @@ document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
     stepIndicators.forEach((si, i)=>{
       if(i <= current) si.classList.add("active"); else si.classList.remove("active");
     });
-    const pct = (current) / Math.max(1, total-1) * 100;
-    if(fillEl) fillEl.style.width = pct + "%";
     if(currentStepLabel) currentStepLabel.textContent = (current + 1);
 
     // Prev/Next button states
