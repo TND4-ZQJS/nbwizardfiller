@@ -137,6 +137,9 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 .muted-inline{ color:var(--muted); font-size:0.9rem; }
 .kbd{ background:#f1f5fb;border-radius:6px;padding:6px 8px;font-size:0.85rem;border:1px solid var(--line); }
 
+ /* PO and Insured data copy */ 
+input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}  
+  
 </style>
 
 </head>
@@ -463,6 +466,61 @@ function safeSetField(form, fieldName, value) {
 // Add this line to the bottom of your <script> block
 // (after all function definitions and before the final closing tag)
 document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
+
+
+/* ---------- Policy Owner - Insured data copy Helper ---------- */  
+document.addEventListener("DOMContentLoaded", () => {
+  const samePersonCheckbox = document.getElementById("wzepp_Insured_Checkbox");
+
+  const poName  = document.getElementById("wzepp_PO_Name");
+  const poNric  = document.getElementById("wzepp_PO_NIRC");
+
+  const insuredName = document.getElementById("wzepp_Insured_Name");
+  const insuredNric = document.getElementById("wzepp_Insured_NIRC");
+
+  function syncInsuredFromPO() {
+    insuredName.value = poName.value;
+    insuredNric.value = poNric.value;
+
+    // Save to localStorage so it persists
+    localStorage.setItem(insuredName.id, insuredName.value);
+    localStorage.setItem(insuredNric.id, insuredNric.value);
+  }
+
+  function setInsuredLocked(locked) {
+    insuredName.readOnly = locked;
+    insuredNric.readOnly = locked;
+
+    insuredName.classList.toggle("locked", locked);
+    insuredNric.classList.toggle("locked", locked);
+  }
+
+  function handleCheckboxChange() {
+    if (samePersonCheckbox.checked) {
+      syncInsuredFromPO();
+      setInsuredLocked(true);
+    } else {
+      setInsuredLocked(false);
+    }
+  }
+
+  // Keep insured fields in sync if PO changes while checked
+  poName.addEventListener("input", () => {
+    if (samePersonCheckbox.checked) syncInsuredFromPO();
+  });
+
+  poNric.addEventListener("input", () => {
+    if (samePersonCheckbox.checked) syncInsuredFromPO();
+  });
+
+  samePersonCheckbox.addEventListener("change", handleCheckboxChange);
+
+  // Restore state on page reload
+  if (samePersonCheckbox.checked) {
+    handleCheckboxChange();
+  }
+});
+  
 
 
 /* ------------------ WIZARD NAV LOGIC ------------------ */
