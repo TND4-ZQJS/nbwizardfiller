@@ -411,10 +411,10 @@ document.querySelectorAll('input, select, textarea').forEach(autoBindSave);
 (function initWizard(){
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
   const stepIndicators = Array.from(document.querySelectorAll(".steps .step"));
-  const fillEl = $("progressFill");
-  const currentStepLabel = $("currentStepLabel");
-  const prevBtn = $("prevBtn");
-  const nextBtn = $("nextBtn");
+  const fillEl = document.getElementById("progressFill");
+  const currentStepLabel = document.getElementById("currentStepLabel");
+  const prevBtn = document.getElementById("prevBtn");
+  const nextBtn = document.getElementById("nextBtn");
   let current = 0;
   const total = steps.length;
 
