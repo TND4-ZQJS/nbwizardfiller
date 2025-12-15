@@ -192,6 +192,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
     <!-- STEP 1: (Policy Owner) -->
     <div class="wizard-step" data-step="0">
       <section class="section">
+      <h2>Basic Information (Policy Owner)</h2>  
       <div class="floating-label">
       <input id="wzepp_PolicyNo" type="text" placeholder=" " required>
       <label for="wzepp_PolicyNo">Policy Number</label>
@@ -237,7 +238,7 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
 <!-- STEP 2: Insured -->
 <div class="wizard-step" data-step="1">
       <section class="section">
-<h2>Step 2— Basic Information (Insured)</h2>
+    <h2>Basic Information (Insured)</h2>
 
     <div class="checkbox-line">
     <input id="wzepp_Insured_Checkbox" type="checkbox"><small class="muted">Tick here if Policy Owner and Insured is same person</small>
@@ -252,10 +253,69 @@ button.ghost{background:transparent;border:1px solid var(--line);color:#333}
       <input id="wzepp_Insured_NIRC" type="text" placeholder=" " required>
       <label for="wzepp_Insured_NIRC">Insured NRIC/Passport No.</label>
     </div>
-
-        
-      </section>
+    </section>
 </div>
+
+<!-- STEP 3: 3rd Party Payor -->
+<div class="wizard-step" data-step="2">
+  <section class="section">  
+  <h2>3rd Party Payor - Basic Information</h2>
+
+ <div class="checkbox-line">
+    <input id="wzepp_ThirdPP_Checkbox" type="checkbox">
+    <small class="muted">Tick here ONLY if there is a 3rd Party Payor</small>
+    </div>
+
+    <div id="ThirdPP_Info_Sec">
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Name" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Name">3rd Party Payor Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_NIRC" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_NIRC">3rd Party Payor NRIC/Passport No.</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Mobile" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Mobile">3rd Party Payor Mobile No.</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Email" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Email">3rd Party Payor Email</label>
+    </div>
+
+    <div class="checkbox-line">
+      <input id="wzepp_ThirdPP_Address" type="checkbox">
+      <small class="muted">Correspondence Address: Tick here if same as Policy Owner</small>
+    </div>
+
+    <div id="ThirdPP_Address_Sec">
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address1" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address1">3rd Party Payor Address: Line 1</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address2" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address2">3rd Party Payor Address: Line 2</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address_Postcode" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address_Postcode">3rd Party Payor Address: Postcode</label>
+    </div>
+
+     <div class="floating-label">
+      <input id="wzepp_ThirdPP_Address_Country" type="text" placeholder=" " required>
+      <label for="wzepp_ThirdPP_Address_Country">3rd Party Payor Address: Country</label>
+     </div>   
+
+
+  </section>
+</div>   
   
 </div> <!-- end wizard -->
 
