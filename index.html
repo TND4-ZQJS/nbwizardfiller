@@ -321,7 +321,7 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 </div>   
 
 <!-- STEP 4: Witness Info -->
-<div class="wizard-step" data-step="4">
+<div class="wizard-step" data-step="3">
   <section class="section">  
   <h2>Witness - Basic Information</h2> 
 
@@ -339,7 +339,116 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
   </section>   
 </div> 
 
+<!-- STEP 5: Credit Card -->
+<div class="wizard-step" data-step="4">
+  <section class="section">  
+  <h2>Credit Card - Basic Information</h2>   
 
+      <div class="floating-label">
+      <input id="wzepp_Agent_Name" type="text" placeholder=" " required>
+      <label for="wzepp_Agent_Name">Agent Name</label>
+    </div>
+
+    <div class="floating-label">
+      <input id="wzepp_Agent_NIRC" type="text" placeholder=" " required>
+      <label for="wzepp_Agent_NIRC">Agent NRIC/Passport No.</label>
+    </div>
+
+    <div class="btns">
+      <button onclick="prevStep()">← Back</button>
+      <button onclick="nextStep()">Next →</button>
+    </div>
+  </div>
+  
+  <!-- Step 2a -->
+  <div class="step" data-step="2a">
+    <h2>Step 2a — Credit Card Information</h2>
+
+    <div class="floating-label">
+      <input id="wzepp_Card_Name" type="text" placeholder=" " required>
+      <label for="wzepp_Card_Name"">Card Holder Name</label>
+    </div>
+
+      <div class="row"></div>
+        <div class="expiry-field">
+      <select id="wzepp_Card_Type" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="wzepp_Card_MBB">VISA</option>
+        <option value="wzepp_Card_PBB">MASTER</option>
+      </select>
+      <label for="wzepp_Card_Type">Card Type</label>
+    </div>
+     
+     <div class="card-number-block">
+      <label>Card Number</label>
+      <small>Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
+      <div class="card-number-inputs">
+        <input class="card-digit" id="wzepp_Card_No_1" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_2" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_3" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_No_4" maxlength="4" inputmode="numeric" pattern="\d*">
+      </div>
+    </div>
+    
+
+     <div class="expiry-field">
+      <select id="wzepp_Card_Bank" value="">
+        <option value="" disabled selected hidden></option>
+        <option value="wzepp_Card_MBB">MAYBANK</option>
+        <option value="wzepp_Card_PBB">PUBLIC BANK</option>
+        <option value="wzepp_Card_UOB">UOB</option>
+        <option value="wzepp_Card_CIMB">CIMB</option>
+        <option value="wzepp_Card_HLB">HONG LEONG BANK</option>
+        <option value="wzepp_Card_HSBC">HSBC</option>
+        <option value="wzepp_Card_ALLIANCE">ALLIANCE BANK</option>
+        <option value="wzepp_Card_STANDCHART">STANDARD CHARTERED</option>
+      </select>
+      <label for="EPPPlan">Card Issuing Bank</label>
+    </div>
+    
+<div class="expiry-row">
+  <div class="expiry-field">
+    <select id="wzepp_Card_ExpMonth" value="">
+      <option value="" disabled selected></option>
+      <option value="01">01</option>
+      <option value="02">02</option>
+      <option value="03">03</option>
+      <option value="04">04</option>
+      <option value="05">05</option>
+      <option value="06">06</option>
+      <option value="07">07</option>
+      <option value="08">08</option>
+      <option value="09">09</option>
+      <option value="10">10</option>
+      <option value="11">11</option>
+      <option value="12">12</option>
+    </select>
+    <label for="expMonth">Expiry Month</label>
+  </div>
+
+  <div class="expiry-field">
+    <select id="wzepp_Card_ExpYear" value="">
+      <option value="" disabled selected></option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+      <option value="2028">2028</option>
+      <option value="2029">2029</option>
+      <option value="2030">2030</option>  
+      <option value="2031">2031</option>
+      <option value="2032">2032</option>
+      <option value="2033">2033</option>
+      <option value="2034">2034</option>
+       <option value="2035">2035</option>
+    </select>
+    <label for="wzepp_Card_ExpYear">Expiry Year</label>
+  </div>
+  </div>
+  </section>
+</div>  
+
+
+  
 </div> <!-- end wizard -->
 
 <!-- Global nav -->
