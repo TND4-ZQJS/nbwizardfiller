@@ -773,6 +773,38 @@ function toggleThirdPP() {
   toggleThirdPP();
 });
 
+/* ---------- Credit Card name copy ---------- */  
+document.addEventListener("DOMContentLoaded", () => {
+  const cardNameInput = document.getElementById("wzepp_Card_Name");
+  const poNameInput   = document.getElementById("wzepp_PO_Name");
+  const thirdPPNameInput = document.getElementById("wzepp_ThirdPP_Name");
+  const thirdPPCheckbox  = document.getElementById("wzepp_ThirdPP_Checkbox");
+
+  function updateCardName() {
+    let name = poNameInput.value.toUpperCase(); // default from Policy Owner
+
+    // If 3rd party exists and name is not empty, override
+    if (thirdPPCheckbox.checked && thirdPPNameInput.value.trim() !== "") {
+      name = thirdPPNameInput.value.toUpperCase();
+    }
+
+    cardNameInput.value = name;
+    localStorage.setItem(cardNameInput.id, name); // save for reload
+  }
+
+  // Copy on load
+  updateCardName();
+
+  // Update whenever relevant fields change
+  poNameInput.addEventListener("input", updateCardName);
+  thirdPPNameInput.addEventListener("input", updateCardName);
+  thirdPPCheckbox.addEventListener("change", updateCardName);
+
+  // Restore from localStorage on reload
+  const savedCardName = localStorage.getItem(cardNameInput.id);
+  if (savedCardName) cardNameInput.value = savedCardName;
+});
+  
 
 /* ------------------ WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
