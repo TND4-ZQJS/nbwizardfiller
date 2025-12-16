@@ -653,36 +653,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const thirdPPInputs = thirdPPInfoSec.querySelectorAll("input");
 
-  // Restore Step 3 from localStorage
-  thirdPPInputs.forEach(i => {
-    const saved = localStorage.getItem(i.id);
-    if (saved !== null) i.value = saved;
-  });
-
-  const savedCheckbox = localStorage.getItem("wzepp_ThirdPP_Checkbox");
-  if (savedCheckbox === "true") thirdPPCheckbox.checked = true;
-
-  const savedAddrCheckbox = localStorage.getItem("wzepp_ThirdPP_Address");
-  if (savedAddrCheckbox === "true") thirdPPAddrChk.checked = true;
-
-  // Then apply toggle logic AFTER restoring values
-  toggleThirdPP();
-  toggleThirdPPAddress();
-
-  // Save changes on user input
-  thirdPPInputs.forEach(i => {
-    i.addEventListener("input", () => localStorage.setItem(i.id, i.value));
-  });
-  thirdPPCheckbox.addEventListener("change", () => {
-    localStorage.setItem("wzepp_ThirdPP_Checkbox", thirdPPCheckbox.checked);
-    toggleThirdPP();
-  });
-  thirdPPAddrChk.addEventListener("change", () => {
-    localStorage.setItem("wzepp_ThirdPP_Address", thirdPPAddrChk.checked);
-    toggleThirdPPAddress();
-  });
-});
-
   // Policy Owner address fields
   const poAddr = {
     a1: document.getElementById("wzepp_PO_Address1"),
@@ -699,8 +669,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ---------- Step 3 Toggle ---------- */
-let isInitialLoad = true;
-  
 function toggleThirdPP() {
   if (thirdPPCheckbox.checked) {
     thirdPPInfoSec.style.display = "block";
@@ -708,18 +676,14 @@ function toggleThirdPP() {
   } else {
     thirdPPInfoSec.style.display = "none";
 
-    // ❗ Only clear when user action, NOT on page load
-    if (!isInitialLoad) {
-      thirdPPInputs.forEach(i => {
-        i.value = "";
-        i.readOnly = false;
-      });
+    thirdPPInputs.forEach(i => {
+      i.value = "";
+      i.readOnly = false;
+    });
 
-      thirdPPAddrChk.checked = false;
-    }
+    thirdPPAddrChk.checked = false;
   }
 }
-
 
   /* ---------- Address Copy ---------- */
   function toggleThirdPPAddress() {
@@ -741,8 +705,7 @@ function toggleThirdPP() {
   thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
   // Init state on load
-toggleThirdPP();
-isInitialLoad = false;
+  toggleThirdPP();
 });
 
 
