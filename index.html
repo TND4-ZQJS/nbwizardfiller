@@ -669,6 +669,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ---------- Step 3 Toggle ---------- */
+let isInitialLoad = true;
+  
 function toggleThirdPP() {
   if (thirdPPCheckbox.checked) {
     thirdPPInfoSec.style.display = "block";
@@ -676,14 +678,18 @@ function toggleThirdPP() {
   } else {
     thirdPPInfoSec.style.display = "none";
 
-    thirdPPInputs.forEach(i => {
-      i.value = "";
-      i.readOnly = false;
-    });
+    // ❗ Only clear when user action, NOT on page load
+    if (!isInitialLoad) {
+      thirdPPInputs.forEach(i => {
+        i.value = "";
+        i.readOnly = false;
+      });
 
-    thirdPPAddrChk.checked = false;
+      thirdPPAddrChk.checked = false;
+    }
   }
 }
+
 
   /* ---------- Address Copy ---------- */
   function toggleThirdPPAddress() {
@@ -705,7 +711,8 @@ function toggleThirdPP() {
   thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
   // Init state on load
-  toggleThirdPP();
+toggleThirdPP();
+isInitialLoad = false;
 });
 
 
