@@ -646,72 +646,67 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ---------- 3RD Party Payor Helper ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
-
-  /* ---------- ELEMENTS ---------- */
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
-  const thirdPPStep     = document.querySelector('.wizard-step[data-step="2"]');
-  const thirdPPSection  = document.getElementById("ThirdPP_Info_Sec");
-  const addressSameCB   = document.getElementById("wzepp_ThirdPP_Address");
+  const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
+  const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
+  const thirdPPAddrSec  = document.getElementById("ThirdPP_Address_Sec");
 
-  const thirdPPFields = [
-    "wzepp_ThirdPP_Name",
-    "wzepp_ThirdPP_NIRC",
-    "wzepp_ThirdPP_Mobile",
-    "wzepp_ThirdPP_Email",
-    "wzepp_ThirdPP_Address1",
-    "wzepp_ThirdPP_Address2",
-    "wzepp_ThirdPP_Address_Postcode",
-    "wzepp_ThirdPP_Address_Country"
-  ].map(id => document.getElementById(id));
+  const thirdPPInputs = thirdPPInfoSec.querySelectorAll("input");
 
-  /* ---------- HELPERS ---------- */
+  // Policy Owner address fields
+  const poAddr = {
+    a1: document.getElementById("wzepp_PO_Address1"),
+    a2: document.getElementById("wzepp_PO_Address2"),
+    pc: document.getElementById("wzepp_PO_Address_Postcode"),
+    ct: document.getElementById("wzepp_PO_Address_Country")
+  };
 
-  function clearThirdPPData() {
-    thirdPPFields.forEach(el => {
-      el.value = "";
-      localStorage.removeItem(el.id);
-      el.classList.remove("locked");
-      el.readOnly = false;
-    });
+  const ppAddr = {
+    a1: document.getElementById("wzepp_ThirdPP_Address1"),
+    a2: document.getElementById("wzepp_ThirdPP_Address2"),
+    pc: document.getElementById("wzepp_ThirdPP_Address_Postcode"),
+    ct: document.getElementById("wzepp_ThirdPP_Address_Country")
+  };
 
-    // reset correspondence checkbox
-    addressSameCB.checked = false;
-    addressSameCB.disabled = true;
-    localStorage.removeItem(addressSameCB.id);
+  /* ---------- Step 3 Toggle ---------- */
+  function toggleThirdPP() {
+    if (thirdPPCheckbox.checked) {
+      thirdPPInfoSec.style.display = "block";
+      thirdPPInputs.forEach(i => i.disabled = false);
+    } else {
+      thirdPPInfoSec.style.display = "none";
+
+      // clear + reset everything
+      thirdPPInputs.forEach(i => {
+        i.value = "";
+        i.disabled = false;
+      });
+
+      thirdPPAddrChk.checked = false;
+    }
   }
 
-  function setThirdPPEnabled(enabled) {
-    const controls = thirdPPSection.querySelectorAll("input, select, textarea");
+  /* ---------- Address Copy ---------- */
+  function toggleThirdPPAddress() {
+    if (!thirdPPAddrChk.checked) {
+      Object.values(ppAddr).forEach(i => i.readOnly = false);
+      return;
+    }
 
-    controls.forEach(el => {
-      if (el.type === "checkbox") {
-        el.disabled = !enabled;
-      } else {
-        el.readOnly = !enabled;
-        el.classList.toggle("locked", !enabled);
-      }
-    });
+    ppAddr.a1.value = poAddr.a1.value;
+    ppAddr.a2.value = poAddr.a2.value;
+    ppAddr.pc.value = poAddr.pc.value;
+    ppAddr.ct.value = poAddr.ct.value;
+
+    Object.values(ppAddr).forEach(i => i.readOnly = true);
   }
 
-  /* ---------- MAIN LOGIC ---------- */
+  // Events
+  thirdPPCheckbox.addEventListener("change", toggleThirdPP);
+  thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
-function handleThirdPPCheckbox() {
-  if (thirdPPCheckbox.checked) {
-    thirdPPContent.style.display = "block";
-    setThirdPPEnabled(true);
-  } else {
-    thirdPPContent.style.display = "none";
-    clearThirdPPData();
-    setThirdPPEnabled(false);
-  }
-}
-
-
-  /* ---------- EVENTS ---------- */
-  thirdPPCheckbox.addEventListener("change", handleThirdPPCheckbox);
-
-  /* ---------- RESTORE STATE ON LOAD ---------- */
-  handleThirdPPCheckbox();
+  // Init state on load
+  toggleThirdPP();
 });
 
 
