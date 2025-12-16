@@ -434,8 +434,31 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 <!-- STEP 6: EPP -->
 <div class="wizard-step" data-step="4">
   <section class="section">  
-  <h2>Credit Card - Basic Information</h2> 
+  <h2>EPP Options</h2> 
+  <div class="expiry-row">
+    <div class="expiry-field">
+    <select id="wzepp_Card_EppOption" value="">
+      <option value="" disabled selected></option>
+      <option value="2025">6 MONTHS</option>
+      <option value="2026">12 MONTHS</option>
+    </select>
+    <label for="wzepp_Card_EppOption">EPP  Options</label>
+  </div>
+  </div>
 
+     <div class="expiry-row">
+    <div class="expiry-field">
+    <select id="wzepp_Card_PaymentMode" value="">
+      <option value="" disabled selected></option>
+      <option value="2025">MONTHLY</option>
+      <option value="2026">QUARTERLY</option>
+       <option value="2025">HALF-YEARLY</option>
+      <option value="2026">YEARLY</option>
+    </select>
+    <label for="wzepp_Card_PaymentMode">Payment Frequency after EPP Ended</label>
+    <small class="muted">Follow payment fequency in PI</small>
+  </div>
+     </div>
 
   </section>    
 </div> 
