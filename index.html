@@ -653,6 +653,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const thirdPPInputs = thirdPPInfoSec.querySelectorAll("input");
 
+  // Restore Step 3 from localStorage
+  thirdPPInputs.forEach(i => {
+    const saved = localStorage.getItem(i.id);
+    if (saved !== null) i.value = saved;
+  });
+
+  const savedCheckbox = localStorage.getItem("wzepp_ThirdPP_Checkbox");
+  if (savedCheckbox === "true") thirdPPCheckbox.checked = true;
+
+  const savedAddrCheckbox = localStorage.getItem("wzepp_ThirdPP_Address");
+  if (savedAddrCheckbox === "true") thirdPPAddrChk.checked = true;
+
+  // Then apply toggle logic AFTER restoring values
+  toggleThirdPP();
+  toggleThirdPPAddress();
+
+  // Save changes on user input
+  thirdPPInputs.forEach(i => {
+    i.addEventListener("input", () => localStorage.setItem(i.id, i.value));
+  });
+  thirdPPCheckbox.addEventListener("change", () => {
+    localStorage.setItem("wzepp_ThirdPP_Checkbox", thirdPPCheckbox.checked);
+    toggleThirdPP();
+  });
+  thirdPPAddrChk.addEventListener("change", () => {
+    localStorage.setItem("wzepp_ThirdPP_Address", thirdPPAddrChk.checked);
+    toggleThirdPPAddress();
+  });
+});
+
   // Policy Owner address fields
   const poAddr = {
     a1: document.getElementById("wzepp_PO_Address1"),
