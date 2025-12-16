@@ -632,60 +632,52 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-/* ---------- #rd Party Payor Helper ---------- */  
+/* ---------- 3RD Party Payor Helper ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
 
   /* ---------- ELEMENTS ---------- */
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
+  const thirdPPStep     = document.querySelector('.wizard-step[data-step="2"]');
   const thirdPPSection  = document.getElementById("ThirdPP_Info_Sec");
+  const addressSameCB   = document.getElementById("wzepp_ThirdPP_Address");
 
-  const addressSameCheckbox = document.getElementById("wzepp_ThirdPP_Address");
-
-  // Policy Owner Address
-  const poAddr1 = document.getElementById("wzepp_PO_Address1");
-  const poAddr2 = document.getElementById("wzepp_PO_Address2");
-  const poPost  = document.getElementById("wzepp_PO_Address_Postcode");
-  const poCtry  = document.getElementById("wzepp_PO_Address_Country");
-
-  // Third Party Address
-  const tpAddr1 = document.getElementById("wzepp_ThirdPP_Address1");
-  const tpAddr2 = document.getElementById("wzepp_ThirdPP_Address2");
-  const tpPost  = document.getElementById("wzepp_ThirdPP_Address_Postcode");
-  const tpCtry  = document.getElementById("wzepp_ThirdPP_Address_Country");
+  const thirdPPFields = [
+    "wzepp_ThirdPP_Name",
+    "wzepp_ThirdPP_NIRC",
+    "wzepp_ThirdPP_Mobile",
+    "wzepp_ThirdPP_Email",
+    "wzepp_ThirdPP_Address1",
+    "wzepp_ThirdPP_Address2",
+    "wzepp_ThirdPP_Address_Postcode",
+    "wzepp_ThirdPP_Address_Country"
+  ].map(id => document.getElementById(id));
 
   /* ---------- HELPERS ---------- */
 
-  function setSectionEnabled(section, enabled) {
-    const controls = section.querySelectorAll("input, select, textarea");
-    controls.forEach(el => {
+  function clearThirdPPData() {
+    thirdPPFields.forEach(el => {
+      el.value = "";
+      localStorage.removeItem(el.id);
+      el.classList.remove("locked");
+      el.readOnly = false;
+    });
 
-      // checkbox
+    // reset correspondence checkbox
+    addressSameCB.checked = false;
+    addressSameCB.disabled = true;
+    localStorage.removeItem(addressSameCB.id);
+  }
+
+  function setThirdPPEnabled(enabled) {
+    const controls = thirdPPSection.querySelectorAll("input, select, textarea");
+
+    controls.forEach(el => {
       if (el.type === "checkbox") {
         el.disabled = !enabled;
-      }
-      // text-like inputs
-      else {
+      } else {
         el.readOnly = !enabled;
         el.classList.toggle("locked", !enabled);
       }
-    });
-  }
-
-  function copyPOAddressToThirdPP() {
-    tpAddr1.value = poAddr1.value;
-    tpAddr2.value = poAddr2.value;
-    tpPost.value  = poPost.value;
-    tpCtry.value  = poCtry.value;
-
-    [tpAddr1, tpAddr2, tpPost, tpCtry].forEach(el => {
-      localStorage.setItem(el.id, el.value);
-    });
-  }
-
-  function setAddressLocked(locked) {
-    [tpAddr1, tpAddr2, tpPost, tpCtry].forEach(el => {
-      el.readOnly = locked;
-      el.classList.toggle("locked", locked);
     });
   }
 
@@ -693,46 +685,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleThirdPPCheckbox() {
     if (thirdPPCheckbox.checked) {
-      setSectionEnabled(thirdPPSection, true);
+      // show step
+      thirdPPStep.style.display = "block";
+      setThirdPPEnabled(true);
     } else {
-      // lock everything below
-      setSectionEnabled(thirdPPSection, false);
-
-      // reset address checkbox
-      addressSameCheckbox.checked = false;
-      addressSameCheckbox.disabled = true;
-
-      setAddressLocked(false);
+      // hide step + clear everything
+      thirdPPStep.style.display = "none";
+      clearThirdPPData();
+      setThirdPPEnabled(false);
     }
   }
-
-  function handleAddressCheckbox() {
-    if (!thirdPPCheckbox.checked) return;
-
-    if (addressSameCheckbox.checked) {
-      copyPOAddressToThirdPP();
-      setAddressLocked(true);
-    } else {
-      setAddressLocked(false);
-    }
-  }
-
-  /* ---------- SYNC WHEN PO ADDRESS CHANGES ---------- */
-  [poAddr1, poAddr2, poPost, poCtry].forEach(el => {
-    el.addEventListener("input", () => {
-      if (thirdPPCheckbox.checked && addressSameCheckbox.checked) {
-        copyPOAddressToThirdPP();
-      }
-    });
-  });
 
   /* ---------- EVENTS ---------- */
   thirdPPCheckbox.addEventListener("change", handleThirdPPCheckbox);
-  addressSameCheckbox.addEventListener("change", handleAddressCheckbox);
 
-  /* ---------- RESTORE STATE ---------- */
+  /* ---------- RESTORE STATE ON LOAD ---------- */
   handleThirdPPCheckbox();
-  handleAddressCheckbox();
 });
 
 
