@@ -669,22 +669,21 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   /* ---------- Step 3 Toggle ---------- */
-  function toggleThirdPP() {
-    if (thirdPPCheckbox.checked) {
-      thirdPPInfoSec.style.display = "block";
-      thirdPPInputs.forEach(i => i.disabled = false);
-    } else {
-      thirdPPInfoSec.style.display = "none";
+function toggleThirdPP() {
+  if (thirdPPCheckbox.checked) {
+    thirdPPInfoSec.style.display = "block";
+    thirdPPInputs.forEach(i => i.readOnly = false);
+  } else {
+    thirdPPInfoSec.style.display = "none";
 
-      // clear + reset everything
-      thirdPPInputs.forEach(i => {
-        i.value = "";
-        i.disabled = false;
-      });
+    thirdPPInputs.forEach(i => {
+      i.value = "";
+      i.readOnly = false;
+    });
 
-      thirdPPAddrChk.checked = false;
-    }
+    thirdPPAddrChk.checked = false;
   }
+}
 
   /* ---------- Address Copy ---------- */
   function toggleThirdPPAddress() {
