@@ -661,12 +661,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ct: document.getElementById("wzepp_PO_Address_Country")
   };
 
-  const ppAddr = {
-    a1: document.getElementById("wzepp_ThirdPP_Address1"),
-    a2: document.getElementById("wzepp_ThirdPP_Address2"),
-    pc: document.getElementById("wzepp_ThirdPP_Address_Postcode"),
-    ct: document.getElementById("wzepp_ThirdPP_Address_Country")
-  };
+   // Save all fields when they change
+Object.values(ppAddr).forEach(i => {
+  i.addEventListener("input", () => localStorage.setItem(i.id, i.value));
+});
 
   /* ---------- Step 3 Toggle ---------- */
 function toggleThirdPP() {
@@ -698,6 +696,9 @@ function toggleThirdPP() {
     ppAddr.ct.value = poAddr.ct.value;
 
     Object.values(ppAddr).forEach(i => i.readOnly = true);
+
+    // Save copied values to localStorage immediately
+  Object.values(ppAddr).forEach(i => localStorage.setItem(i.id, i.value));
   }
 
   // Events
