@@ -467,43 +467,42 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 <!-- STEP 7: Signature -->
 <div class="wizard-step" data-step="6">
   <section class="section">  
-  <h2>Signature</h2> 
+    <h2>Signature</h2> 
 
- <div class="sig-preview" id="preview_wzepp_cardholder" onclick="openSig('simple_cardholder')">
+    <div class="sig-preview" id="preview_cardholder" onclick="openSig('cardholder')">
       <span>Tap to Sign (Card Holder)</span>
     </div>
     <div class="row">
-      <button id="clearPreview_wzepp_Cardholder" class="secondary" type="button">Clear Signature</button>
+      <button id="clear_cardholder" class="secondary" type="button" onclick="clearSpecificSig('cardholder')">Clear Signature</button>
     </div>
 
-     <div class="row"></div>
-   <div class="sig-preview" id="preview_wzepp_owner" onclick="openSig('simple_owner')">
+    <div class="sig-preview" id="preview_owner" onclick="openSig('owner')">
       <span>Tap to Sign (Policy Owner)</span>
     </div>
     <div class="row">
-      <button id="clearPreview_wzepp_Owner" class="secondary" type="button">Clear Signature</button>
+      <button id="clear_owner" class="secondary" type="button" onclick="clearSpecificSig('owner')">Clear Signature</button>
     </div>
 
-       <div class="row"></div>
-   <div class="sig-preview" id="preview_wzepp_witness" onclick="openSig('simple_witness')">
+    <div class="sig-preview" id="preview_witness" onclick="openSig('witness')">
       <span>Tap to Sign (Witness)</span>
     </div>
     <div class="row">
-      <button id="clearPreview_wzepp_Witness" class="secondary" type="button">Clear Signature</button>
+      <button id="clear_witness" class="secondary" type="button" onclick="clearSpecificSig('witness')">Clear Signature</button>
     </div>
     
- <div id="sigModal" class="sig-modal" aria-hidden="true">
-  <div class="box">
-    <h3 id="sigModalTitle">Draw Signature</h3>
-    <!-- Responsive canvas: internal pixels are set in JS for crispness -->
-    <canvas id="sigCanvas"></canvas>
-    <div class="sig-actions">
-      <button id="sigDone" type="button">Done</button>
-      <button id="sigClear" type="button" class="ghost">Clear</button>
-      <button id="sigCancel" type="button" class="secondary">Cancel</button>
+    <div id="sigModal" class="sig-modal" style="display:none;" aria-hidden="true">
+      <div class="box">
+        <h3 id="sigModalTitle">Draw Signature</h3>
+        <canvas id="sigCanvas"></canvas>
+        <div class="sig-actions">
+          <button id="sigDone" type="button">Done</button>
+          <button id="sigClear" type="button" class="ghost">Clear Pad</button>
+          <button id="sigCancel" type="button" class="secondary">Cancel</button>
+        </div>
+      </div>
     </div>
-  </div>
- </div>
+  </section>
+</div>
 
 
   
@@ -807,123 +806,100 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
+// Helper for selectors (assuming you use this based on your snippet)
+const $ = (id) => document.getElementById(id);
+
 let sigTarget = null;
 const sigModal = $("sigModal");
 const sigCanvas = $("sigCanvas");
 const sigCtx = sigCanvas.getContext("2d");
 
 const signaturePad = new SignaturePad(sigCanvas, {
-  minWidth: 0.7,              // Thin lines when moving fast
-  maxWidth: 2.5,              // Thicker when moving slowly
-  velocityFilterWeight: 0.6,  // More responsive to speed, but still smooth
-  minDistance: 3,             // Capture detail without too many points
-  throttle: 16,               // ~60 FPS, smooth without lag
-  penColor: "black",          // Signature color
-  backgroundColor: "rgba(0,0,0,0)" // Transparent background
-  //minWidth: 1,
-  //maxWidth: 3,
-  //penColor: "black",
-  //backgroundColor: "rgba(0,0,0,0)"
+  minWidth: 0.7,
+  maxWidth: 2.5,
+  penColor: "black",
+  backgroundColor: "rgba(0,0,0,0)"
 });
 
-function resizeCanvas() {
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-
-  // If modal is open and sigTarget exists, prefer the stored PNG for that role.
-  // Otherwise fall back to the current canvas content.
-  const storageKey = sigTarget ? "mhse_sig_" + sigTarget : null;
-  const savedFromStorage = storageKey ? localStorage.getItem(storageKey) : null;
-  const sourceData = savedFromStorage || sigCanvas.toDataURL();
-
-  // Set canvas size in device pixels (prevent subpixel rounding issues)
-  sigCanvas.width = Math.floor(sigCanvas.offsetWidth * ratio);
-  sigCanvas.height = Math.floor(sigCanvas.offsetHeight * ratio);
-
-  // Reset transform and set scale so drawing coordinates are in CSS pixels
-  sigCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-  // CSS size (in drawing units now) for layout math
-  const cssW = sigCanvas.offsetWidth;
-  const cssH = sigCanvas.offsetHeight;
-
-  // If we have an image source (PNG), draw it proportionally and center it
-  if (sourceData && typeof sourceData === "string" && sourceData.indexOf("data:image") === 0) {
-    const img = new Image();
-    img.onload = () => {
-      // clear using CSS coordinate space
-      sigCtx.clearRect(0, 0, cssW, cssH);
-
-      // Scale image proportionally to fit inside canvas area (CSS pixels)
-      const scale = Math.min(cssW / img.width, cssH / img.height);
-      const x = (cssW - img.width * scale) / 2;
-      const y = (cssH - img.height * scale) / 2;
-
-      // draw using CSS units (ctx is already scaled by devicePixelRatio)
-      sigCtx.drawImage(img, x, y, img.width * scale, img.height * scale);
-    };
-    img.src = sourceData;
-  } else {
-    // No image to draw — clear the pad so it's ready for a new signature
-    signaturePad.clear();
-  }
-}
-window.addEventListener("resize", resizeCanvas);
-
-function openSig(target){
+function openSig(target) {
   sigTarget = target;
-  $("sigModalTitle").textContent = 
-    target === 'owner' ? "Sign: Policy Owner" :
-    target === 'witness' ? "Sign: Witness" : "Sign: Trustee";
+  
+  // Set Title Dynamically
+  const displayNames = {
+    'cardholder': 'Card Holder',
+    'owner': 'Policy Owner',
+    'witness': 'Witness'
+  };
+  $("sigModalTitle").textContent = "Sign: " + (displayNames[target] || "User");
 
   sigModal.style.display = "block";
   sigModal.setAttribute("aria-hidden", "false");
 
-  // Wait for layout to settle then resize & restore (resizeCanvas will restore the saved PNG if present)
-  requestAnimationFrame(()=>{
+  requestAnimationFrame(() => {
     resizeCanvas();
   });
 }
 
-$("sigClear").addEventListener("click", ()=>{
-  signaturePad.clear();
+function resizeCanvas() {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  const storageKey = sigTarget ? "mhse_sig_" + sigTarget : null;
+  const savedFromStorage = storageKey ? localStorage.getItem(storageKey) : null;
 
-  if (sigTarget) {
-    // remove saved signature
-    localStorage.removeItem("mhse_sig_" + sigTarget);
+  // Set visual size vs internal resolution
+  sigCanvas.width = sigCanvas.offsetWidth * ratio;
+  sigCanvas.height = sigCanvas.offsetHeight * ratio;
+  sigCtx.setTransform(ratio, 0, 0, ratio, 0, 0);
 
-    // reset preview back to "Tap to Sign (…) "
-    $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${
-      sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1)
-    })</span>`;
+  signaturePad.clear(); // Clear internal pad state
+
+  if (savedFromStorage) {
+    const img = new Image();
+    img.onload = () => {
+      sigCtx.drawImage(img, 0, 0, sigCanvas.offsetWidth, sigCanvas.offsetHeight);
+    };
+    img.src = savedFromStorage;
   }
-});
+}
+
+// "Done" Button logic
+$("sigDone").addEventListener("click", () => {
+  if (!sigTarget) return;
+
+  if (signaturePad.isEmpty()) {
+    alert("Please provide a signature first.");
+    return;
+  }
+
+  const dataURL = sigCanvas.toDataURL("image/png");
+  localStorage.setItem("mhse_sig_" + sigTarget, dataURL);
   
-$("sigCancel").addEventListener("click", closeSigModal);
-function closeSigModal(){
+  // Update Preview Image
+  const previewDiv = $("preview_" + sigTarget);
+  previewDiv.innerHTML = `<img src="${dataURL}" style="max-height:100%; width:auto;">`;
+
+  closeSigModal();
+});
+
+// Clear inside modal
+$("sigClear").addEventListener("click", () => {
+  signaturePad.clear();
+});
+
+// Clear from the main form (External buttons)
+function clearSpecificSig(target) {
+  localStorage.removeItem("mhse_sig_" + target);
+  const label = target === 'cardholder' ? 'Card Holder' : (target === 'owner' ? 'Policy Owner' : 'Witness');
+  $("preview_" + target).innerHTML = `<span>Tap to Sign (${label})</span>`;
+}
+
+function closeSigModal() {
   sigModal.style.display = "none";
   sigModal.setAttribute("aria-hidden", "true");
   sigTarget = null;
 }
-  
-$("sigDone").addEventListener("click", () => {
-  if (!sigTarget) return;
 
-  // Always take snapshot from the canvas (even if unchanged)
-  const dataURL = sigCanvas.toDataURL("image/png");
-
-  if (signaturePad.isEmpty() && !localStorage.getItem("mhse_sig_" + sigTarget)) {
-    // If no strokes and nothing saved before → treat as empty
-    const label = sigTarget.charAt(0).toUpperCase() + sigTarget.slice(1);
-    $("preview_" + sigTarget).innerHTML = `<span>Tap to Sign (${label})</span>`;
-    localStorage.removeItem("mhse_sig_" + sigTarget);
-  } else {
-    // Save whatever is currently visible on the canvas
-    localStorage.setItem("mhse_sig_" + sigTarget, dataURL);
-    $("preview_" + sigTarget).innerHTML = `<img alt="Signature ${sigTarget}" src="${dataURL}">`;
-  }
-
-  closeSigModal();
-});
+$("sigCancel").addEventListener("click", closeSigModal);
+window.addEventListener("resize", resizeCanvas);
 
   
 
