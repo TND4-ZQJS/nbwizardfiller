@@ -451,7 +451,7 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
    
 
     <div class="signature-group">
-    <h2>Signature</h2>   
+    <h2>Signature of Card Holder</h2>   
     <div class="sig-preview" id="preview_cardholder" onclick="openSig('cardholder')">
       <span>Tap to Sign (Card Holder)</span>
     </div>
@@ -460,19 +460,25 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
     </div>
     </div>  
 
+    <div class="signature-group">
+    <h2>Signature of Policy Owner</h2>  
     <div class="sig-preview" id="preview_owner" onclick="openSig('owner')">
       <span>Tap to Sign (Policy Owner)</span>
     </div>
     <div class="row">
       <button id="clear_owner" class="secondary" type="button" onclick="clearSpecificSig('owner')">Clear Signature</button>
     </div>
+    </div>  
 
+    <div class="signature-group">
+    <h2>Signature of Witness</h2>
     <div class="sig-preview" id="preview_witness" onclick="openSig('witness')">
       <span>Tap to Sign (Witness)</span>
     </div>
     <div class="row">
       <button id="clear_witness" class="secondary" type="button" onclick="clearSpecificSig('witness')">Clear Signature</button>
     </div>
+    </div>  
     
   </section>
 </div>
