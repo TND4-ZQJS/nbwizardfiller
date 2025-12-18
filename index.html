@@ -842,7 +842,7 @@ function openSig(target) {
 
 function resizeCanvas() {
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  const storageKey = sigTarget ? "mhse_sig_" + sigTarget : null;
+  const storageKey = sigTarget ? "wzepp_sig_" + sigTarget : null;
   const savedFromStorage = storageKey ? localStorage.getItem(storageKey) : null;
 
   // Set visual size vs internal resolution
@@ -871,7 +871,7 @@ $("sigDone").addEventListener("click", () => {
   }
 
   const dataURL = sigCanvas.toDataURL("image/png");
-  localStorage.setItem("mhse_sig_" + sigTarget, dataURL);
+  localStorage.setItem("wzepp_sig_" + sigTarget, dataURL);
   
   // Update Preview Image
   const previewDiv = $("preview_" + sigTarget);
@@ -887,7 +887,7 @@ $("sigClear").addEventListener("click", () => {
 
 // Clear from the main form (External buttons)
 function clearSpecificSig(target) {
-  localStorage.removeItem("mhse_sig_" + target);
+  localStorage.removeItem("wzepp_sig_" + target);
   const label = target === 'cardholder' ? 'Card Holder' : (target === 'owner' ? 'Policy Owner' : 'Witness');
   $("preview_" + target).innerHTML = `<span>Tap to Sign (${label})</span>`;
 }
