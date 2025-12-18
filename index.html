@@ -712,11 +712,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
   const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
   const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
-  const thirdPPAddrSec  = document.getElementById("ThirdPP_Address_Sec");
 
   const thirdPPInputs = thirdPPInfoSec.querySelectorAll("input");
 
-  // Policy Owner address fields
   const poAddr = {
     a1: document.getElementById("wzepp_PO_Address1"),
     a2: document.getElementById("wzepp_PO_Address2"),
@@ -735,58 +733,49 @@ document.addEventListener("DOMContentLoaded", () => {
   function toggleThirdPP() {
     if (thirdPPCheckbox.checked) {
       thirdPPInfoSec.style.display = "block";
-      thirdPPInputs.forEach(i => i.readOnly = false);
     } else {
       thirdPPInfoSec.style.display = "none";
-      
-      // Optional: Reset values when main section is hidden
       thirdPPInputs.forEach(i => {
         i.value = "";
         i.readOnly = false;
+        localStorage.removeItem(i.id); // Clear storage if section hidden
       });
-
       thirdPPAddrChk.checked = false;
     }
   }
 
-  /* ---------- Address Copy ---------- */
+  /* ---------- Address Copy & Erase ---------- */
   function toggleThirdPPAddress() {
-    // 1. If unchecked, make editable and stop
     if (!thirdPPAddrChk.checked) {
-      Object.values(ppAddr).forEach(i => i.readOnly = false);
+      // IF UNCHECKED: Clear values and storage, make editable
+      Object.values(ppAddr).forEach(input => {
+        input.value = "";
+        input.readOnly = false;
+        localStorage.removeItem(input.id); // Remove from Local Storage
+      });
       return;
     }
 
-    // 2. Loop through keys (a1, a2, pc, ct) to Copy AND Save
+    // IF CHECKED: Copy values and Save to storage
     ['a1', 'a2', 'pc', 'ct'].forEach(key => {
-       // Copy value from Policy Owner
        ppAddr[key].value = poAddr[key].value;
-       
-       // Save to Local Storage using the HTML ID
        localStorage.setItem(ppAddr[key].id, ppAddr[key].value);
+       ppAddr[key].readOnly = true;
     });
-
-    // 3. Set fields to read-only
-    Object.values(ppAddr).forEach(i => i.readOnly = true);
   }
 
-  /* ---------- Load from Storage (New Feature) ---------- */
+  /* ---------- Load from Storage ---------- */
   function loadSavedAddress() {
-    // Check if the first address line exists in storage
-    // We assume if one exists, the user previously saved the state
+    // Check if there is data for the first address line
     if (localStorage.getItem(ppAddr.a1.id)) {
-      
-      // 1. Fill inputs from storage
       Object.values(ppAddr).forEach(input => {
         const savedVal = localStorage.getItem(input.id);
         if (savedVal) input.value = savedVal;
       });
 
-      // 2. Automatically check the "Same as Policy Owner" box
       thirdPPAddrChk.checked = true;
-
-      // 3. Apply the read-only state (Reuse logic)
-      toggleThirdPPAddress();
+      // Set to read-only since it's "Same as Policy Owner"
+      Object.values(ppAddr).forEach(i => i.readOnly = true);
     }
   }
 
@@ -795,8 +784,8 @@ document.addEventListener("DOMContentLoaded", () => {
   thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
   // Init state on load
-  toggleThirdPP();    // Initialize visibility
-  loadSavedAddress(); // Initialize data from storage
+  toggleThirdPP();    
+  loadSavedAddress(); 
 });
   
 
