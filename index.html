@@ -923,7 +923,22 @@ function closeSigModal() {
 $("sigCancel").addEventListener("click", closeSigModal);
 window.addEventListener("resize", resizeCanvas);
 
-  
+// Run this function when the page loads
+document.addEventListener("DOMContentLoaded", () => {
+  const roles = ['cardholder', 'owner', 'witness'];
+
+  roles.forEach(role => {
+    const savedSig = localStorage.getItem("wzepp_sig_" + role);
+    if (savedSig) {
+      // Find the preview div for this role
+      const previewDiv = $("preview_" + role);
+      if (previewDiv) {
+        // Inject the saved image back into the preview box
+        previewDiv.innerHTML = `<img src="${savedSig}" style="max-height:100%; width:auto;" alt="Signature ${role}">`;
+      }
+    }
+  });
+});
 
 /* ------------------ WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
