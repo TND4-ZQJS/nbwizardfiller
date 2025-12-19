@@ -801,42 +801,85 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// Function to combine the 4 inputs into one string
-function updateCombinedCardNumber() {
-    const part1 = document.getElementById('wzepp_Card_No_1').value;
-    const part2 = document.getElementById('wzepp_Card_No_2').value;
-    const part3 = document.getElementById('wzepp_Card_No_3').value;
-    const part4 = document.getElementById('wzepp_Card_No_4').value;
+/* ---------- Credit Card Card Number Processing ---------- */
 
-    // Combine them without spaces (standard for data processing)
-    const combined = part1 + part2 + part3 + part4;
+// 1. Setup references to the 4 UI boxes
+const cardBoxes = [
+  document.getElementById("wzepp_Card_No_1"),
+  document.getElementById("wzepp_Card_No_2"),
+  document.getElementById("wzepp_Card_No_3"),
+  document.getElementById("wzepp_Card_No_4")
+].filter(Boolean);
 
-    // Log it to console for testing
-    console.log("Combined Number:", combined);
+// 2. The Master Sync Function (Updates 1 Combined field + 16 Individual fields)
+function syncCardData() {
+  let fullString = "";
+  // Collect values from the 4 boxes
+  cardBoxes.forEach(el => fullString += el.value);
 
-    // If you have a hidden input to store this for a form submission:
-    // document.getElementById('wzepp_Card_Combine').value = combined;
-    
-    return combined;
+  // A. Store for EPP Form (Combined String)
+  if (typeof saveElValue === "function") {
+    saveElValue({ id: "wzepp_Card_Combine", value: fullString });
+  }
+
+  // B. Store for PDF Fields (16 Individual Digits)
+  for (let i = 1; i <= 16; i++) {
+    const digit = fullString[i - 1] || ""; 
+    if (typeof saveElValue === "function") {
+      saveElValue({ id: `wzepp_Card_No_${i}`, value: digit });
+    }
+  }
 }
 
-// Auto Split credit card numbers when copy and paste
-const inputs = document.querySelectorAll('.card-digit');
-inputs.forEach(input => {
-    input.addEventListener('input', updateCombinedCardNumber);
-});
-
-document.getElementById('wzepp_Card_No_1').addEventListener('paste', (e) => {
-    const data = e.clipboardData.getData('text').replace(/\s/g, ''); // Remove spaces
-    if (data.length === 16) {
-        e.preventDefault(); // Stop default paste
-        for (let i = 0; i < 4; i++) {
-            document.getElementById(`wzepp_Card_No_${i + 1}`).value = data.substr(i * 4, 4);
-        }
-        updateCombinedCardNumber(); // Update the hidden combined field
+// 3. Attach Listeners for better User Experience
+cardBoxes.forEach((el, idx) => {
+  
+  // Handle Typing, Digits Only, and Auto-Focus
+  el.addEventListener("input", () => {
+    el.value = el.value.replace(/\D/g, '').slice(0, 4);
+    
+    // Auto-save the individual box change
+    if (typeof saveElValue === "function") saveElValue(el);
+    
+    // Auto-focus next box
+    if (el.value.length === 4 && idx < cardBoxes.length - 1) {
+      cardBoxes[idx + 1].focus();
     }
-});
+    syncCardData();
+  });
 
+  // Handle Backspace (Go to previous box)
+  el.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && el.value.length === 0 && idx > 0) {
+      cardBoxes[idx - 1].focus();
+    }
+  });
+
+  // Handle Paste (Auto-split any string containing numbers)
+  el.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const digits = paste.replace(/\D/g, '').slice(0, 16);
+    
+    // Distribute pasted digits into the 4 UI boxes
+    for (let i = 0; i < 4; i++) {
+      if (cardBoxes[i]) {
+        cardBoxes[i].value = digits.slice(i * 4, (i * 4) + 4);
+        if (typeof saveElValue === "function") saveElValue(cardBoxes[i]);
+      }
+    }
+    
+    syncCardData();
+
+    // Focus management after paste
+    if (digits.length < 16) {
+      const nextBoxIndex = Math.floor(digits.length / 4);
+      if (cardBoxes[nextBoxIndex]) cardBoxes[nextBoxIndex].focus();
+    } else {
+      cardBoxes[3].focus();
+    }
+  });
+});
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
 // Helper for selectors (assuming you use this based on your snippet)
