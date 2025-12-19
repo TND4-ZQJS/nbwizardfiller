@@ -337,8 +337,8 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
         <div class="expiry-field">
       <select id="wzepp_Card_Type" value="">
         <option value="" disabled selected hidden></option>
-        <option value="wzepp_Card_MBB">VISA</option>
-        <option value="wzepp_Card_PBB">MASTER</option>
+        <option value="wzepp_Card_Visa">VISA</option>
+        <option value="wzepp_Card_Master">MASTER</option>
       </select>
       <label for="wzepp_Card_Type">Card Type</label>
     </div>
@@ -798,6 +798,43 @@ document.addEventListener("DOMContentLoaded", () => {
   // Restore from localStorage on reload
   const savedCardName = localStorage.getItem(cardNameInput.id);
   if (savedCardName) cardNameInput.value = savedCardName;
+});
+
+
+// Function to combine the 4 inputs into one string
+function updateCombinedCardNumber() {
+    const part1 = document.getElementById('wzepp_Card_No_1').value;
+    const part2 = document.getElementById('wzepp_Card_No_2').value;
+    const part3 = document.getElementById('wzepp_Card_No_3').value;
+    const part4 = document.getElementById('wzepp_Card_No_4').value;
+
+    // Combine them without spaces (standard for data processing)
+    const combined = part1 + part2 + part3 + part4;
+
+    // Log it to console for testing
+    console.log("Combined Number:", combined);
+
+    // If you have a hidden input to store this for a form submission:
+    // document.getElementById('wzepp_Card_Combine').value = combined;
+    
+    return combined;
+}
+
+// Auto Split credit card numbers when copy and paste
+const inputs = document.querySelectorAll('.card-digit');
+inputs.forEach(input => {
+    input.addEventListener('input', updateCombinedCardNumber);
+});
+
+document.getElementById('wzepp_Card_No_1').addEventListener('paste', (e) => {
+    const data = e.clipboardData.getData('text').replace(/\s/g, ''); // Remove spaces
+    if (data.length === 16) {
+        e.preventDefault(); // Stop default paste
+        for (let i = 0; i < 4; i++) {
+            document.getElementById(`wzepp_Card_No_${i + 1}`).value = data.substr(i * 4, 4);
+        }
+        updateCombinedCardNumber(); // Update the hidden combined field
+    }
 });
 
 
