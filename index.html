@@ -347,10 +347,10 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
       <label>Card Number</label>
       <small>Type 4 digits per box. Paste full 16-digit number — it will auto-split.</small>
       <div class="card-number-inputs">
-        <input class="card-digit" id="wzepp_Card_No_1" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_2" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_3" maxlength="4" inputmode="numeric" pattern="\d*">
-        <input class="card-digit" id="wzepp_Card_No_4" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_Set1" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_Set2" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_Set3" maxlength="4" inputmode="numeric" pattern="\d*">
+        <input class="card-digit" id="wzepp_Card_Set4" maxlength="4" inputmode="numeric" pattern="\d*">
       </div>
     </div>
     
@@ -393,17 +393,14 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
   <div class="expiry-field">
     <select id="wzepp_Card_ExpYear" value="">
       <option value="" disabled selected></option>
-      <option value="2025">2025</option>
-      <option value="2026">2026</option>
-      <option value="2027">2027</option>
-      <option value="2028">2028</option>
-      <option value="2029">2029</option>
-      <option value="2030">2030</option>  
-      <option value="2031">2031</option>
-      <option value="2032">2032</option>
-      <option value="2033">2033</option>
-      <option value="2034">2034</option>
-       <option value="2035">2035</option>
+      <option value="2025">2025</option><option value="2026">2026</option>
+      <option value="2027">2027</option><option value="2028">2028</option>
+      <option value="2029">2029</option><option value="2030">2030</option>  
+      <option value="2031">2031</option><option value="2032">2032</option>
+      <option value="2033">2033</option><option value="2034">2034</option>
+      <option value="2035">2035</option><option value="2035">2036</option>
+      <option value="2035">2037</option><option value="2035">2038</option>
+      <option value="2035">2039</option><option value="2035">2040</option>
     </select>
     <label for="wzepp_Card_ExpYear">Expiry Year</label>
   </div>
@@ -805,10 +802,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // 1. Setup references to the 4 UI boxes
 const cardBoxes = [
-  document.getElementById("wzepp_Card_No_1"),
-  document.getElementById("wzepp_Card_No_2"),
-  document.getElementById("wzepp_Card_No_3"),
-  document.getElementById("wzepp_Card_No_4")
+  document.getElementById("wzepp_Card_Set1"),
+  document.getElementById("wzepp_Card_Set2"),
+  document.getElementById("wzepp_Card_Set3"),
+  document.getElementById("wzepp_Card_Set4")
 ].filter(Boolean);
 
 // 2. The Master Sync Function (Updates 1 Combined field + 16 Individual fields)
