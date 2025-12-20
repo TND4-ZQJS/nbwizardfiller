@@ -878,6 +878,31 @@ cardBoxes.forEach((el, idx) => {
   });
 });
 
+/* ---------- BANK SELECTION LOGIC (text and checkbox output) ---------- */
+
+const bankDropdown = document.getElementById("wzepp_Card_Bank");
+
+if (bankDropdown) {
+  bankDropdown.addEventListener("change", (e) => {
+    const selectedCheckboxId = e.target.value; // "wzepp_Card_MBB"
+    const selectedText = e.target.options[e.target.selectedIndex].text; // "MAYBANK"
+
+    // 1. PRINT TEXT to wzepp_Card_Bank_Text
+    saveElValue({ id: "wzepp_Card_Bank_Text", value: selectedText });
+
+    // 2. TICK CHECKBOX logic
+    // We clear all possible bank checkboxes first so only one is "Yes"
+    const allBankIds = ["wzepp_Card_MBB", "wzepp_Card_PBB", "wzepp_Card_UOB", "wzepp_Card_CIMB", "wzepp_Card_HLB", "wzepp_Card_HSBC", "wzepp_Card_ALLIANCE", "wzepp_Card_STANDCHART"];
+    
+    allBankIds.forEach(id => {
+      saveElValue({ id: id, value: "Off" }); 
+    });
+
+    // Tick the selected one
+    saveElValue({ id: selectedCheckboxId, value: "Yes" });
+  });
+}
+
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
 // Helper for selectors (assuming you use this based on your snippet)
 const $ = (id) => document.getElementById(id);
