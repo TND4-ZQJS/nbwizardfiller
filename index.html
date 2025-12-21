@@ -129,25 +129,37 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 .dob-wrapper {
     display: flex;
     align-items: center;
-    width: 100%;
+    cursor: text;
+    /* Use your existing style properties */
     padding: 12px 10px;
-    font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    background: transparent;
+    min-height: 46px; /* Match height of your other inputs */
 }
 
 .dob-wrapper input {
+    width: auto !important; /* Overrides the 100% width */
     border: none !important;
     padding: 0 !important;
-    width: 30px;
+    background: transparent !important;
+    outline: none !important;
+    font-size: 16px;
     text-align: center;
-    border-radius: 0 !important;
+}
+  
+#wzepp_DOB_MM_UI, 
+#wzepp_DOB_DD_UI {
+    width: 35px !important; /* Space for 2 digits */
+}
+#wzepp_DOB_YYYY_UI {
+    width: 60px !important; /* Space for 4 digits */
 }
 
-#wzepp_DOB_YYYY_UI { width: 50px; }
-
-.sep { color: #ccc; margin: 0 5px; }
+.sep {
+    padding: 0 4px;
+    color: #777;
+    user-select: none;
+}
 
 /* Force the label to stay up if the wrapper is "active" or has data */
 .dob-container.active label,
