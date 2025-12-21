@@ -903,6 +903,56 @@ if (bankDropdown) {
   });
 }
 
+/* ---------- Credit Card EXPIRY DATE FORMATTING (WORD + SPLIT) ---------- */
+
+const monthSelect = document.getElementById("wzepp_Card_ExpMonth");
+const yearSelect = document.getElementById("wzepp_Card_ExpYear");
+
+// Mapping for Month Numbers to Words
+const monthNames = {
+  "01": "JANUARY", "02": "FEBRUARY", "03": "MARCH", "04": "APRIL",
+  "05": "MAY", "06": "JUNE", "07": "JULY", "08": "AUGUST",
+  "09": "SEPTEMBER", "10": "OCTOBER", "11": "NOVEMBER", "12": "DECEMBER"
+};
+
+function syncExpiryFormats() {
+  const mm = monthSelect.value || ""; // e.g., "12"
+  const yyyy = yearSelect.value || ""; // e.g., "2028"
+  const yy = yyyy.slice(-2); // e.g., "28"
+
+  // 1. COMBINED FORMAT (Month in Words + Full Year)
+  // Example Result: "DECEMBER 2028"
+  if (mm && yyyy) {
+    const monthWord = monthNames[mm];
+    const combinedString = `${monthWord} ${yyyy}`;
+    
+    if (typeof saveElValue === "function") {
+      saveElValue({ id: "wzepp_Card_Exp_Combine", value: combinedString });
+    }
+  }
+
+  // 2. SPLIT FORMAT FOR PDF BOXES (Individual Digits)
+  if (typeof saveElValue === "function") {
+    // Month digits (MM)
+    saveElValue({ id: "wzepp_Card_Exp_M1", value: mm.charAt(0) });
+    saveElValue({ id: "wzepp_Card_Exp_M2", value: mm.charAt(1) });
+    
+    // Year digits (YY - Last two digits)
+    saveElValue({ id: "wzepp_Card_Exp_Y1", value: yy.charAt(0) });
+    saveElValue({ id: "wzepp_Card_Exp_Y2", value: yy.charAt(1) });
+  }
+}
+
+// Attach listeners
+[monthSelect, yearSelect].forEach(el => {
+  if (el) {
+    el.addEventListener("change", () => {
+      if (typeof saveElValue === "function") saveElValue(el);
+      syncExpiryFormats();
+    });
+  }
+});  
+
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
 // Helper for selectors (assuming you use this based on your snippet)
 const $ = (id) => document.getElementById(id);
