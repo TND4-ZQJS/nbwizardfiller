@@ -180,6 +180,76 @@ width: 40px !important;
 .dob-wrapper:focus-within {
     border-color: var(--accent);
 } 
+
+/* Style for the "Source of Fund" Label */
+.group-header-label {
+    display: block;
+    font-size: 14px;
+    color: #777; /* Matches your floating label color */
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.muted-info {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 12px;
+}
+
+/* Flexbox Grid for Checkboxes */
+.funds-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 25px; /* Vertical and Horizontal spacing */
+}
+
+.check-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    user-select: none;
+}
+
+.check-item input {
+    display: none; /* Hide default checkbox */
+}
+
+/* Custom Checkbox Square */
+.custom-check {
+    height: 20px;
+    width: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 8px;
+    position: relative;
+    background: white;
+    transition: all 0.2s;
+}
+
+.check-item input:checked + .custom-check {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Checkmark Tick */
+.custom-check:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.check-item input:checked + .custom-check:after {
+    display: block;
+}  
   
 </style>
 
@@ -368,6 +438,38 @@ width: 40px !important;
       <input id="wzepp_ThirdPP_Income" type="text" placeholder=" " required>
       <label for="wzepp_ThirdPP_Income">3rd Party Payor Monthly Income(RM)</label>
     </div>    
+
+     <div class="input-group-wrapper" style="margin-top: 25px;">
+  <label class="group-header-label">Source of Fund</label>
+  <p class="muted-info">Select all that apply</p>
+  
+  <div class="funds-grid">
+    <label class="check-item">
+      <input type="checkbox" id="wzepp_Fund_Self" value="Yes">
+      <span class="custom-check"></span> Self
+    </label>
+
+    <label class="check-item">
+      <input type="checkbox" id="wzepp_Fund_Parents" value="Yes">
+      <span class="custom-check"></span> Parent(s)
+    </label>
+
+    <label class="check-item">
+      <input type="checkbox" id="wzepp_Fund_Spouse" value="Yes">
+      <span class="custom-check"></span> Spouse
+    </label>
+
+    <label class="check-item">
+      <input type="checkbox" id="wzepp_Fund_Others" value="Yes">
+      <span class="custom-check"></span> Others
+    </label>
+  </div>
+
+  <div class="floating-label" id="others_spec_wrapper" style="display: none; margin-top: 15px;">
+    <input type="text" id="wzepp_Fund_Others_Spec" placeholder=" ">
+    <label>Please specify other source</label>
+  </div>
+</div> 
 
     <div class="checkbox-line">
       <input id="wzepp_ThirdPP_Address" type="checkbox">
