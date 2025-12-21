@@ -129,12 +129,13 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 .dob-wrapper {
     display: flex;
     align-items: center;
-    cursor: text;
-    /* Use your existing style properties */
+    width: 100%;
     padding: 12px 10px;
+    font-size: 16px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    min-height: 46px; /* Match height of your other inputs */
+    background: white;
+    box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
 
 .dob-wrapper input {
@@ -359,7 +360,7 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 
      <div class="floating-label">
       <input id="wzepp_ThirdPP_Income" type="text" placeholder=" " required>
-      <label for="wzepp_ThirdPP_Income">3rd Party Payor Monthly</label>
+      <label for="wzepp_ThirdPP_Income">3rd Party Payor Monthly Income(RM)</label>
     </div>    
 
     <div class="checkbox-line">
