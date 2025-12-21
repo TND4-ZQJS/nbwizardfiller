@@ -1014,6 +1014,27 @@ function checkDobData() {
         dobContainer.classList.remove("has-data");
     }
 }  
+
+/* ---------- SOURCE OF FUNDS LOGIC ---------- */
+const fundIds = ["wzepp_Fund_Self", "wzepp_Fund_Parents", "wzepp_Fund_Spouse", "wzepp_Fund_Others"];
+
+fundIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("change", (e) => {
+        const value = e.target.checked ? "Yes" : "Off";
+        
+        // Save to PDF
+        if (typeof saveElValue === "function") saveElValue({ id: id, value: value });
+
+        // Show/Hide Specification field
+        if (id === "wzepp_Fund_Others") {
+            const spec = document.getElementById("others_spec_wrapper");
+            spec.style.display = e.target.checked ? "block" : "none";
+        }
+    });
+});  
   
 
 /* ---------- Credit Card name copy ---------- */  
