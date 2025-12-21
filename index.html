@@ -398,9 +398,9 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
       <option value="2029">2029</option><option value="2030">2030</option>  
       <option value="2031">2031</option><option value="2032">2032</option>
       <option value="2033">2033</option><option value="2034">2034</option>
-      <option value="2035">2035</option><option value="2035">2036</option>
-      <option value="2035">2037</option><option value="2035">2038</option>
-      <option value="2035">2039</option><option value="2035">2040</option>
+      <option value="2035">2035</option><option value="2036">2036</option>
+      <option value="2037">2037</option><option value="2038">2038</option>
+      <option value="2039">2039</option><option value="2040">2040</option>
     </select>
     <label for="wzepp_Card_ExpYear">Expiry Year</label>
   </div>
@@ -417,8 +417,8 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
     <div class="expiry-field">
     <select id="wzepp_Card_EppOption" value="">
       <option value="" disabled selected></option>
-      <option value="2025">6 MONTHS</option>
-      <option value="2026">12 MONTHS</option>
+      <option value="wzepp_Card_EppOption_6M">6 MONTHS</option>
+      <option value="wzepp_Card_EppOption_12M">12 MONTHS</option>
     </select>
     <label for="wzepp_Card_EppOption">EPP  Options</label>
   </div>
@@ -426,14 +426,14 @@ input.locked {background:#f3f4f6; color:#777; cursor:not-allowed;}
 
      <div class="expiry-row">
     <div class="expiry-field">
-    <select id="wzepp_Card_PaymentMode" value="">
+    <select id="wzepp_Card_AfterEPP" value="">
       <option value="" disabled selected></option>
-      <option value="2025">MONTHLY</option>
-      <option value="2026">QUARTERLY</option>
-       <option value="2025">HALF-YEARLY</option>
-      <option value="2026">YEARLY</option>
+      <option value="wzepp_Card_AfterEPP_Monthly">MONTHLY</option>
+      <option value="wzepp_Card_AfterEPP_Quarterly">QUARTERLY</option>
+       <option value="wzepp_Card_AfterEPP_Halfyearly">HALF-YEARLY</option>
+      <option value="wzepp_Card_AfterEPP_Yearly">YEARLY</option>
     </select>
-    <label for="wzepp_Card_PaymentMode">Payment Frequency after EPP Ended</label>
+    <label for="wzepp_Card_AfterEPP">Payment Frequency after EPP Ended</label>
     <small class="muted">Follow payment fequency in PI</small>
   </div>
      </div>
@@ -952,6 +952,37 @@ function syncExpiryFormats() {
     });
   }
 });  
+
+/* ---------- EPP CHECKBOX LOGIC ---------- */
+
+function bindDropdownToCheckboxes(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+
+    dropdown.addEventListener("change", (e) => {
+        const selectedPdfField = e.target.value; 
+        
+        // 1. Clear all checkboxes in this group
+        // This prevents multiple boxes being checked if the user changes selection
+        Array.from(dropdown.options).forEach(opt => {
+            if (opt.value && typeof saveElValue === "function") {
+                saveElValue({ id: opt.value, value: "Off" });
+            }
+        });
+
+        // 2. Tick the selected PDF checkbox
+        if (selectedPdfField && typeof saveElValue === "function") {
+            saveElValue({ id: selectedPdfField, value: "Yes" });
+        }
+
+        // 3. Save the dropdown itself (for page reload persistence)
+        if (typeof saveElValue === "function") saveElValue(e.target);
+    });
+}
+
+// Initialize for both your specific dropdowns
+bindDropdownToCheckboxes("wzepp_Card_EppOption");
+bindDropdownToCheckboxes("wzepp_Card_AfterEPP");  
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
 // Helper for selectors (assuming you use this based on your snippet)
