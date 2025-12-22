@@ -589,11 +589,11 @@ width: 40px !important;
         <option value="" disabled selected hidden></option>
         <option value="wzepp_Card_Ownself">OWNSELF</option>
         <option value="wzepp_Card_Spouse">SPOUSE</option>
-        <option value="wzepp_Card_Ownself">CHILDREN</option>
-        <option value="wzepp_Card_Spouse">PARENTS</option>
-        <option value="wzepp_Card_Ownself">GRANDPARENTS</option>
-        <option value="wzepp_Card_Spouse">SIBLINGS</option>
-        <option value="wzepp_Card_Ownself">EMPLOYER/EMPLOYEE</option>
+        <option value="wzepp_Card_Children">CHILDREN</option>
+        <option value="wzepp_Card_Parents">PARENTS</option>
+        <option value="wzepp_Card_Grandparents">GRANDPARENTS</option>
+        <option value="wzepp_Card_Siblings">SIBLINGS</option>
+        <option value="wzepp_Card_Employer">EMPLOYER/EMPLOYEE</option>
       </select>
       <label for="wzepp_Relationship">Relationship of Card Holder with Policy Owner</label>
     </div>
@@ -1134,6 +1134,48 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedCardName = localStorage.getItem(cardNameInput.id);
   if (savedCardName) cardNameInput.value = savedCardName;
 });
+
+/* ---------- Credit Card - RELATIONSHIP LOGIC ---------- */
+const thirdPartyCheck = document.getElementById("wzepp_ThirdPP_Checkbox");
+const relDropdown = document.getElementById("wzepp_Relationship");
+
+function handleRelationshipLock() {
+    if (!thirdPartyCheck || !relDropdown) return;
+
+    const isThirdParty = thirdPartyCheck.checked;
+
+    if (!isThirdParty) {
+        // 1. Force selection to OWNSELF
+        relDropdown.value = "wzepp_Card_Ownself";
+        
+        // 2. Disable other options so user can't change it
+        Array.from(relDropdown.options).forEach(opt => {
+            if (opt.value !== "wzepp_Card_Ownself" && opt.value !== "") {
+                opt.disabled = true;
+            }
+        });
+
+        // 3. Save "Ownself" to PDF
+        if (typeof saveElValue === "function") saveElValue(relDropdown);
+        
+    } else {
+        // 4. If 3rd Party is checked, enable all options
+        Array.from(relDropdown.options).forEach(opt => {
+            opt.disabled = false;
+        });
+    }
+}
+
+// Event Listeners
+if (thirdPartyCheck) {
+    thirdPartyCheck.addEventListener("change", handleRelationshipLock);
+    // Run on load to ensure correct state if page refreshes
+    handleRelationshipLock();
+}
+
+relDropdown.addEventListener("change", (e) => {
+    if (typeof saveElValue === "function") saveElValue(e.target);
+});  
 
 
 /* ---------- Credit Card Card Number Processing ---------- */
