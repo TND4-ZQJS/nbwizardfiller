@@ -709,9 +709,35 @@ width: 40px !important;
 
 <!-- STEP 7: Signature -->
 <div class="wizard-step" data-step="6">
-  <section class="section">  
-   
 
+  <section class="section">
+  <div class="expiry-row">
+  <div class="expiry-field">
+    <select id="wzepp_Sign_State" value="">
+      <option value="" disabled selected></option>
+      <option value="SELANGOR">SELANGOR</option>
+      <option value="K.LUMPUR">K.LUMPUR</option>
+      <option value="MELAKA">MELAKA</option>
+      <option value="JOHOR">JOHOR</option>
+      <option value="N.SEMBILAN">N.SEMBILAN</option>
+      <option value="PENANG">PENANG</option>
+      <option value="PERAK">PERAK</option>
+      <option value="SABAH">SABAH</option>
+      <option value="SARAWAK">SARAWAK</option>
+      <option value="KELANTAN">KELANTAN</option>
+      <option value="PERLIS">PERLIS</option>
+      <option value="T'GANU">T'GANU</option>
+      <option value="PAHANG">PAHANG</option>
+      <option value="KEDAH">KEDAH</option>
+    </select>
+    <label for="zepp_Sign_State">State</label>
+  </div>
+
+  </section>  
+  
+  
+  <section class="section">  
+  
     <div class="signature-group">
     <h2>Signature of Card Holder</h2>   
     <div class="sig-preview" id="preview_cardholder" onclick="openSig('cardholder')">
