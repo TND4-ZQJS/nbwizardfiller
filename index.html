@@ -1174,6 +1174,58 @@ fundIds.forEach(id => {
         }
     });
 });  
+
+/* ---------- SOURCE OF WEALTH LOGIC ---------- */
+const wealthIds = [
+    "wzepp_Wealth_Employment", 
+    "wzepp_Wealth_Investment", 
+    "wzepp_Wealth_Savings", 
+    "wzepp_Wealth_Inheritance", 
+    "wzepp_Wealth_Parents", 
+    "wzepp_Wealth_Spouse", 
+    "wzepp_Wealth_Others"
+];
+
+wealthIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("change", (e) => {
+        const isChecked = e.target.checked;
+        const value = isChecked ? "Yes" : "Off";
+        
+        // Save to PDF Checkbox
+        if (typeof saveElValue === "function") saveElValue({ id: id, value: value });
+
+        // Logic for "Others" Checkbox
+        if (id === "wzepp_Wealth_Others") {
+            const specWrapper = document.getElementById("wealth_others_spec_wrapper");
+            const specInput = document.getElementById("wzepp_Wealth_Others_Spec");
+            
+            if (isChecked) {
+                specWrapper.style.display = "block";
+            } else {
+                specWrapper.style.display = "none";
+                // Clear UI and PDF field when unchecked
+                if (specInput) specInput.value = "";
+                if (typeof saveElValue === "function") {
+                    saveElValue({ id: "wzepp_Wealth_Others_Spec_PDF", value: "" });
+                }
+            }
+        }
+    });
+});
+
+// Listener for the Wealth "Others" text input
+const wealthSpecInput = document.getElementById("wzepp_Wealth_Others_Spec");
+if (wealthSpecInput) {
+    wealthSpecInput.addEventListener("input", (e) => {
+        if (typeof saveElValue === "function") {
+            // Mapping to PDF text field
+            saveElValue({ id: "wzepp_Wealth_Others_Spec_PDF", value: e.target.value.toUpperCase() });
+        }
+    });
+}  
   
 
 /* ---------- Credit Card name copy ---------- */  
