@@ -1039,14 +1039,13 @@ document.addEventListener("DOMContentLoaded", () => {
     handleCheckboxChange();
   }
 });
-
+  
 /* ---------- 3RD Party Payor & Address Sync ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
   const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
   const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
 
-  // Field mapping for Policy Owner (PO)
   const poAddr = {
     ct: document.getElementById("wzepp_PO_Address_Country"),
     st: document.getElementById("wzepp_PO_Address_State"),
@@ -1055,7 +1054,6 @@ document.addEventListener("DOMContentLoaded", () => {
     a1: document.getElementById("wzepp_PO_Address1")
   };
 
-  // Field mapping for 3rd Party Payor (PP)
   const ppAddr = {
     ct: document.getElementById("wzepp_ThirdPP_Address_Country"),
     st: document.getElementById("wzepp_ThirdPP_Address_State"),
@@ -1066,14 +1064,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
 
-  /**
-   * Function to build the EPP single-line address string
-   */
   function syncEPPAddress() {
-    // Determine which source to use
     const source = thirdPPCheckbox.checked ? ppAddr : poAddr;
-
-    // Arrange in a logical order: Line 1, Postcode City, State, Country
     const parts = [
       source.a1.value.trim(),
       `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
@@ -1082,23 +1074,20 @@ document.addEventListener("DOMContentLoaded", () => {
     ].filter(part => part !== "" && part !== " ");
 
     const combinedString = parts.join(", ").toUpperCase();
-
     if (typeof saveElValue === "function") {
       saveElValue({ id: EPP_ADDR_ID, value: combinedString });
     }
   }
 
-  /**
-   * Toggle 3rd Party Section
-   */
   function toggleThirdPP() {
     if (thirdPPCheckbox.checked) {
       thirdPPInfoSec.style.display = "block";
     } else {
       thirdPPInfoSec.style.display = "none";
-      // Clear 3rd party specific inputs if hidden
       thirdPPInfoSec.querySelectorAll("input").forEach(i => {
         i.value = "";
+        i.readOnly = false;
+        i.classList.remove("locked"); // Unlock if hidden
         localStorage.removeItem(i.id);
       });
       thirdPPAddrChk.checked = false;
@@ -1107,32 +1096,43 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /**
-   * Copy PO Address to 3rd Party Address
+   * Copy & Lock Function
+   * Updated to handle your CSS "locked" class
    */
   function toggleThirdPPAddress() {
     const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
+    const isLocked = thirdPPAddrChk.checked;
     
-    if (thirdPPAddrChk.checked) {
-      keys.forEach(key => {
-        ppAddr[key].value = poAddr[key].value;
-        ppAddr[key].readOnly = true;
-        localStorage.setItem(ppAddr[key].id, ppAddr[key].value);
-        // Save individual fields to Credit Card PDF
-        if (typeof saveElValue === "function") saveElValue(ppAddr[key]);
-      });
-    } else {
-      keys.forEach(key => {
-        ppAddr[key].value = "";
-        ppAddr[key].readOnly = false;
-        localStorage.removeItem(ppAddr[key].id);
-      });
-    }
+    keys.forEach(key => {
+        const input = ppAddr[key];
+        const source = poAddr[key];
+
+        if (isLocked) {
+            input.value = source.value;
+            input.readOnly = true;
+            input.classList.add("locked"); // Apply your CSS
+            localStorage.setItem(input.id, input.value);
+        } else {
+            input.value = "";
+            input.readOnly = false;
+            input.classList.remove("locked"); // Remove your CSS
+            localStorage.removeItem(input.id);
+        }
+        
+        if (typeof saveElValue === "function") saveElValue(input);
+    });
+    
     syncEPPAddress();
   }
 
   // Listen for input on ALL address fields
   [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
-    input.addEventListener("input", () => {
+    input.addEventListener("input", (e) => {
+      // LIVE SYNC: If PO is typing and "Same as" is checked, copy it live
+      if (thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
+          toggleThirdPPAddress(); 
+      }
+
       if (typeof saveElValue === "function") saveElValue(input);
       syncEPPAddress();
     });
@@ -1150,7 +1150,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (savedVal) input.value = savedVal;
     });
     thirdPPAddrChk.checked = true;
-    Object.values(ppAddr).forEach(i => i.readOnly = true);
+    
+    // Apply locked state on page load
+    Object.values(ppAddr).forEach(i => {
+        i.readOnly = true;
+        i.classList.add("locked");
+    });
     syncEPPAddress();
   }
 });
