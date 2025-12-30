@@ -1040,85 +1040,119 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-/* ---------- 3RD Party Payor Helper ---------- */  
+/* ---------- 3RD Party Payor & Address Sync ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
   const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
   const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
 
-  const thirdPPInputs = thirdPPInfoSec.querySelectorAll("input");
-
+  // Field mapping for Policy Owner (PO)
   const poAddr = {
-    a1: document.getElementById("wzepp_PO_Address1"),
-    a2: document.getElementById("wzepp_PO_Address2"),
+    ct: document.getElementById("wzepp_PO_Address_Country"),
+    st: document.getElementById("wzepp_PO_Address_State"),
+    cy: document.getElementById("wzepp_PO_Address_City"),
     pc: document.getElementById("wzepp_PO_Address_Postcode"),
-    ct: document.getElementById("wzepp_PO_Address_Country")
+    a1: document.getElementById("wzepp_PO_Address1")
   };
 
+  // Field mapping for 3rd Party Payor (PP)
   const ppAddr = {
-    a1: document.getElementById("wzepp_ThirdPP_Address1"),
-    a2: document.getElementById("wzepp_ThirdPP_Address2"),
+    ct: document.getElementById("wzepp_ThirdPP_Address_Country"),
+    st: document.getElementById("wzepp_ThirdPP_Address_State"),
+    cy: document.getElementById("wzepp_ThirdPP_Address_City"),
     pc: document.getElementById("wzepp_ThirdPP_Address_Postcode"),
-    ct: document.getElementById("wzepp_ThirdPP_Address_Country")
+    a1: document.getElementById("wzepp_ThirdPP_Address1")
   };
 
-  /* ---------- Step 3 Toggle ---------- */
+  const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
+
+  /**
+   * Function to build the EPP single-line address string
+   */
+  function syncEPPAddress() {
+    // Determine which source to use
+    const source = thirdPPCheckbox.checked ? ppAddr : poAddr;
+
+    // Arrange in a logical order: Line 1, Postcode City, State, Country
+    const parts = [
+      source.a1.value.trim(),
+      `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
+      source.st.value.trim(),
+      source.ct.value.trim()
+    ].filter(part => part !== "" && part !== " ");
+
+    const combinedString = parts.join(", ").toUpperCase();
+
+    if (typeof saveElValue === "function") {
+      saveElValue({ id: EPP_ADDR_ID, value: combinedString });
+    }
+  }
+
+  /**
+   * Toggle 3rd Party Section
+   */
   function toggleThirdPP() {
     if (thirdPPCheckbox.checked) {
       thirdPPInfoSec.style.display = "block";
     } else {
       thirdPPInfoSec.style.display = "none";
-      thirdPPInputs.forEach(i => {
+      // Clear 3rd party specific inputs if hidden
+      thirdPPInfoSec.querySelectorAll("input").forEach(i => {
         i.value = "";
-        i.readOnly = false;
-        localStorage.removeItem(i.id); // Clear storage if section hidden
+        localStorage.removeItem(i.id);
       });
       thirdPPAddrChk.checked = false;
     }
+    syncEPPAddress();
   }
 
-  /* ---------- Address Copy & Erase ---------- */
+  /**
+   * Copy PO Address to 3rd Party Address
+   */
   function toggleThirdPPAddress() {
-    if (!thirdPPAddrChk.checked) {
-      // IF UNCHECKED: Clear values and storage, make editable
-      Object.values(ppAddr).forEach(input => {
-        input.value = "";
-        input.readOnly = false;
-        localStorage.removeItem(input.id); // Remove from Local Storage
+    const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
+    
+    if (thirdPPAddrChk.checked) {
+      keys.forEach(key => {
+        ppAddr[key].value = poAddr[key].value;
+        ppAddr[key].readOnly = true;
+        localStorage.setItem(ppAddr[key].id, ppAddr[key].value);
+        // Save individual fields to Credit Card PDF
+        if (typeof saveElValue === "function") saveElValue(ppAddr[key]);
       });
-      return;
+    } else {
+      keys.forEach(key => {
+        ppAddr[key].value = "";
+        ppAddr[key].readOnly = false;
+        localStorage.removeItem(ppAddr[key].id);
+      });
     }
+    syncEPPAddress();
+  }
 
-    // IF CHECKED: Copy values and Save to storage
-    ['a1', 'a2', 'pc', 'ct'].forEach(key => {
-       ppAddr[key].value = poAddr[key].value;
-       localStorage.setItem(ppAddr[key].id, ppAddr[key].value);
-       ppAddr[key].readOnly = true;
+  // Listen for input on ALL address fields
+  [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
+    input.addEventListener("input", () => {
+      if (typeof saveElValue === "function") saveElValue(input);
+      syncEPPAddress();
     });
-  }
-
-  /* ---------- Load from Storage ---------- */
-  function loadSavedAddress() {
-    // Check if there is data for the first address line
-    if (localStorage.getItem(ppAddr.a1.id)) {
-      Object.values(ppAddr).forEach(input => {
-        const savedVal = localStorage.getItem(input.id);
-        if (savedVal) input.value = savedVal;
-      });
-
-      thirdPPAddrChk.checked = true;
-      // Set to read-only since it's "Same as Policy Owner"
-      Object.values(ppAddr).forEach(i => i.readOnly = true);
-    }
-  }
+  });
 
   // Events
   thirdPPCheckbox.addEventListener("change", toggleThirdPP);
   thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
-  // Init state on load
-  toggleThirdPP();    
-  loadSavedAddress(); 
+  // Initialize
+  toggleThirdPP();
+  if (localStorage.getItem(ppAddr.a1.id)) {
+    Object.values(ppAddr).forEach(input => {
+      const savedVal = localStorage.getItem(input.id);
+      if (savedVal) input.value = savedVal;
+    });
+    thirdPPAddrChk.checked = true;
+    Object.values(ppAddr).forEach(i => i.readOnly = true);
+    syncEPPAddress();
+  }
 });
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
