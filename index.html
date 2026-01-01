@@ -250,6 +250,8 @@ width: 40px !important;
 .check-item input:checked + .custom-check:after {
     display: block;
 }  
+
+#SecSigPO {display: none;}  
   
 </style>
 
@@ -1045,6 +1047,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
   const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
   const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
+  const secSigPO = document.getElementById("SecSigPO");
 
   const poAddr = {
     ct: document.getElementById("wzepp_PO_Address_Country"),
@@ -1079,20 +1082,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function toggleThirdPP() {
+function toggleThirdPP() {
     if (thirdPPCheckbox.checked) {
+      // SHOW Info Section AND Signature Section
       thirdPPInfoSec.style.display = "block";
+      if (secSigPO) secSigPO.style.display = "block"; 
     } else {
+      // HIDE Info Section AND Signature Section
       thirdPPInfoSec.style.display = "none";
+      if (secSigPO) secSigPO.style.display = "none";
+
+      // Clear 3rd party specific inputs if hidden
       thirdPPInfoSec.querySelectorAll("input").forEach(i => {
         i.value = "";
         i.readOnly = false;
-        i.classList.remove("locked"); // Unlock if hidden
+        i.classList.remove("locked");
         localStorage.removeItem(i.id);
       });
       thirdPPAddrChk.checked = false;
+      
+      // OPTIONAL: Clear the signature if they uncheck 3rd Party
+      if (typeof clearSpecificSig === "function") {
+          clearSpecificSig('owner');
+      }
     }
-    syncEPPAddress();
+    
+    // Ensure the EPP Address String is updated
+    if (typeof syncEPPAddress === "function") syncEPPAddress();
+  }
+
+  // Ensure the listener is attached
+  thirdPPCheckbox.addEventListener("change", toggleThirdPP);
+
+  // Initialize state on load
+  toggleThirdPP();
   }
 
   /**
