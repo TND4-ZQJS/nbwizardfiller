@@ -1043,145 +1043,130 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 /* ---------- 3RD Party Payor & Address Sync ---------- */  
+/* ---------- 3RD Party Payor & Address Sync ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
-  const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
-  const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
-  const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
-  const secSigPO = document.getElementById("SecSigPO");
+    const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
+    const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
+    const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
+    const secSigPO = document.getElementById("SecSigPO");
 
-  const poAddr = {
-    ct: document.getElementById("wzepp_PO_Address_Country"),
-    st: document.getElementById("wzepp_PO_Address_State"),
-    cy: document.getElementById("wzepp_PO_Address_City"),
-    pc: document.getElementById("wzepp_PO_Address_Postcode"),
-    a1: document.getElementById("wzepp_PO_Address1")
-  };
+    // Mapping for Policy Owner (PO)
+    const poAddr = {
+        ct: document.getElementById("wzepp_PO_Address_Country"),
+        st: document.getElementById("wzepp_PO_Address_State"),
+        cy: document.getElementById("wzepp_PO_Address_City"),
+        pc: document.getElementById("wzepp_PO_Address_Postcode"),
+        a1: document.getElementById("wzepp_PO_Address1")
+    };
 
-  const ppAddr = {
-    ct: document.getElementById("wzepp_ThirdPP_Address_Country"),
-    st: document.getElementById("wzepp_ThirdPP_Address_State"),
-    cy: document.getElementById("wzepp_ThirdPP_Address_City"),
-    pc: document.getElementById("wzepp_ThirdPP_Address_Postcode"),
-    a1: document.getElementById("wzepp_ThirdPP_Address1")
-  };
+    // Mapping for 3rd Party Payor (PP)
+    const ppAddr = {
+        ct: document.getElementById("wzepp_ThirdPP_Address_Country"),
+        st: document.getElementById("wzepp_ThirdPP_Address_State"),
+        cy: document.getElementById("wzepp_ThirdPP_Address_City"),
+        pc: document.getElementById("wzepp_ThirdPP_Address_Postcode"),
+        a1: document.getElementById("wzepp_ThirdPP_Address1")
+    };
 
-  const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
+    const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
 
-  function syncEPPAddress() {
-    const source = thirdPPCheckbox.checked ? ppAddr : poAddr;
-    const parts = [
-      source.a1.value.trim(),
-      `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
-      source.st.value.trim(),
-      source.ct.value.trim()
-    ].filter(part => part !== "" && part !== " ");
+    // 1. Build EPP string
+    function syncEPPAddress() {
+        const source = thirdPPCheckbox.checked ? ppAddr : poAddr;
+        const parts = [
+            source.a1.value.trim(),
+            `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
+            source.st.value.trim(),
+            source.ct.value.trim()
+        ].filter(part => part !== "" && part !== " ");
 
-    const combinedString = parts.join(", ").toUpperCase();
-    if (typeof saveElValue === "function") {
-      saveElValue({ id: EPP_ADDR_ID, value: combinedString });
-    }
-  }
-
-function toggleThirdPP() {
-    if (thirdPPCheckbox.checked) {
-      // SHOW Info Section AND Signature Section
-      thirdPPInfoSec.style.display = "block";
-      if (secSigPO) secSigPO.style.display = "block"; 
-    } else {
-      // HIDE Info Section AND Signature Section
-      thirdPPInfoSec.style.display = "none";
-      if (secSigPO) secSigPO.style.display = "none";
-
-      // Clear 3rd party specific inputs if hidden
-      thirdPPInfoSec.querySelectorAll("input").forEach(i => {
-        i.value = "";
-        i.readOnly = false;
-        i.classList.remove("locked");
-        localStorage.removeItem(i.id);
-      });
-      thirdPPAddrChk.checked = false;
-      
-      // OPTIONAL: Clear the signature if they uncheck 3rd Party
-      if (typeof clearSpecificSig === "function") {
-          clearSpecificSig('owner');
-      }
-    }
-    
-    // Ensure the EPP Address String is updated
-    if (typeof syncEPPAddress === "function") syncEPPAddress();
-  }
-
-  // Ensure the listener is attached
-  thirdPPCheckbox.addEventListener("change", toggleThirdPP);
-
-  // Initialize state on load
-  toggleThirdPP();
-  }
-
-  /**
-   * Copy & Lock Function
-   * Updated to handle your CSS "locked" class
-   */
-  function toggleThirdPPAddress() {
-    const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
-    const isLocked = thirdPPAddrChk.checked;
-    
-    keys.forEach(key => {
-        const input = ppAddr[key];
-        const source = poAddr[key];
-
-        if (isLocked) {
-            input.value = source.value;
-            input.readOnly = true;
-            input.classList.add("locked"); // Apply your CSS
-            localStorage.setItem(input.id, input.value);
-        } else {
-            input.value = "";
-            input.readOnly = false;
-            input.classList.remove("locked"); // Remove your CSS
-            localStorage.removeItem(input.id);
+        const combinedString = parts.join(", ").toUpperCase();
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: EPP_ADDR_ID, value: combinedString });
         }
+    }
+
+    // 2. Toggle 3rd Party Visibility
+    function toggleThirdPP() {
+        if (thirdPPCheckbox.checked) {
+            thirdPPInfoSec.style.display = "block";
+            if (secSigPO) secSigPO.style.display = "block";  
+        } else {
+            thirdPPInfoSec.style.display = "none";
+            if (secSigPO) secSigPO.style.display = "none";
+
+            thirdPPInfoSec.querySelectorAll("input").forEach(i => {
+                i.value = "";
+                i.readOnly = false;
+                i.classList.remove("locked");
+                localStorage.removeItem(i.id);
+            });
+            thirdPPAddrChk.checked = false;
+            
+            if (typeof clearSpecificSig === "function") {
+                clearSpecificSig('owner');
+            }
+        }
+        syncEPPAddress();
+    }
+
+    // 3. Copy and Lock Address
+    function toggleThirdPPAddress() {
+        const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
+        const isLocked = thirdPPAddrChk.checked;
         
-        if (typeof saveElValue === "function") saveElValue(input);
-    });
-    
-    syncEPPAddress();
-  }
+        keys.forEach(key => {
+            const input = ppAddr[key];
+            const source = poAddr[key];
+            if (!input || !source) return;
 
-  // Listen for input on ALL address fields
-  [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
-    input.addEventListener("input", (e) => {
-      // LIVE SYNC: If PO is typing and "Same as" is checked, copy it live
-      if (thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
-          toggleThirdPPAddress(); 
-      }
+            if (isLocked) {
+                input.value = source.value;
+                input.readOnly = true;
+                input.classList.add("locked");
+                localStorage.setItem(input.id, input.value);
+            } else {
+                input.value = "";
+                input.readOnly = false;
+                input.classList.remove("locked");
+                localStorage.removeItem(input.id);
+            }
+            if (typeof saveElValue === "function") saveElValue(input);
+        });
+        syncEPPAddress();
+    }
 
-      if (typeof saveElValue === "function") saveElValue(input);
-      syncEPPAddress();
-    });
-  });
+    /* --- Event Listeners --- */
+    thirdPPCheckbox.addEventListener("change", toggleThirdPP);
+    thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
-  // Events
-  thirdPPCheckbox.addEventListener("change", toggleThirdPP);
-  thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+    // Listen for input on ALL address fields for live-sync
+    [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
+        if (!input) return;
+        input.addEventListener("input", (e) => {
+            if (thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
+                toggleThirdPPAddress(); 
+            }
+            if (typeof saveElValue === "function") saveElValue(input);
+            syncEPPAddress();
+        });
+    });
 
-  // Initialize
-  toggleThirdPP();
-  if (localStorage.getItem(ppAddr.a1.id)) {
-    Object.values(ppAddr).forEach(input => {
-      const savedVal = localStorage.getItem(input.id);
-      if (savedVal) input.value = savedVal;
-    });
-    thirdPPAddrChk.checked = true;
-    
-    // Apply locked state on page load
-    Object.values(ppAddr).forEach(i => {
-        i.readOnly = true;
-        i.classList.add("locked");
-    });
-    syncEPPAddress();
-  }
-});
+    /* --- Initialization --- */
+    toggleThirdPP(); // Set initial visibility
+
+    // Restore saved 3rd party address if it exists
+    if (localStorage.getItem(ppAddr.a1.id)) {
+        Object.values(ppAddr).forEach(input => {
+            const savedVal = localStorage.getItem(input.id);
+            if (savedVal) input.value = savedVal;
+            input.readOnly = true;
+            input.classList.add("locked");
+        });
+        thirdPPAddrChk.checked = true;
+        syncEPPAddress();
+    }
+}); // End of DOMContentLoaded
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
