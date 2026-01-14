@@ -1031,7 +1031,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
   
-/* ---------- 3RD Party Payor & Address Sync ---------- */  
+
 /* ---------- 3RD Party Payor & Address Sync ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
@@ -1061,19 +1061,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 1. Build EPP string
     function syncEPPAddress() {
-        const source = thirdPPCheckbox.checked ? ppAddr : poAddr;
-        const parts = [
-            source.a1.value.trim(),
-            `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
-            source.st.value.trim(),
-            source.ct.value.trim()
-        ].filter(part => part !== "" && part !== " ");
+    // Determine which data to pull from:
+    // If 3rd Party is checked AND they have a DIFFERENT address, use ppAddr.
+    // Otherwise (if 3rd party is same as PO, or there is no 3rd party), use poAddr.
+    const isDifferentPPAddress = thirdPPCheckbox.checked && !thirdPPAddrChk.checked;
+    const source = isDifferentPPAddress ? ppAddr : poAddr;
 
-        const combinedString = parts.join(", ").toUpperCase();
-        if (typeof saveElValue === "function") {
-            saveElValue({ id: EPP_ADDR_ID, value: combinedString });
-        }
+    const parts = [
+        source.a1.value.trim(),
+        `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
+        source.st.value.trim(),
+        source.ct.value.trim()
+    ].filter(part => part.length > 0);
+
+    const combinedString = parts.join(", ").toUpperCase();
+
+    // This ID maps to the 'Full Address' line on the EPP Form
+    if (typeof saveElValue === "function") {
+        saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
     }
+}
 
     // 2. Toggle 3rd Party Visibility
     function toggleThirdPP() {
