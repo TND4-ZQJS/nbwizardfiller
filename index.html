@@ -241,6 +241,57 @@ width: 40px !important;
 }  
 
 #SecSigPO {display: none;}  
+
+//Generate PDF Button
+.btn-generate-large {
+    background: linear-gradient(135deg, #00a651 0%, #007a3d 100%);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 20px 40px;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0, 166, 81, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.btn-generate-large:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px rgba(0, 166, 81, 0.4);
+    background: linear-gradient(135deg, #00b358 0%, #008a45 100%);
+}
+
+.btn-generate-large:active {
+    transform: translateY(1px);
+}
+
+.btn-generate-large .icon {
+    margin-right: 15px;
+    font-size: 2rem;
+}
+
+.pdf-link {
+    display: block;
+    background: #f8f9fa;
+    margin: 10px 0;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: #003399;
+    text-decoration: none;
+    font-weight: 500;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s;
+}
+
+.pdf-link:hover {
+    background: #e9ecef;
+    border-color: #003399;
+}  
   
 </style>
 
