@@ -1911,65 +1911,79 @@ async function processSinglePDF_Bytes(fileName) {
     return await pdfDoc.save();
 }
   
-/* ------------------ WIZARD NAV LOGIC ------------------ */
+/* ------------------ FIXED WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
+  // Select all steps (0-7)
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
   const stepIndicators = Array.from(document.querySelectorAll(".steps .step"));
   const currentStepLabel = document.getElementById("currentStepLabel");
-  const prevBtn = document.getElementById("prevBtn");
+  
+  // Use IDs that actually exist in your HTML
+  const backBtn = document.getElementById("backBtn") || document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
+  
   let current = 0;
-  const total = steps.length;
+  const total = steps.length; 
 
   function updateUI(){
+    // 1. Toggle Step Visibility
     steps.forEach((s, i)=> {
-      if(i === current) { s.classList.add("active"); } else { s.classList.remove("active"); }
+      if(i === current) { 
+        s.classList.add("active"); 
+        s.style.display = "block"; // Force display
+        s.style.opacity = "1";
+      } else { 
+        s.classList.remove("active"); 
+        s.style.display = "none";
+      }
     });
+
+    // 2. Update Progress Bubbles
     stepIndicators.forEach((si, i)=>{
-      if(i <= current) si.classList.add("active"); else si.classList.remove("active");
+      if(i <= current) si.classList.add("active"); 
+      else si.classList.remove("active");
     });
+
+    // 3. Update Text Label (Step X of 8)
     if(currentStepLabel) currentStepLabel.textContent = (current + 1);
 
-    // Prev/Next button states
-    if(prevBtn) prevBtn.disabled = (current === 0);
-    if(nextBtn) nextBtn.disabled = false;
-
-    // last step: show Generate + Reset inside the step (they already exist in DOM)
-    // We hide global next button when on last step and show nothing (or disable)
-    if(current === total - 1){
-      if(nextBtn) nextBtn.style.display = "none";
-    } else {
-      if(nextBtn) nextBtn.style.display = "inline-block";
-      if(nextBtn) nextBtn.textContent = "Next";
+    // 4. Back Button State
+    if(backBtn) {
+      backBtn.style.visibility = (current === 0) ? "hidden" : "visible";
     }
 
-    // Scroll into view for better UX
-    const active = steps[current];
-    if(active) active.scrollIntoView({ behavior: "smooth", block: "start" });
+    // 5. Next Button vs. Generate Logic
+    if(nextBtn) {
+      if(current === total - 1){
+        // We are on Step 8 (Generate)
+        nextBtn.style.display = "none"; 
+      } else {
+        nextBtn.style.display = "inline-block";
+        nextBtn.textContent = "Next";
+      }
+    }
   }
 
-  // Navigation functions
   function goToStep(n){
-    if(n < 0) n = 0;
-    if(n >= total) n = total - 1;
-    current = n;
-    updateUI();
+    if(n >= 0 && n < total) {
+        current = n;
+        updateUI();
+        window.scrollTo(0, 0); // Jump to top for each step
+    }
   }
-  if(prevBtn) prevBtn.addEventListener("click", ()=> goToStep(current - 1));
-  if(nextBtn) nextBtn.addEventListener("click", ()=> {
-    if(current < total - 1) goToStep(current + 1);
-  });
 
-  // click on step indicator to jump (optional)
+  // Event Listeners
+  if(backBtn) backBtn.addEventListener("click", () => goToStep(current - 1));
+  if(nextBtn) nextBtn.addEventListener("click", () => goToStep(current + 1));
+
+  // Jump to step by clicking bubbles
   stepIndicators.forEach((si, idx)=> {
-    si.addEventListener("click", ()=> {
-      goToStep(idx);
-    });
+    si.addEventListener("click", ()=> goToStep(idx));
   });
 
-  // Initialize
-  goToStep(0);
-})();  
+  // Start at Step 1
+  updateUI();
+})();
 </script>
 
 </body>
