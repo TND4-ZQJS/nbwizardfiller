@@ -886,27 +886,19 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
   </section>
 </div>
 
-<!-- STEP 8: Sign -->
+<!-- STEP 8: Generate -->
 <div class="wizard-step" data-step="7">
+    <div style="text-align: center; padding: 40px; border: 2px dashed #e0e0e0; border-radius: 15px;">
+        <button type="button" id="nextBtn" onclick="generateAllForms()" class="btn-generate-large">
+            <span class="icon">📄</span> GENERATE ALL MANULIFE FORMS
+        </button>
 
-<div style="text-align: center; padding: 40px; border: 2px dashed #e0e0e0; border-radius: 15px;">
-    
-    <!-- The Big Button -->
-    <button type="button" id="nextBtn" onclick="generateAllForms()" class="btn-generate-large">
-        <span class="icon">📄</span> GENERATE ALL MANULIFE FORMS
-    </button>
-
-    <!-- The File List (Hidden until generated) -->
-    <div id="downloadArea" style="margin-top: 30px; display: none;">
-        <h3 style="color: #003399; font-size: 1.2rem;">Generated Documents</h3>
-        <ul id="fileList" style="list-style: none; padding: 0; display: inline-block; text-align: left;">
-            <!-- Links will be injected here by JS -->
-        </ul>
+        <div id="downloadArea" style="margin-top: 30px; display: none;">
+            <h3 style="color: #003399;">Generated Documents</h3>
+            <ul id="fileList" style="list-style: none; padding: 0;"></ul>
+        </div>
     </div>
-    
 </div>
-
-</div>  
   
 </div> <!-- end wizard -->
 
@@ -1016,14 +1008,19 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
     signatures: [
       { 
         id: "wzepp_sig_owner", // Assuming Cardholder is the Owner
-        previewId: "preview_sig_owner", 
+        previewId: "preview_owner", 
         page: 0, posX: 50, posY: 490, factor: 0.40 
       },
       { 
-        id: "wzepp_sig_third", 
-        previewId: "preview_sig_third", 
+        id: "wzepp_sig_cardholder", 
+        previewId: "preview_sig_cardholder", 
         page: 0, posX: 370, posY: 490, factor: 0.40 
-      }
+      },
+      { 
+        id: "wzepp_sig_witness", 
+        previewId: "preview_sig_witness", 
+        page: 0, posX: 370, posY: 490, factor: 0.40 
+      },
     ]
   }
 }; 
