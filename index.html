@@ -1065,23 +1065,14 @@ function safeSetField(form, fieldName, value) {
     }
 
     // DROPDOWNS / RADIO GROUPS
-    else if (field instanceof PDFLib.PDFCheckBox) {
-  // We now check for EVERY possible "positive" value your script generates
-  const isPositive = (
-    value === true || 
-    value === "true" || 
-    value === "Yes" || 
-    value === "checked" || 
-    value === "on"
-  );
-  
-  if (isPositive) {
-    field.check();
-  } else {
-    field.uncheck();
+    else if (field instanceof PDFLib.PDFDropdown || field instanceof PDFLib.PDFRadioGroup) {
+      field.select(value);
+    }
+
+  } catch (err) {
+    console.warn(`Field "${fieldName}" not found or error occurred:`, err.message);
   }
 }
-
 
 
 // Add this line to the bottom of your <script> block
@@ -1778,87 +1769,86 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ---------- GENERATE PDF (MAPPED VERSION) ---------- */
 async function fillPDF() {
   try {
-    // 1. UI Feedback: Disable button
-    const genBtn = document.getElementById("generate");
-    if (genBtn) genBtn.disabled = true;
+    const generateBtn = document.getElementById("generate");
+    generateBtn.disabled = true;
 
-    // 2. Identify the Mapping (Use the specific PDF filename as the key)
+    // 1. Setup - Get the config for the specific PDF
+    // Note: If you have multiple PDFs, you can make this dynamic
     const fileName = "Credit Card Enrolment Form_LF4092_200524_fillable.pdf";
     const mapping = PDF_MAPPING_LOGIC[fileName];
-    if (!mapping) throw new Error("Mapping logic not found for " + fileName);
 
-    // 3. Load the PDF
     const res = await fetch(fileName);
-    if (!res.ok) throw new Error("Could not find the PDF file on the server.");
+    if (!res.ok) throw new Error("Cannot load PDF: " + fileName);
     const bytes = await res.arrayBuffer();
     const pdfDoc = await PDFLib.PDFDocument.load(bytes);
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
 
-    /* ---------- THE DYNAMIC LOOP ---------- */
-    // Instead of a fixed list, we loop through every PDF field defined in your mapping
+    /* ---------- A. DYNAMIC FIELD FILLING ---------- */
+    // Instead of a manual list, we loop through the mapping object
     Object.keys(mapping.fields).forEach(pdfFieldId => {
-      const storageKey = mapping.fields[pdfFieldId];
-      let value = localStorage.getItem(storageKey);
-
-      // --- BRIDGE LOGIC START ---
-      // This part checks if the user selected a specific option in a dropdown 
-      // that corresponds to a checkbox field in the PDF.
-      const currentRel = localStorage.getItem("wzepp_Relationship");
-      const currentType = localStorage.getItem("wzepp_Card_Type");
-      const currentBank = localStorage.getItem("wzepp_Card_Bank");
-
-      // If the selected value in the dropdown matches the Mapping ID, treat as "Checked"
-      if (currentRel === storageKey || currentType === storageKey || currentBank === storageKey) {
-        value = "true";
+      const htmlInputId = mapping.fields[pdfFieldId];
+      const htmlElement = document.getElementById(htmlInputId);
+      
+      if (htmlElement) {
+        // Handle Checkboxes
+        if (htmlElement.type === "checkbox") {
+          try {
+            const pdfCB = form.getCheckBox(pdfFieldId);
+            if (htmlElement.checked) pdfCB.check(); else pdfCB.uncheck();
+          } catch (e) { console.warn(`Checkbox field ${pdfFieldId} not found in PDF`); }
+        } 
+        // Handle Radio Buttons (assuming they share the same ID logic or values)
+        else if (htmlElement.type === "radio") {
+           if (htmlElement.checked) {
+              try { form.getCheckBox(pdfFieldId).check(); } catch(e) {}
+           }
+        }
+        // Handle Text Fields
+        else {
+          const value = htmlElement.value || "";
+          try {
+            const textField = form.getTextField(pdfFieldId);
+            textField.setText(value);
+          } catch (e) { console.warn(`Text field ${pdfFieldId} not found in PDF`); }
+        }
       }
-      // --- BRIDGE LOGIC END ---
-
-      // Use your universal helper to actually write the data
-      safeSetField(form, pdfFieldId, value);
     });
 
-    /* ---------- SIGNATURE LOOP ---------- */
+    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING ---------- */
+    // Loop through the signatures array in your mapping
     for (const sig of mapping.signatures) {
-      const sigData = localStorage.getItem(sig.id);
-      if (sigData) {
+      const sigDataUri = localStorage.getItem(sig.id); // Getting from storage using the ID in mapping
+      
+      if (sigDataUri) {
         try {
-          const img = await pdfDoc.embedPng(sigData);
-          const factor = sig.factor || 0.40;
+          const img = await pdfDoc.embedPng(sigDataUri);
           const { width, height } = img.size();
 
+          // Calculate scaling based on the preview box on your web page
+          const previewEl = document.getElementById(sig.previewId);
+          const boxW = previewEl ? previewEl.offsetWidth : 200; // fallback width
+          const boxH = previewEl ? previewEl.offsetHeight : 100; // fallback height
+
+          const imgScale = Math.min(boxW / width, boxH / height);
+          
+          // Apply the 'factor' from your mapping (e.g., 0.40)
+          const finalWidth = width * imgScale * sig.factor;
+          const finalHeight = height * imgScale * sig.factor;
+
+          // Draw on the specific page defined in mapping
           const targetPage = pages[sig.page];
           targetPage.drawImage(img, {
             x: sig.posX,
             y: sig.posY,
-            width: width * factor,
-            height: height * factor
+            width: finalWidth,
+            height: finalHeight
           });
-        } catch (e) { console.warn("Signature failed:", sig.id, e); }
+        } catch (e) {
+          console.error(`Error embedding signature ${sig.id}:`, e);
+        }
       }
     }
-
-    // 4. Finalize & Download
-    const pdfBytes = await pdfDoc.save();
-    const policyNo = (localStorage.getItem("wzepp_PolicyNo") || "NEW").replace(/\s/g, '_');
-    
-    const blob = new Blob([pdfBytes], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${policyNo}_Credit_Card_Enrolment.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-  } catch (err) {
-    console.error(err);
-    alert("PDF Generation Error: " + err.message);
-  } finally {
-    if (genBtn) genBtn.disabled = false;
-  }
-}
-
 
     /* ---------- C. SAVE & DOWNLOAD ---------- */
     const pdfBytes = await pdfDoc.save();
