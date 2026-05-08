@@ -926,6 +926,7 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "CardExpry_Y1": "wzepp_Card_Exp_Y1", "CardExpry_Y2": "wzepp_Card_Exp_Y2",
       "CardBank": "wzepp_Card_Bank_Text",
       "ThirdPP_Yes": "wzepp_ThirdPP_Checkbox",
+      "ThirdPP_SubmittedNRIC": "wzepp_SubmitNIRC_Checkbox",
       "ThirdPP_Name": "wzepp_ThirdPP_Name",
       "ThirdPP_NIRC": "wzepp_ThirdPP_NIRC",
       "ThirdPP_DOB_DD": "wzepp_ThirdPP_DOB_DD",
@@ -1393,7 +1394,37 @@ if (wealthSpecInput) {
         }
     });
 }  
-  
+
+/* ---------- 3rd Party Payor NIRC checkbox force ---------- */  
+document.addEventListener("DOMContentLoaded", () => {
+    const triggerBox = document.getElementById("wzepp_ThirdPP_Checkbox");
+    const targetBox = document.getElementById("wzepp_SubmitNIRC_Checkbox");
+
+    if (triggerBox && targetBox) {
+        // --- STEP 4 LOGIC (Run on Page Load) ---
+        // If the user already checked Third Party in a previous session,
+        // make sure the NIRC box is checked visually when the page opens.
+        if (triggerBox.checked || localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true") {
+            targetBox.checked = true;
+        }
+
+        // --- STEP 2 LOGIC (Run on User Click) ---
+        // Listen for changes while the user is interacting with the form.
+        triggerBox.addEventListener("change", function() {
+            if (this.checked) {
+                targetBox.checked = true;
+                localStorage.setItem("wzepp_SubmitNIRC_Checkbox", "true");
+            }
+            // Optional: If you want to uncheck NIRC when Third Party is unchecked
+            /*
+            else {
+                targetBox.checked = false;
+                localStorage.setItem("wzepp_SubmitNIRC_Checkbox", "false");
+            }
+            */
+        });
+    }
+});
 
 /* ---------- Credit Card name copy ---------- */  
 document.addEventListener("DOMContentLoaded", () => {
