@@ -1042,55 +1042,38 @@ function autoBindSave(el) {
   
 /* ---------- UNIVERSAL HELPER FUNCTION ---------- */
 
-  //Detect input type - text/dropdown/checkbox/radio
 function safeSetField(form, fieldName, value) {
-  if (value === null || value === undefined) return;
+  if (value === null || value === undefined || value === "") return;
 
   try {
-    let field;
+    const field = form.getField(fieldName);
 
-    // text or textarea, then force Uppercase
-    try {
-      field = form.getTextField(fieldName);
-      // Keep original case for email
-      if (fieldName === "wzepp_ThirdPP_Email") {
-        field.setText(value);
-      } else {
-        field.setText(value.toUpperCase());
-      }
-      return;
-    } catch (e) {}
-
-    // dropdown
-    try {
-      field = form.getDropdown(fieldName);
-      field.select(value);
-      return;
-    } catch (e) {}
-
-    // checkbox
-    try {
-      field = form.getCheckBox(fieldName);
-      if (value === true || value === "true" || value === "on" || value === "checked") {
+    // TEXT FIELDS
+    if (field instanceof PDFLib.PDFTextField) {
+      // Keep original case for email, uppercase for everything else
+      const textVal = (fieldName.toLowerCase().includes("email")) ? value : value.toUpperCase();
+      field.setText(textVal);
+    } 
+    
+    // CHECKBOXES (Handles "true", "Yes", or the actual ID match)
+    else if (field instanceof PDFLib.PDFCheckBox) {
+      if (value === true || value === "true" || value === "Yes" || value === "checked") {
         field.check();
       } else {
         field.uncheck();
       }
-      return;
-    } catch (e) {}
-    
-    // radio
-    try {
-      field = form.getRadioGroup(fieldName);
-      field.select(value);
-      return;
-    } catch (e) {}
+    }
 
-    console.warn(`Field ${fieldName} not found in PDF`);
+    // DROPDOWNS / RADIO GROUPS
+    else if (field instanceof PDFLib.PDFDropdown || field instanceof PDFLib.PDFRadioGroup) {
+      field.select(value);
+    }
+
   } catch (err) {
-    console.error(`Error setting field ${fieldName}`, err);
+    console.warn(`Field "${fieldName}" not found or error occurred:`, err.message);
   }
 }
+
 
 // Add this line to the bottom of your <script> block
 // (after all function definitions and before the final closing tag)
