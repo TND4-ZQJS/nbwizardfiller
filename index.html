@@ -958,11 +958,20 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "Sign_State": "wzepp_Sign_State",
       "Sign_Date": "wzepp_Sign_Day",
       "Sign_Month": "wzepp_Sign_Month",
-      "Sign_Year": "wzepp_Sign_Year", // Fixed typo
-      "Sign_OwnerName": "wzepp_PO_Name",
-      "Sign_OwnerNIRC": "wzepp_PO_NIRC",
-      "Sign_PayorName": "wzepp_ThirdPP_Name",
-      "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
+      "Sign_Year": "wzepp_Sign_Year",
+    },
+    // 2. Dynamic Text: Names/ICs that change boxes based on the scenario
+    conditionalFields: {
+      "ownself": {
+        "Sign_OwnerName": "wzepp_Card_Name", // Cardholder name goes in the Owner box
+        "Sign_OwnerNIRC": "wzepp_Card_NIRC"
+      },
+      "third_party": {
+        "Sign_OwnerName": "wzepp_PO_Name",    // PO name stays in Owner box
+        "Sign_OwnerNIRC": "wzepp_PO_NIRC",
+        "Sign_PayorName": "wzepp_Card_Name",  // Cardholder name goes in Payor box
+        "Sign_PayorNIRC": "wzepp_Card_NIRC"
+      }
     },
  signatureLayouts: {
       // Scenario A: Only Cardholder signs (is also the Owner)
@@ -1776,6 +1785,10 @@ async function fillPDF() {
     const pdfDoc = await PDFLib.PDFDocument.load(bytes);
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
+
+    /* ---------- 0. IDENTIFY THE SCENARIO (MOVE TO TOP) ---------- */
+    const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
+    const layoutKey = isThirdParty ? "third_party" : "ownself";
 
     /* ---------- A. DYNAMIC FIELD FILLING ---------- */
     Object.keys(mapping.fields).forEach(pdfFieldId => {
