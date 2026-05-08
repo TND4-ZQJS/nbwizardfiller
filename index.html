@@ -963,14 +963,14 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
     // 2. Dynamic Text: Names/ICs that change boxes based on the scenario
     conditionalFields: {
       "ownself": {
-        "Sign_OwnerName": "wzepp_Card_Name", // Cardholder name goes in the Owner box
-        "Sign_OwnerNIRC": "wzepp_Card_NIRC"
+        "Sign_OwnerName": "wzepp_PO_Name", // Cardholder name goes in the Owner box
+        "Sign_OwnerNIRC": "wzepp_PO_NIRC"
       },
       "third_party": {
         "Sign_OwnerName": "wzepp_PO_Name",    // PO name stays in Owner box
         "Sign_OwnerNIRC": "wzepp_PO_NIRC",
-        "Sign_PayorName": "wzepp_Card_Name",  // Cardholder name goes in Payor box
-        "Sign_PayorNIRC": "wzepp_Card_NIRC"
+        "Sign_PayorName": "wwzepp_ThirdPP_Name",  // Cardholder name goes in Payor box
+        "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
       }
     },
  signatureLayouts: {
