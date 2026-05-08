@@ -1065,14 +1065,23 @@ function safeSetField(form, fieldName, value) {
     }
 
     // DROPDOWNS / RADIO GROUPS
-    else if (field instanceof PDFLib.PDFDropdown || field instanceof PDFLib.PDFRadioGroup) {
-      field.select(value);
-    }
-
-  } catch (err) {
-    console.warn(`Field "${fieldName}" not found or error occurred:`, err.message);
+    else if (field instanceof PDFLib.PDFCheckBox) {
+  // We now check for EVERY possible "positive" value your script generates
+  const isPositive = (
+    value === true || 
+    value === "true" || 
+    value === "Yes" || 
+    value === "checked" || 
+    value === "on"
+  );
+  
+  if (isPositive) {
+    field.check();
+  } else {
+    field.uncheck();
   }
 }
+
 
 
 // Add this line to the bottom of your <script> block
