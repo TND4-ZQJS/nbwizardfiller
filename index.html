@@ -976,14 +976,12 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
  signatureLayouts: {
       // Scenario A: Only Cardholder signs (is also the Owner)
       "ownself": [
-        { id: "wzepp_sig_cardholder", page: 2, posX: 50, posY: 490, factor: 0.40 },
-        { id: "wzepp_sig_witness",    page: 2, posX: 50,  posY: 490, factor: 0.40 }
+        { id: "wzepp_sig_cardholder", page: 2, posX: 50, posY: 490, factor: 0.40 }
       ],
       // Scenario B: Owner and Third Party Payor (Cardholder) are different
       "third_party": [
-        { id: "wzepp_sig_owner",      page: 2, posX: 370,  posY: 490, factor: 0.40 },
-        { id: "wzepp_sig_cardholder", page: 2, posX: 50, posY: 490, factor: 0.40 },
-        { id: "wzepp_sig_witness",    page: 2, posX: 370, posY: 300, factor: 0.40 } 
+        { id: "wzepp_sig_owner",      page: 2, posX: 50,  posY: 490, factor: 0.40 },
+        { id: "wzepp_sig_cardholder", page: 2, posX: 370, posY: 490, factor: 0.40 }
       ]
     }
   }
