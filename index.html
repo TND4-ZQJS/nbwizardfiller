@@ -964,25 +964,21 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "Sign_PayorName": "wzepp_ThirdPP_Name",
       "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
     },
-    signatures: [
-      { 
-        id: "wzepp_sig_owner", // Assuming Cardholder is the Owner
-        previewId: "preview_owner", 
-        page: 2, posX: 50, posY: 490, factor: 0.40 
-      },
-      { 
-        id: "wzepp_sig_cardholder", 
-        previewId: "preview_sig_cardholder", 
-        page: 2, posX: 370, posY: 490, factor: 0.40 
-      },
-      { 
-        id: "wzepp_sig_witness", 
-        previewId: "preview_sig_witness", 
-        page: 2, posX: 370, posY: 490, factor: 0.40 
-      },
-    ]
+ signatureLayouts: {
+      // Scenario A: Only Cardholder signs (is also the Owner)
+      "ownself": [
+        { id: "wzepp_sig_cardholder", page: 2, posX: 370, posY: 490, factor: 0.40 },
+        { id: "wzepp_sig_witness",    page: 2, posX: 50,  posY: 490, factor: 0.40 }
+      ],
+      // Scenario B: Owner and Third Party Payor (Cardholder) are different
+      "third_party": [
+        { id: "wzepp_sig_owner",      page: 2, posX: 50,  posY: 490, factor: 0.40 },
+        { id: "wzepp_sig_cardholder", page: 2, posX: 370, posY: 490, factor: 0.40 },
+        { id: "wzepp_sig_witness",    page: 2, posX: 370, posY: 300, factor: 0.40 } 
+      ]
+    }
   }
-}; 
+};
 
   /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
 const saveStatusEl = document.getElementById("saveStatus");
@@ -1769,7 +1765,7 @@ document.addEventListener("DOMContentLoaded", () => {
 async function fillPDF() {
   try {
     const generateBtn = document.getElementById("generate");
-    generateBtn.disabled = true;
+    if (generateBtn) generateBtn.disabled = true;
 
     const fileName = "Credit Card Enrolment Form_LF4092_200524_fillable.pdf";
     const mapping = PDF_MAPPING_LOGIC[fileName];
@@ -1781,15 +1777,12 @@ async function fillPDF() {
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
 
-    /* ---------- A. DYNAMIC FIELD FILLING (CORRECTED) ---------- */
+    /* ---------- A. DYNAMIC FIELD FILLING ---------- */
     Object.keys(mapping.fields).forEach(pdfFieldId => {
       const storageKey = mapping.fields[pdfFieldId];
-      
-      // 1. Prioritize LocalStorage (This captures all your split digits/session data)
       let value = localStorage.getItem(storageKey);
 
-      // 2. Bridge Logic for Dropdowns
-      // If the storageKey is actually a selected value in your CC dropdowns
+      // Bridge Logic for Dropdowns
       const currentRel = localStorage.getItem("wzepp_Relationship");
       const currentType = localStorage.getItem("wzepp_Card_Type");
       const currentBank = localStorage.getItem("wzepp_Card_Bank");
@@ -1798,60 +1791,59 @@ async function fillPDF() {
         value = "true";
       }
 
-      // 3. Fallback to Element Value if localStorage is empty
+      // Fallback to Element Value
       if (value === null || value === undefined) {
         const el = document.getElementById(storageKey);
         if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
       }
 
-      // 4. Use your Helper Function to write to PDF
-      // This handles text, checkboxes, and uppercase formatting
       safeSetField(form, pdfFieldId, value);
     });
 
-    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING (REPAIRED) ---------- */
-    for (const sig of mapping.signatures) {
-      const sigDataUri = localStorage.getItem(sig.id);
-      
-      if (sigDataUri && sigDataUri.startsWith("data:image/png")) {
-        try {
-          const img = await pdfDoc.embedPng(sigDataUri);
-          const originalSize = img.size();
-          
-          // 1. Get the factor from mapping (default to 0.40 if missing)
-          const scaleFactor = sig.factor || 0.40;
+    /* ---------- B. CONDITIONAL SIGNATURE EMBEDDING ---------- */
+    // 1. Identify the Scenario
+    const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
+    const layoutKey = isThirdParty ? "third_party" : "ownself";
 
-          // 2. Calculate dimensions. 
-          // Instead of raw pixels, we use a base "Standard Width" 
-          // then apply your factor. This makes '0.40' actually meaningful.
-          const baseWidth = 250; // Standard reference width in PDF points
-          const aspectRatio = originalSize.width / originalSize.height;
-          
-          const finalWidth = baseWidth * scaleFactor;
-          const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
+    // 2. Select the correct layout (Check if signatureLayouts exists)
+    const activeLayout = mapping.signatureLayouts ? mapping.signatureLayouts[layoutKey] : null;
 
-          // 3. Draw on the specific page
-          const targetPage = pages[sig.page];
-          targetPage.drawImage(img, {
-            x: sig.posX,
-            y: sig.posY,
-            width: finalWidth,
-            height: finalHeight
-          });
-          
-          console.log(`Signature ${sig.id} placed at scale ${scaleFactor}`);
-        } catch (e) {
-          console.error(`Error embedding signature ${sig.id}:`, e);
+    if (activeLayout) {
+      for (const sig of activeLayout) {
+        const sigDataUri = localStorage.getItem(sig.id);
+        
+        if (sigDataUri && sigDataUri.startsWith("data:image/png")) {
+          try {
+            const img = await pdfDoc.embedPng(sigDataUri);
+            const originalSize = img.size();
+            const scaleFactor = sig.factor || 0.40;
+
+            const baseWidth = 250; 
+            const aspectRatio = originalSize.width / originalSize.height;
+            const finalWidth = baseWidth * scaleFactor;
+            const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
+
+            const targetPage = pages[sig.page];
+            if (targetPage) {
+              targetPage.drawImage(img, {
+                x: sig.posX,
+                y: sig.posY,
+                width: finalWidth,
+                height: finalHeight
+              });
+            }
+          } catch (e) {
+            console.error(`Error embedding signature ${sig.id}:`, e);
+          }
         }
       }
+    } else {
+      console.warn(`No signature layout found for: ${layoutKey}`);
     }
 
     /* ---------- C. SAVE & DOWNLOAD ---------- */
     const pdfBytes = await pdfDoc.save();
-
-    // Use PolicyNo from storage for filename
-    const policyKey = mapping.fields["PolicyNo1"] || "wzepp_PolicyNo";
-    const policyNum = localStorage.getItem(policyKey) || "NEW";
+    const policyNum = localStorage.getItem("wzepp_PolicyNo") || "NEW";
     const finalFileName = `${policyNum.replace(/[^a-z0-9]/gi, '_')}_CC_Enrolment.pdf`;
 
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
@@ -1862,14 +1854,14 @@ async function fillPDF() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-
-    setTimeout(() => URL.revokeObjectURL(url), 2500);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
 
   } catch (err) {
-    alert("PDF generation failed: " + (err.message || err));
+    alert("PDF generation failed: " + err.message);
     console.error(err);
   } finally {
-    document.getElementById("generate").disabled = false;
+    const generateBtn = document.getElementById("generate");
+    if (generateBtn) generateBtn.disabled = false;
   }
 }
 
