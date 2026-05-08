@@ -1693,6 +1693,118 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/* ---------- GENERATE PDF (MAPPED VERSION) ---------- */
+async function fillPDF() {
+  try {
+    const generateBtn = document.getElementById("generate");
+    generateBtn.disabled = true;
+
+    // 1. Setup - Get the config for the specific PDF
+    // Note: If you have multiple PDFs, you can make this dynamic
+    const fileName = "Credit Card Enrolment Form_LF4092_200524_fillable.pdf";
+    const mapping = PDF_MAPPING_LOGIC[fileName];
+
+    const res = await fetch(fileName);
+    if (!res.ok) throw new Error("Cannot load PDF: " + fileName);
+    const bytes = await res.arrayBuffer();
+    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    const form = pdfDoc.getForm();
+    const pages = pdfDoc.getPages();
+
+    /* ---------- A. DYNAMIC FIELD FILLING ---------- */
+    // Instead of a manual list, we loop through the mapping object
+    Object.keys(mapping.fields).forEach(pdfFieldId => {
+      const htmlInputId = mapping.fields[pdfFieldId];
+      const htmlElement = document.getElementById(htmlInputId);
+      
+      if (htmlElement) {
+        // Handle Checkboxes
+        if (htmlElement.type === "checkbox") {
+          try {
+            const pdfCB = form.getCheckBox(pdfFieldId);
+            if (htmlElement.checked) pdfCB.check(); else pdfCB.uncheck();
+          } catch (e) { console.warn(`Checkbox field ${pdfFieldId} not found in PDF`); }
+        } 
+        // Handle Radio Buttons (assuming they share the same ID logic or values)
+        else if (htmlElement.type === "radio") {
+           if (htmlElement.checked) {
+              try { form.getCheckBox(pdfFieldId).check(); } catch(e) {}
+           }
+        }
+        // Handle Text Fields
+        else {
+          const value = htmlElement.value || "";
+          try {
+            const textField = form.getTextField(pdfFieldId);
+            textField.setText(value);
+          } catch (e) { console.warn(`Text field ${pdfFieldId} not found in PDF`); }
+        }
+      }
+    });
+
+    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING ---------- */
+    // Loop through the signatures array in your mapping
+    for (const sig of mapping.signatures) {
+      const sigDataUri = localStorage.getItem(sig.id); // Getting from storage using the ID in mapping
+      
+      if (sigDataUri) {
+        try {
+          const img = await pdfDoc.embedPng(sigDataUri);
+          const { width, height } = img.size();
+
+          // Calculate scaling based on the preview box on your web page
+          const previewEl = document.getElementById(sig.previewId);
+          const boxW = previewEl ? previewEl.offsetWidth : 200; // fallback width
+          const boxH = previewEl ? previewEl.offsetHeight : 100; // fallback height
+
+          const imgScale = Math.min(boxW / width, boxH / height);
+          
+          // Apply the 'factor' from your mapping (e.g., 0.40)
+          const finalWidth = width * imgScale * sig.factor;
+          const finalHeight = height * imgScale * sig.factor;
+
+          // Draw on the specific page defined in mapping
+          const targetPage = pages[sig.page];
+          targetPage.drawImage(img, {
+            x: sig.posX,
+            y: sig.posY,
+            width: finalWidth,
+            height: finalHeight
+          });
+        } catch (e) {
+          console.error(`Error embedding signature ${sig.id}:`, e);
+        }
+      }
+    }
+
+    /* ---------- C. SAVE & DOWNLOAD ---------- */
+    const pdfBytes = await pdfDoc.save();
+
+    // Filename logic: uses PolicyNo from the HTML input mapped to "PolicyNo1"
+    const policyInputId = mapping.fields["PolicyNo1"];
+    const policyNum = document.getElementById(policyInputId)?.value.trim() || "NEW";
+    const finalFileName = `${policyNum.replace(/[^a-z0-9]/gi, '_')}_CC_Enrolment.pdf`;
+
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = finalFileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 2500);
+
+  } catch (err) {
+    alert("PDF generation failed: " + (err.message || err));
+    console.error(err);
+  } finally {
+    document.getElementById("generate").disabled = false;
+  }
+}
+
+
 /* ------------------ WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
