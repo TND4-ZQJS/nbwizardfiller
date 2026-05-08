@@ -1766,14 +1766,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* ---------- GENERATE PDF (MAPPED VERSION) ---------- */
 async function fillPDF() {
   try {
     const generateBtn = document.getElementById("generate");
     generateBtn.disabled = true;
 
-    // 1. Setup - Get the config for the specific PDF
-    // Note: If you have multiple PDFs, you can make this dynamic
     const fileName = "Credit Card Enrolment Form_LF4092_200524_fillable.pdf";
     const mapping = PDF_MAPPING_LOGIC[fileName];
 
@@ -1784,65 +1781,49 @@ async function fillPDF() {
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
 
-    /* ---------- A. DYNAMIC FIELD FILLING ---------- */
-    // Instead of a manual list, we loop through the mapping object
+    /* ---------- A. DYNAMIC FIELD FILLING (CORRECTED) ---------- */
     Object.keys(mapping.fields).forEach(pdfFieldId => {
-      const htmlInputId = mapping.fields[pdfFieldId];
-      const htmlElement = document.getElementById(htmlInputId);
+      const storageKey = mapping.fields[pdfFieldId];
       
-      if (htmlElement) {
-        // Handle Checkboxes
-        if (htmlElement.type === "checkbox") {
-          try {
-            const pdfCB = form.getCheckBox(pdfFieldId);
-            if (htmlElement.checked) pdfCB.check(); else pdfCB.uncheck();
-          } catch (e) { console.warn(`Checkbox field ${pdfFieldId} not found in PDF`); }
-        } 
-        // Handle Radio Buttons (assuming they share the same ID logic or values)
-        else if (htmlElement.type === "radio") {
-           if (htmlElement.checked) {
-              try { form.getCheckBox(pdfFieldId).check(); } catch(e) {}
-           }
-        }
-        // Handle Text Fields
-        else {
-          const value = htmlElement.value || "";
-          try {
-            const textField = form.getTextField(pdfFieldId);
-            textField.setText(value);
-          } catch (e) { console.warn(`Text field ${pdfFieldId} not found in PDF`); }
-        }
+      // 1. Prioritize LocalStorage (This captures all your split digits/session data)
+      let value = localStorage.getItem(storageKey);
+
+      // 2. Bridge Logic for Dropdowns
+      // If the storageKey is actually a selected value in your CC dropdowns
+      const currentRel = localStorage.getItem("wzepp_Relationship");
+      const currentType = localStorage.getItem("wzepp_Card_Type");
+      const currentBank = localStorage.getItem("wzepp_Card_Bank");
+
+      if (currentRel === storageKey || currentType === storageKey || currentBank === storageKey) {
+        value = "true";
       }
+
+      // 3. Fallback to Element Value if localStorage is empty
+      if (value === null || value === undefined) {
+        const el = document.getElementById(storageKey);
+        if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
+      }
+
+      // 4. Use your Helper Function to write to PDF
+      // This handles text, checkboxes, and uppercase formatting
+      safeSetField(form, pdfFieldId, value);
     });
 
     /* ---------- B. DYNAMIC SIGNATURE EMBEDDING ---------- */
-    // Loop through the signatures array in your mapping
     for (const sig of mapping.signatures) {
-      const sigDataUri = localStorage.getItem(sig.id); // Getting from storage using the ID in mapping
-      
+      const sigDataUri = localStorage.getItem(sig.id);
       if (sigDataUri) {
         try {
           const img = await pdfDoc.embedPng(sigDataUri);
           const { width, height } = img.size();
+          const factor = sig.factor || 0.40;
 
-          // Calculate scaling based on the preview box on your web page
-          const previewEl = document.getElementById(sig.previewId);
-          const boxW = previewEl ? previewEl.offsetWidth : 200; // fallback width
-          const boxH = previewEl ? previewEl.offsetHeight : 100; // fallback height
-
-          const imgScale = Math.min(boxW / width, boxH / height);
-          
-          // Apply the 'factor' from your mapping (e.g., 0.40)
-          const finalWidth = width * imgScale * sig.factor;
-          const finalHeight = height * imgScale * sig.factor;
-
-          // Draw on the specific page defined in mapping
           const targetPage = pages[sig.page];
           targetPage.drawImage(img, {
             x: sig.posX,
             y: sig.posY,
-            width: finalWidth,
-            height: finalHeight
+            width: width * factor,
+            height: height * factor
           });
         } catch (e) {
           console.error(`Error embedding signature ${sig.id}:`, e);
@@ -1853,9 +1834,9 @@ async function fillPDF() {
     /* ---------- C. SAVE & DOWNLOAD ---------- */
     const pdfBytes = await pdfDoc.save();
 
-    // Filename logic: uses PolicyNo from the HTML input mapped to "PolicyNo1"
-    const policyInputId = mapping.fields["PolicyNo1"];
-    const policyNum = document.getElementById(policyInputId)?.value.trim() || "NEW";
+    // Use PolicyNo from storage for filename
+    const policyKey = mapping.fields["PolicyNo1"] || "wzepp_PolicyNo";
+    const policyNum = localStorage.getItem(policyKey) || "NEW";
     const finalFileName = `${policyNum.replace(/[^a-z0-9]/gi, '_')}_CC_Enrolment.pdf`;
 
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
