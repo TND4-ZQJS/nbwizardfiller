@@ -1769,91 +1769,105 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ---------- GENERATE PDF (MAPPED VERSION) ---------- */
 async function fillPDF() {
   try {
-    document.getElementById("generate").disabled = true;
+    const genBtn = document.getElementById("generate");
+    if (genBtn) genBtn.disabled = true;
 
     // 1. Setup - Identify the PDF configuration
     const fileName = "Credit Card Enrolment Form_LF4092_200524_fillable.pdf";
     const mapping = PDF_MAPPING_LOGIC[fileName];
+    
+    if (!mapping) throw new Error("Mapping not found for " + fileName);
 
     const res = await fetch(fileName);
-    if (!res.ok) throw new Error("Cannot load PDF: " + fileName);
+    if (!res.ok) throw new Error("Cannot load PDF file from server.");
     const bytes = await res.arrayBuffer();
-    const pdfDoc = await PDFLib.PDFDocument.load(bytes);
+    
+    // Safety check for PDFLib namespace
+    const lib = window.PDFLib || PDFLib;
+    const pdfDoc = await lib.PDFDocument.load(bytes);
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
 
     /* ---------- PRE-PROCESSING: CARD NUMBERS ---------- */
-    // This takes your 4 HTML boxes and prepares them for the 16 PDF boxes
-    const fullNum = [
-      localStorage.getItem("wzepp_Card_Set1") || "",
-      localStorage.getItem("wzepp_Card_Set2") || "",
-      localStorage.getItem("wzepp_Card_Set3") || "",
-      localStorage.getItem("wzepp_Card_Set4") || ""
-    ].join("").split("");
+    const s1 = localStorage.getItem("wzepp_Card_Set1") || "";
+    const s2 = localStorage.getItem("wzepp_Card_Set2") || "";
+    const s3 = localStorage.getItem("wzepp_Card_Set3") || "";
+    const s4 = localStorage.getItem("wzepp_Card_Set4") || "";
+    const digits = (s1 + s2 + s3 + s4).split("");
 
-    fullNum.forEach((digit, index) => {
-      localStorage.setItem(`wzepp_Card_No_${index + 1}`, digit);
-    });
+    // Map these digits to the localStorage keys the loop expects
+    for (let i = 0; i < 16; i++) {
+      localStorage.setItem(`wzepp_Card_No_${i + 1}`, digits[i] || "");
+    }
 
     /* ---------- THE INTEGRATED LOOP ---------- */
-    // This replaces your old 'fieldNames.forEach' list
     Object.keys(mapping.fields).forEach(pdfFieldId => {
       const htmlInputId = mapping.fields[pdfFieldId];
-      
-      // Get the value from LocalStorage
       let value = localStorage.getItem(htmlInputId);
 
-      // BRIDGE LOGIC: Check if this field is a "selected option" in a dropdown
-      // This is why your Credit Card "Visa/Master" or "Bank" wasn't working before
+      // BRIDGE LOGIC: Handles the dropdown-to-checkbox conversion
       const cardType = localStorage.getItem("wzepp_Card_Type");
       const relationship = localStorage.getItem("wzepp_Relationship");
       const bank = localStorage.getItem("wzepp_Card_Bank");
 
-      if (value === htmlInputId || cardType === htmlInputId || relationship === htmlInputId || bank === htmlInputId) {
+      // If the mapping ID matches the SELECTED value in any dropdown, mark as true
+      if (cardType === htmlInputId || relationship === htmlInputId || bank === htmlInputId) {
         value = "true"; 
       }
 
-      // Use your helper function to actually write to the PDF
+      // Fill the field
       safeSetField(form, pdfFieldId, value);
     });
 
     /* ---------- SIGNATURES LOOP ---------- */
     for (const sig of mapping.signatures) {
       const sigDataUri = localStorage.getItem(sig.id);
-      if (sigDataUri) {
+      if (sigDataUri && sigDataUri.includes("data:image/png;base64")) {
         try {
           const img = await pdfDoc.embedPng(sigDataUri);
-          const { width, height } = img.size();
           const factor = sig.factor || 0.40;
+          const { width, height } = img.size();
 
-          // Drawing on the correct page from mapping
-          pages[sig.page].drawImage(img, {
+          const targetPage = pages[sig.page] || pages[0];
+          targetPage.drawImage(img, {
             x: sig.posX,
             y: sig.posY,
             width: width * factor,
             height: height * factor
           });
-        } catch (e) { console.error("Sig error:", e); }
+        } catch (e) { 
+          console.warn("Signature failed to embed:", sig.id, e); 
+        }
       }
     }
 
     /* ---------- SAVE & DOWNLOAD ---------- */
     const pdfBytes = await pdfDoc.save();
-    const policyNo = localStorage.getItem("wzepp_PolicyNo") || "NEW";
+    
+    // Get policy number for filename
+    const policyKey = mapping.fields["PolicyNo1"] || "wzepp_PolicyNo";
+    const policyNo = (localStorage.getItem(policyKey) || "NEW").replace(/[^a-z0-9]/gi, '_');
+    
     const blob = new Blob([pdfBytes], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${policyNo}_CC_Enrolment.pdf`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
 
   } catch (err) {
-    console.error(err);
-    alert("Error: " + err.message);
+    console.error("PDF Error:", err);
+    alert("Critical Error: " + err.message);
   } finally {
-    document.getElementById("generate").disabled = false;
+    const genBtn = document.getElementById("generate");
+    if (genBtn) genBtn.disabled = false;
   }
 }
+
 
 
     /* ---------- C. SAVE & DOWNLOAD ---------- */
