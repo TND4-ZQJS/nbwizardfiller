@@ -958,22 +958,12 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "Sign_State": "wzepp_Sign_State",
       "Sign_Date": "wzepp_Sign_Day",
       "Sign_Month": "wzepp_Sign_Month",
-      "Sign_Year": "wzepp_Sign_Year",
+      "Sign_Year": "wzepp_Sign_Year", // Fixed typo
+      "Sign_OwnerName": "wzepp_PO_Name",
+      "Sign_OwnerNIRC": "wzepp_PO_NIRC",
+      "Sign_PayorName": "wzepp_ThirdPP_Name",
+      "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
     },
-    // 2. Scenario-Based Text Mapping
-    conditionalFields: {
-      "ownself": {
-        "Sign_OwnerName": "wzepp_Card_Name", // Maps Card Name to the Owner box
-        "Sign_OwnerNIRC": "wzepp_Card_NIRC"
-      },
-      "third_party": {
-        "Sign_OwnerName": "wzepp_PO_Name",    // Maps Policy Owner Name to the Owner box
-        "Sign_OwnerNIRC": "wzepp_PO_NIRC",
-        "Sign_PayorName": "wzepp_Card_Name",  // Maps Card Name to the Payor box
-        "Sign_PayorNIRC": "wzepp_Card_NIRC"
-      }
-    },
- // 3. Scenario-Based Signature Mapping   
  signatureLayouts: {
       // Scenario A: Only Cardholder signs (is also the Owner)
       "ownself": [
@@ -1787,17 +1777,9 @@ async function fillPDF() {
     const form = pdfDoc.getForm();
     const pages = pdfDoc.getPages();
 
- /* ---------- A. DYNAMIC FIELD FILLING (SCENARIO AWARE) ---------- */
-    // 1. Identify the scenario
-    const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
-    const layoutKey = isThirdParty ? "third_party" : "ownself";
-
-    // 2. Combine standard fields with the dynamic ones for this scenario
-    const conditionalFields = mapping.conditionalFields ? mapping.conditionalFields[layoutKey] : {};
-    const allFields = { ...mapping.fields, ...conditionalFields };
-
-    Object.keys(allFields).forEach(pdfFieldId => {
-      const storageKey = allFields[pdfFieldId];
+    /* ---------- A. DYNAMIC FIELD FILLING ---------- */
+    Object.keys(mapping.fields).forEach(pdfFieldId => {
+      const storageKey = mapping.fields[pdfFieldId];
       let value = localStorage.getItem(storageKey);
 
       // Bridge Logic for Dropdowns
@@ -1815,7 +1797,6 @@ async function fillPDF() {
         if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
       }
 
-      // Final write to PDF
       safeSetField(form, pdfFieldId, value);
     });
 
