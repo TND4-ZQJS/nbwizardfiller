@@ -894,6 +894,96 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 
 <script>
 
+/* ============================================================
+   1. GLOBAL CONFIGURATION & MAPPING
+   (Put this at the top so it's easy to edit later)
+   ============================================================ */
+ const PDF_MAPPING_LOGIC = {
+  "Credit Card Enrolment Form_LF4092_200524_fillable.pdf": {
+    fields: {
+      "CCAgree": "wzepp_CCRequest_Checkbox",
+      "PolicyNo1": "wzepp_PolicyNo",
+      "Insured1": "wzepp_Insured_Name",
+      "Relationship1_Ownself": "wzepp_Card_Ownself",
+      "Relationship1_spouse": "wzepp_Card_Spouse",
+      "Relationship1_children": "wzepp_Card_Children",
+      "Relationship1_Parent": "wzepp_Card_Parents",
+      "Relationship1_Grandparent": "wzepp_Card_Grandparents",
+      "Relationship1_Sibling": "wzepp_Card_Siblings",
+      "Relationship1_Company": "wzepp_Card_Employer",
+      "CardName": "wzepp_Card_Name",
+      "Visa_Tick": "wzepp_Card_Visa",
+      "Master_Tick": "wzepp_Card_Master",
+      "CardNo_1": "wzepp_Card_No_1", "CardNo_2": "wzepp_Card_No_2",
+      "CardNo_3": "wzepp_Card_No_3", "CardNo_4": "wzepp_Card_No_4",
+      "CardNo_5": "wzepp_Card_No_5", "CardNo_6": "wzepp_Card_No_6",
+      "CardNo_7": "wzepp_Card_No_7", "CardNo_8": "wzepp_Card_No_8",
+      "CardNo_9": "wzepp_Card_No_9", "CardNo_10": "wzepp_Card_No_10",
+      "CardNo_11": "wzepp_Card_No_11", "CardNo_12": "wzepp_Card_No_12",
+      "CardNo_13": "wzepp_Card_No_13", "CardNo_14": "wzepp_Card_No_14",
+      "CardNo_15": "wzepp_Card_No_15", "CardNo_16": "wzepp_Card_No_16",
+      "CardExpry_M1": "wzepp_Card_Exp_M1", "CardExpry_M2": "wzepp_Card_Exp_M2",
+      "CardExpry_Y1": "wzepp_Card_Exp_Y1", "CardExpry_Y2": "wzepp_Card_Exp_Y2",
+      "CardBank": "wzepp_Card_Bank_Text",
+      "ThirdPP_Yes": "wzepp_ThirdPP_Checkbox",
+      "ThirdPP_Name": "wzepp_ThirdPP_Name",
+      "ThirdPP_NIRC": "wzepp_ThirdPP_NIRC",
+      "ThirdPP_DOB_DD": "wzepp_ThirdPP_DOB_DD",
+      "ThirdPP_DOB_MM": "wzepp_ThirdPP_DOB_MM",
+      "ThirdPP_DOB_YYYY": "wzepp_ThirdPP_DOB_YYYY",
+      "ThirdPP_Nationality": "wzepp_ThirdPP_Nationality",
+      "ThirdPP_CorrespAdd_Line1": "wzepp_ThirdPP_Address1",
+      "ThirdPP_ResAdd_Postcoe": "wzepp_ThirdPP_Address_Postcode",
+      "ThirdPP_ResAdd_Country": "wzepp_ThirdPP_Address_Country",
+      "ThirdPP_Email": "wzepp_ThirdPP_Email",
+      "ThirdPP_Phone": "wzepp_ThirdPP_Mobile",
+      "ThirdPP_Occupation": "wzepp_ThirdPP_Occupation",
+      "ThirdPP_Employer": "wzepp_ThirdPP_Company",
+      "ThirdPP_NatureBusiness": "wzepp_ThirdPP_Business",
+      "ThirdPP_Income": "wzepp_ThirdPP_Income",
+      "ThirdPP_SourceFund_Self": "wzepp_Fund_Self",
+      "ThirdPP_SourceFund_Parent": "wzepp_Fund_Parents",
+      "ThirdPP_SourceFund_Spouse": "wzepp_Fund_Spouse",
+      "ThirdPP_SourceFund_Others": "wzepp_Fund_Others",
+      "ThirdPP_SourceFund_Others_Write": "wzepp_Fund_Others_Spec",
+      "ThirdPP_SourceWealth_EmployBus": "wzepp_Wealth_Employment",
+      "ThirdPP_SourceWealth_Invest": "wzepp_Wealth_Investment", // Fixed typo
+      "ThirdPP_SourceWealth_Inherit": "wzepp_Wealth_Inheritance",
+      "ThirdPP_SourceWealth_Savings": "wzepp_Wealth_Savings",
+      "ThirdPP_SourceWealth_Parents": "wzepp_Wealth_Parents",
+      "ThirdPP_SourceWealth_Spouse": "wzepp_Wealth_Spouse",
+      "ThirdPP_SourceWealth_Others": "wzepp_Wealth_Others",
+      "ThirdPP_SourceWealth_Others_Write": "wzepp_Wealth_Others_Spec",
+      "PDPA": "wzepp_PDPA_Checkbox",
+      "Sign_State": "wzepp_Sign_State",
+      "Sign_Date": "wzepp_Sign_Day",
+      "Sign_Month": "wzepp_Sign_Month",
+      "Sign_Year": "wzepp_Sign_Year", // Fixed typo
+      "Sign_OwnerName": "wzepp_PO_Name",
+      "Sign_OwnerNIRC": "wzepp_PO_NIRC",
+      "Sign_PayorName": "wzepp_ThirdPP_Name",
+      "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
+    },
+    signatures: [
+      { 
+        id: "wzepp_sig_owner", // Assuming Cardholder is the Owner
+        previewId: "preview_owner", 
+        page: 0, posX: 50, posY: 490, factor: 0.40 
+      },
+      { 
+        id: "wzepp_sig_cardholder", 
+        previewId: "preview_sig_cardholder", 
+        page: 0, posX: 370, posY: 490, factor: 0.40 
+      },
+      { 
+        id: "wzepp_sig_witness", 
+        previewId: "preview_sig_witness", 
+        page: 0, posX: 370, posY: 490, factor: 0.40 
+      },
+    ]
+  }
+}; 
+
   /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
 const saveStatusEl = document.getElementById("saveStatus");
 
