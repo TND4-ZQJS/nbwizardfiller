@@ -933,8 +933,8 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "ThirdPP_DOB_YYYY": "wzepp_ThirdPP_DOB_YYYY",
       "ThirdPP_Nationality": "wzepp_ThirdPP_Nationality",
       "ThirdPP_CorrespAdd_Line1": "wzepp_ThirdPP_Address1",
-      "ThirdPP_CorrrepAdd_Postcode": "wzepp_ThirdPP_Address_Postcode",
-      "ThirdPP_CorrespAdd_Country": "wzepp_ThirdPP_Address_Country",
+      "ThirdPP_ResAdd_Postcoe": "wzepp_ThirdPP_Address_Postcode",
+      "ThirdPP_ResAdd_Country": "wzepp_ThirdPP_Address_Country",
       "ThirdPP_Email": "wzepp_ThirdPP_Email",
       "ThirdPP_Phone": "wzepp_ThirdPP_Mobile",
       "ThirdPP_Occupation": "wzepp_ThirdPP_Occupation",
@@ -964,35 +964,24 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "Sign_PayorName": "wzepp_ThirdPP_Name",
       "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
     },
-    signatureLayouts: {
-  // Scenario A: Cardholder is the Owner (Only one person signs)
-    "ownself": [
-    { 
-      id: "wzepp_sig_cardholder", 
-      page: 2, posX: 370, posY: 490, factor: 0.40 
-    },
-    { 
-      id: "wzepp_sig_witness", 
-      page: 2, posX: 50, posY: 490, factor: 0.40 // Or wherever the witness goes when it's just the owner
-    }
-  ],
-      
-  // Scenario B: 3rd Party involved (Two different people sign)
-  "third_party": [
-    { 
-      id: "wzepp_sig_owner", 
-      page: 2, posX: 50, posY: 490, factor: 0.40 
-    },
-    { 
-      id: "wzepp_sig_cardholder", 
-      page: 2, posX: 370, posY: 490, factor: 0.40 
-    },
-    { 
-      id: "wzepp_sig_witness", 
-      page: 2, posX: 370, posY: 300, factor: 0.40 // Moved to make room
-    }
-  ]
-}
+    signatures: [
+      { 
+        id: "wzepp_sig_owner", // Assuming Cardholder is the Owner
+        previewId: "preview_owner", 
+        page: 2, posX: 50, posY: 490, factor: 0.40 
+      },
+      { 
+        id: "wzepp_sig_cardholder", 
+        previewId: "preview_sig_cardholder", 
+        page: 2, posX: 370, posY: 490, factor: 0.40 
+      },
+      { 
+        id: "wzepp_sig_witness", 
+        previewId: "preview_sig_witness", 
+        page: 2, posX: 370, posY: 490, factor: 0.40 
+      },
+    ]
+  }
 }; 
 
   /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
@@ -1820,46 +1809,43 @@ async function fillPDF() {
       safeSetField(form, pdfFieldId, value);
     });
 
-   /* ---------- B. DYNAMIC SIGNATURE EMBEDDING ---------- */
+    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING (REPAIRED) ---------- */
+    for (const sig of mapping.signatures) {
+      const sigDataUri = localStorage.getItem(sig.id);
+      
+      if (sigDataUri && sigDataUri.startsWith("data:image/png")) {
+        try {
+          const img = await pdfDoc.embedPng(sigDataUri);
+          const originalSize = img.size();
+          
+          // 1. Get the factor from mapping (default to 0.40 if missing)
+          const scaleFactor = sig.factor || 0.40;
 
-// 1. Detect the state of the 3rd Party Checkbox
-// We check localStorage for the boolean value
-const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
+          // 2. Calculate dimensions. 
+          // Instead of raw pixels, we use a base "Standard Width" 
+          // then apply your factor. This makes '0.40' actually meaningful.
+          const baseWidth = 250; // Standard reference width in PDF points
+          const aspectRatio = originalSize.width / originalSize.height;
+          
+          const finalWidth = baseWidth * scaleFactor;
+          const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
 
-// 2. Select the correct layout from your mapping
-const layoutKey = isThirdParty ? "third_party" : "ownself";
-const activeSignatures = mapping.signatureLayouts[layoutKey];
-
-// 3. Run the loop only on the ACTIVE signatures
-if (activeSignatures) {
-  for (const sig of activeSignatures) {
-    const sigDataUri = localStorage.getItem(sig.id);
-    
-    if (sigDataUri && sigDataUri.startsWith("data:image/png")) {
-      try {
-        const img = await pdfDoc.embedPng(sigDataUri);
-        const originalSize = img.size();
-        const scaleFactor = sig.factor || 0.40;
-
-        // Standardized scaling logic
-        const baseWidth = 250; 
-        const aspectRatio = originalSize.width / originalSize.height;
-        const finalWidth = baseWidth * scaleFactor;
-        const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
-
-        const targetPage = pages[sig.page];
-        targetPage.drawImage(img, {
-          x: sig.posX,
-          y: sig.posY,
-          width: finalWidth,
-          height: finalHeight
-        });
-      } catch (e) {
-        console.error(`Error embedding ${sig.id}:`, e);
+          // 3. Draw on the specific page
+          const targetPage = pages[sig.page];
+          targetPage.drawImage(img, {
+            x: sig.posX,
+            y: sig.posY,
+            width: finalWidth,
+            height: finalHeight
+          });
+          
+          console.log(`Signature ${sig.id} placed at scale ${scaleFactor}`);
+        } catch (e) {
+          console.error(`Error embedding signature ${sig.id}:`, e);
+        }
       }
     }
-  }
-}
+
     /* ---------- C. SAVE & DOWNLOAD ---------- */
     const pdfBytes = await pdfDoc.save();
 
