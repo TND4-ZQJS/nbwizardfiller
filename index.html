@@ -1809,22 +1809,37 @@ async function fillPDF() {
       safeSetField(form, pdfFieldId, value);
     });
 
-    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING ---------- */
+    /* ---------- B. DYNAMIC SIGNATURE EMBEDDING (REPAIRED) ---------- */
     for (const sig of mapping.signatures) {
       const sigDataUri = localStorage.getItem(sig.id);
-      if (sigDataUri) {
+      
+      if (sigDataUri && sigDataUri.startsWith("data:image/png")) {
         try {
           const img = await pdfDoc.embedPng(sigDataUri);
-          const { width, height } = img.size();
-          const factor = sig.factor || 0.40;
+          const originalSize = img.size();
+          
+          // 1. Get the factor from mapping (default to 0.40 if missing)
+          const scaleFactor = sig.factor || 0.40;
 
+          // 2. Calculate dimensions. 
+          // Instead of raw pixels, we use a base "Standard Width" 
+          // then apply your factor. This makes '0.40' actually meaningful.
+          const baseWidth = 250; // Standard reference width in PDF points
+          const aspectRatio = originalSize.width / originalSize.height;
+          
+          const finalWidth = baseWidth * scaleFactor;
+          const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
+
+          // 3. Draw on the specific page
           const targetPage = pages[sig.page];
           targetPage.drawImage(img, {
             x: sig.posX,
             y: sig.posY,
-            width: width * factor,
-            height: height * factor
+            width: finalWidth,
+            height: finalHeight
           });
+          
+          console.log(`Signature ${sig.id} placed at scale ${scaleFactor}`);
         } catch (e) {
           console.error(`Error embedding signature ${sig.id}:`, e);
         }
