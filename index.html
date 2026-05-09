@@ -1192,6 +1192,26 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof saveElValue === "function") {
         saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
     }
+
+     // --- FIXED FORMATTER LOGIC ---
+function syncShortAddress(source) {
+    if (!source || !source.a1) return "";
+
+    const parts = [
+        source.a1.value ? source.a1.value.trim() : "",
+        source.cy.value ? source.cy.value.trim() : "",
+        source.st.value ? source.st.value.trim() : ""
+    ].filter(part => part.length > 0);
+
+    const shortString = parts.join(", ").toUpperCase();
+    
+    // CRITICAL: Double check this key name matches your Step 8 Mapping exactly
+    localStorage.setItem("wzepp_CC_Short_Address", shortString);
+    
+    console.log("Debug - Short Address Updated:", shortString); 
+    return shortString;
+}
+  
 }
 
 
@@ -1245,25 +1265,7 @@ document.addEventListener("DOMContentLoaded", () => {
         syncEPPAddress();
     }
 
-   // --- FIXED FORMATTER LOGIC ---
-function syncShortAddress(source) {
-    if (!source || !source.a1) return "";
-
-    const parts = [
-        source.a1.value ? source.a1.value.trim() : "",
-        source.cy.value ? source.cy.value.trim() : "",
-        source.st.value ? source.st.value.trim() : ""
-    ].filter(part => part.length > 0);
-
-    const shortString = parts.join(", ").toUpperCase();
-    
-    // CRITICAL: Double check this key name matches your Step 8 Mapping exactly
-    localStorage.setItem("wzepp_CC_Short_Address", shortString);
-    
-    console.log("Debug - Short Address Updated:", shortString); 
-    return shortString;
-}
-
+  
     /* --- Event Listeners --- */
     thirdPPCheckbox.addEventListener("change", toggleThirdPP);
     thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
