@@ -242,10 +242,70 @@ width: 40px !important;
 
 #SecSigPO {display: none;}  
 
-    .btn-primary { background: #0071e3; color: #fff; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; margin-left: 8px; }
-    .btn-secondary { background: #f5f5f7; color: #0071e3; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; }
-    .btn-reset { background: none; color: #ff3b30; border: 1px solid #ff3b30; padding: 10px 24px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: 0.2s; }
-    .btn-reset:hover { background: #ff3b30; color: #fff; }
+    /* Container Fix */
+.action-center {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px; /* Provides consistent side-spacing on mobile */
+    box-sizing: border-box;
+}
+
+.pdf-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.doc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #d2d2d7;
+    box-sizing: border-box;
+}
+
+.doc-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.doc-title { font-size: 15px; color: #1d1d1f; }
+.doc-sub { font-size: 12px; color: #86868b; }
+
+/* Button Styles */
+.btn-primary { background: #0071e3; color: #fff; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; }
+.btn-secondary { background: #f5f5f7; color: #0071e3; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; margin-right: 4px; }
+.btn-reset { background: none; color: #ff3b30; border: 1px solid #ff3b30; padding: 12px 24px; border-radius: 22px; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; max-width: 300px; }
+
+.reset-container {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #d2d2d7;
+}
+
+/* MOBILE ALIGNMENT FIX */
+@media (max-width: 600px) {
+    .doc-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .actions {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .actions button {
+        flex: 1; /* Makes buttons equal width on mobile */
+        text-align: center;
+    }
+}
 </style>
 
 </head>
@@ -846,50 +906,48 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 
 <div class="wizard-step" data-step="7"> 
   <section class="section">
-    <div class="action-center" style="max-width: 800px; margin: 50px auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-    
+   <div class="action-center">
     <!-- PDF GENERATION CARDS -->
-    <div class="pdf-grid" style="display: grid; gap: 12px; margin-bottom: 30px;">
-        
+    <div class="pdf-grid">
         <!-- Form 1 -->
-        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
-            <div>
-                <b style="display: block;">Credit Card Enrolment</b>
-                <span style="font-size: 12px; color: #86868b;">LF4092 · 3 Pages</span>
+        <div class="doc-row">
+            <div class="doc-info">
+                <b class="doc-title">Credit Card Enrolment</b>
+                <span class="doc-sub">LF4092 · 3 Pages</span>
             </div>
             <div class="actions">
-                <button onclick="generateSinglePDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'download')" class="btn-primary">Download</button>
+                <button onclick="generateSinglePDF('Credit Card Enrolment...', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Credit Card Enrolment...', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
 
         <!-- Form 2 -->
-        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
-            <div>
-                <b style="display: block;">EPP Payment Form</b>
-                <span style="font-size: 12px; color: #86868b;">LF1739 · 1 Page</span>
+        <div class="doc-row">
+            <div class="doc-info">
+                <b class="doc-title">EPP Payment Form</b>
+                <span class="doc-sub">LF1739 · 1 Page</span>
             </div>
             <div class="actions">
-                <button onclick="generateSinglePDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'download')" class="btn-primary">Download</button>
+                <button onclick="generateSinglePDF('Zero Interest...', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Zero Interest...', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
 
         <!-- Form 3 -->
-        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
-            <div>
-                <b style="display: block;">Amendment to Application</b>
-                <span style="font-size: 12px; color: #86868b;">LF1042 · 1 Page</span>
+        <div class="doc-row">
+            <div class="doc-info">
+                <b class="doc-title">Amendment to Application</b>
+                <span class="doc-sub">LF1042 · 1 Page</span>
             </div>
             <div class="actions">
-                <button onclick="generateSinglePDF('Amendment to Application_LF1042_fillable.pdf', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Amendment to Application_LF1042_fillable.pdf', 'download')" class="btn-primary">Download</button>
+                <button onclick="generateSinglePDF('Amendment...', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Amendment...', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
     </div>
 
     <!-- RESET BUTTON -->
-    <div style="text-align: center; border-top: 1px solid #d2d2d7; pt: 30px;">
+    <div class="reset-container">
         <button onclick="resetAllData()" class="btn-reset">Reset All Fields & Signatures</button>
     </div>
 </div>
