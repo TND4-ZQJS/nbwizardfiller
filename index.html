@@ -842,25 +842,53 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 
 <div class="wizard-step" data-step="7"> 
   <section class="section">
-    <div style="text-align: center; padding: 20px;">
-      <div class="success-icon" style="font-size: 50px;">📄</div>
-      <h2>Ready to Generate</h2>
-      <p>Review your details. Click the button below to build your PDFs.</p>
-      
-      <!-- The missing button -->
-      <button 
-        id="generate" 
-        onclick="fillPDF()" 
-        style="padding: 12px 24px; font-size: 16px; background-color: #003399; color: white; border: none; border-radius: 6px; cursor: pointer;">
-        Generate & Download PDF
-      </button>
+    <div class="action-center" style="max-width: 800px; margin: 50px auto; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    
+    <!-- PDF GENERATION CARDS -->
+    <div class="pdf-grid" style="display: grid; gap: 12px; margin-bottom: 30px;">
+        
+        <!-- Form 1 -->
+        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
+            <div>
+                <b style="display: block;">Credit Card Enrolment</b>
+                <span style="font-size: 12px; color: #86868b;">LF4092 · 3 Pages</span>
+            </div>
+            <div class="actions">
+                <button onclick="generateSinglePDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'download')" class="btn-primary">Download</button>
+            </div>
+        </div>
 
-      <!-- Results Area -->
-      <div id="downloadArea" style="display: none; margin-top: 20px; text-align: left; background: #f4f4f4; padding: 15px; border-radius: 8px;">
-        <h4 style="color: #003399;">Download Links:</h4>
-        <ul id="fileList"></ul>
-      </div>
+        <!-- Form 2 -->
+        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
+            <div>
+                <b style="display: block;">EPP Payment Form</b>
+                <span style="font-size: 12px; color: #86868b;">LF1739 · 1 Page</span>
+            </div>
+            <div class="actions">
+                <button onclick="generateSinglePDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'download')" class="btn-primary">Download</button>
+            </div>
+        </div>
+
+        <!-- Form 3 -->
+        <div class="doc-row" style="display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 16px; border-radius: 12px; border: 1px solid #d2d2d7;">
+            <div>
+                <b style="display: block;">Amendment to Application</b>
+                <span style="font-size: 12px; color: #86868b;">LF1042 · 1 Page</span>
+            </div>
+            <div class="actions">
+                <button onclick="generateSinglePDF('Amendment to Application_LF1042_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="generateSinglePDF('Amendment to Application_LF1042_fillable.pdf', 'download')" class="btn-primary">Download</button>
+            </div>
+        </div>
     </div>
+
+    <!-- RESET BUTTON -->
+    <div style="text-align: center; border-top: 1px solid #d2d2d7; pt: 30px;">
+        <button onclick="resetAllData()" class="btn-reset">Reset All Fields & Signatures</button>
+    </div>
+</div>
   </section>
 </div>
 
