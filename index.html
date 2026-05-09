@@ -1169,53 +1169,56 @@ document.addEventListener("DOMContentLoaded", () => {
         a1: document.getElementById("wzepp_ThirdPP_Address1")
     };
 
-    const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
+    /**
+     * Helper: Creates the shortened address (Line 1, City, State)
+     */
+    function syncShortAddress(source) {
+        if (!source || !source.a1) return "";
 
-    // 1. Build EPP string
-    function syncEPPAddress() {
-    // Determine which data to pull from:
-    // If 3rd Party is checked AND they have a DIFFERENT address, use ppAddr.
-    // Otherwise (if 3rd party is same as PO, or there is no 3rd party), use poAddr.
-    const isDifferentPPAddress = thirdPPCheckbox.checked && !thirdPPAddrChk.checked;
-    const source = isDifferentPPAddress ? ppAddr : poAddr;
+        const parts = [
+            source.a1.value ? source.a1.value.trim() : "",
+            source.cy.value ? source.cy.value.trim() : "",
+            source.st.value ? source.st.value.trim() : ""
+        ].filter(part => part.length > 0);
 
-    const parts = [
-        source.a1.value.trim(),
-        `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
-        source.st.value.trim(),
-        source.ct.value.trim()
-    ].filter(part => part.length > 0);
-
-    const combinedString = parts.join(", ").toUpperCase();
-
-    // This ID maps to the 'Full Address' line on the EPP Form
-    if (typeof saveElValue === "function") {
-        saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
+        const shortString = parts.join(", ").toUpperCase();
+        
+        // This key is used in your PDF_MAPPING_LOGIC
+        localStorage.setItem("wzepp_CC_Short_Address", shortString);
+        console.log("Debug - Short Address Updated:", shortString); 
+        return shortString;
     }
 
-     // --- FIXED FORMATTER LOGIC ---
-function syncShortAddress(source) {
-    if (!source || !source.a1) return "";
+    /**
+     * 1. Build Full EPP Address and trigger Short Address
+     */
+    function syncEPPAddress() {
+        const isDifferentPPAddress = thirdPPCheckbox.checked && !thirdPPAddrChk.checked;
+        const source = isDifferentPPAddress ? ppAddr : poAddr;
 
-    const parts = [
-        source.a1.value ? source.a1.value.trim() : "",
-        source.cy.value ? source.cy.value.trim() : "",
-        source.st.value ? source.st.value.trim() : ""
-    ].filter(part => part.length > 0);
+        // Build Full String for EPP Form
+        const parts = [
+            source.a1.value.trim(),
+            `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
+            source.st.value.trim(),
+            source.ct.value.trim()
+        ].filter(part => part.length > 0);
 
-    const shortString = parts.join(", ").toUpperCase();
-    
-    // CRITICAL: Double check this key name matches your Step 8 Mapping exactly
-    localStorage.setItem("wzepp_CC_Short_Address", shortString);
-    
-    console.log("Debug - Short Address Updated:", shortString); 
-    return shortString;
-}
-  
-}
+        const combinedString = parts.join(", ").toUpperCase();
 
+        // Save Full Address
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
+        }
 
-    // 2. Toggle 3rd Party Visibility
+        // --- TRIGGER SHORT ADDRESS ---
+        // This ensures the Credit Card specific address is also generated
+        syncShortAddress(source);
+    }
+
+    /**
+     * 2. Toggle 3rd Party Visibility
+     */
     function toggleThirdPP() {
         if (thirdPPCheckbox.checked) {
             thirdPPInfoSec.style.display = "block";
@@ -1239,7 +1242,9 @@ function syncShortAddress(source) {
         syncEPPAddress();
     }
 
-    // 3. Copy and Lock Address
+    /**
+     * 3. Copy and Lock Address (Same as Insured Logic)
+     */
     function toggleThirdPPAddress() {
         const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
         const isLocked = thirdPPAddrChk.checked;
@@ -1265,7 +1270,6 @@ function syncShortAddress(source) {
         syncEPPAddress();
     }
 
-  
     /* --- Event Listeners --- */
     thirdPPCheckbox.addEventListener("change", toggleThirdPP);
     thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
@@ -1274,6 +1278,7 @@ function syncShortAddress(source) {
     [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
         if (!input) return;
         input.addEventListener("input", (e) => {
+            // Auto-sync if "Same Address" is checked
             if (thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
                 toggleThirdPPAddress(); 
             }
@@ -1283,7 +1288,7 @@ function syncShortAddress(source) {
     });
 
     /* --- Initialization --- */
-    toggleThirdPP(); // Set initial visibility
+    toggleThirdPP(); 
 
     // Restore saved 3rd party address if it exists
     if (localStorage.getItem(ppAddr.a1.id)) {
@@ -1296,7 +1301,7 @@ function syncShortAddress(source) {
         thirdPPAddrChk.checked = true;
         syncEPPAddress();
     }
-}); // End of DOMContentLoaded
+});
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
