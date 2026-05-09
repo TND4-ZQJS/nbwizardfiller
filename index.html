@@ -612,6 +612,9 @@ width: 40px !important;
       </select>
       <label for="wzepp_Card_Type">Card Type</label>
     </div>
+
+    <!-- Hardcoded to checked and hidden from view -->
+<input type="checkbox" id="wzepp_Card_Checkbox" checked style="display: none;">
      
      <div class="card-number-block">
       <label>Card Number</label>
@@ -914,6 +917,7 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
       "Relationship1_Sibling": "wzepp_Card_Siblings",
       "Relationship1_Company": "wzepp_Card_Employer",
       "CardName": "wzepp_Card_Name",
+      "CC_Tick": "wzepp_Card_Checkbox",
       "Visa_Tick": "wzepp_Card_Visa",
       "Master_Tick": "wzepp_Card_Master",
       "CardNo_1": "wzepp_Card_No_1", "CardNo_2": "wzepp_Card_No_2",
@@ -1502,6 +1506,19 @@ relDropdown.addEventListener("change", (e) => {
     if (typeof saveElValue === "function") saveElValue(e.target);
 });  
 
+/* ---------- Credit Card CHECKBOX FORCE ---------- */  
+document.addEventListener("DOMContentLoaded", () => {
+    // Force the Credit Card checkbox state in storage
+    const ccCheckbox = document.getElementById("wzepp_Card_Checkbox");
+    
+    if (ccCheckbox) {
+        // 1. Ensure it's checked in the DOM
+        ccCheckbox.checked = true; 
+        
+        // 2. Ensure it's 'true' in storage for the PDF generator
+        localStorage.setItem("wzepp_Card_Checkbox", "true");
+    }
+});  
 
 /* ---------- Credit Card Card Number Processing ---------- */
 
