@@ -1027,15 +1027,42 @@ const PDF_MAPPING_LOGIC = {
             "Witness_Name": "wzepp_Agent_Name",
             "Witness_NRIC": "wzepp_Agent_NIRC"
         },
-        // IMPORTANT: EPP signatures usually don't change based on Third Party status
         signatureLayouts: {
             "ownself": [
-                { id: "wzepp_sig_cardholder", page: 0, posX: 30, posY: 100, factor: 0.40 },
-                { id: "wzepp_sig_witness", page: 0, posX: 30, posY: 100, factor: 0.40 }
+                { id: "wzepp_sig_cardholder", page: 1, posX: 30, posY: 100, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 1, posX: 30, posY: 100, factor: 0.40 }
             ],
             "third_party": [
-                { id: "wzepp_sig_cardholder", page: 0, posX: 30, posY: 100, factor: 0.40 },
-                { id: "wzepp_sig_witness", page: 0, posX: 30, posY: 100, factor: 0.40 }
+                { id: "wzepp_sig_cardholder", page: 1, posX: 30, posY: 100, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 1, posX: 30, posY: 100, factor: 0.40 }
+            ]
+        }
+    },
+
+    // --- FORM 3: NB RFC (AMENDMENT) ---
+    "Amendment to Application_LF1042_fillable.pdf": {
+        fields: {
+            "PolicyNo": "wzepp_PolicyNo",
+            "LifeProposed_Name": "wzepp_Insured_Name",
+            "LifeProposed_NRIC": "wzepp_Insured_NIRC",
+            "Sign_State": "wzepp_Sign_State",
+            "Sign_Date": "wzepp_Sign_Day",
+            "Sign_Month": "wzepp_Sign_Month",
+            "Sign_Year": "wzepp_Sign_Year",
+            "Sign_LifeProposedPO_Name": "wzepp_PO_Name",
+            "Sign_LifeProposedPO_NRIC": "wzepp_PO_NIRC",
+            "Sign_LifeProposedPO_Mobile": "wzepp_PO_Mobile", // FIXED QUOTE ERROR HERE
+            "Witness_Name": "wzepp_Agent_Name",
+            "Witness_NRIC": "wzepp_Agent_NIRC"
+        },
+        signatureLayouts: {
+            "ownself": [
+                { id: "wzepp_sig_cardholder", page: 0, posX: 380, posY: 145, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 0, posX: 50, posY: 145, factor: 0.40 }
+            ],
+            "third_party": [
+                { id: "wzepp_sig_owner", page: 0, posX: 380, posY: 145, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 0, posX: 50, posY: 145, factor: 0.40 }
             ]
         }
     }
