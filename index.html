@@ -901,98 +901,146 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 
 /* ============================================================
    1. GLOBAL CONFIGURATION & MAPPING
-   (Put this at the top so it's easy to edit later)
    ============================================================ */
- const PDF_MAPPING_LOGIC = {
-  "Credit Card Enrolment Form_LF4092_200524_fillable.pdf": {
-    fields: {
-      "CCAgree": "wzepp_CCRequest_Checkbox",
-      "PolicyNo1": "wzepp_PolicyNo",
-      "Insured1": "wzepp_Insured_Name",
-      "Relationship1_Ownself": "wzepp_Card_Ownself",
-      "Relationship1_spouse": "wzepp_Card_Spouse",
-      "Relationship1_children": "wzepp_Card_Children",
-      "Relationship1_Parent": "wzepp_Card_Parents",
-      "Relationship1_Grandparent": "wzepp_Card_Grandparents",
-      "Relationship1_Sibling": "wzepp_Card_Siblings",
-      "Relationship1_Company": "wzepp_Card_Employer",
-      "CardName": "wzepp_Card_Name",
-      "CC_Tick": "wzepp_Card_Checkbox",
-      "Visa_Tick": "wzepp_Card_Visa",
-      "Master_Tick": "wzepp_Card_Master",
-      "CardNo_1": "wzepp_Card_No_1", "CardNo_2": "wzepp_Card_No_2",
-      "CardNo_3": "wzepp_Card_No_3", "CardNo_4": "wzepp_Card_No_4",
-      "CardNo_5": "wzepp_Card_No_5", "CardNo_6": "wzepp_Card_No_6",
-      "CardNo_7": "wzepp_Card_No_7", "CardNo_8": "wzepp_Card_No_8",
-      "CardNo_9": "wzepp_Card_No_9", "CardNo_10": "wzepp_Card_No_10",
-      "CardNo_11": "wzepp_Card_No_11", "CardNo_12": "wzepp_Card_No_12",
-      "CardNo_13": "wzepp_Card_No_13", "CardNo_14": "wzepp_Card_No_14",
-      "CardNo_15": "wzepp_Card_No_15", "CardNo_16": "wzepp_Card_No_16",
-      "CardExpry_M1": "wzepp_Card_Exp_M1", "CardExpry_M2": "wzepp_Card_Exp_M2",
-      "CardExpry_Y1": "wzepp_Card_Exp_Y1", "CardExpry_Y2": "wzepp_Card_Exp_Y2",
-      "CardBank": "wzepp_Card_Bank_Text",
-      "ThirdPP_Yes": "wzepp_ThirdPP_Checkbox",
-      "ThirdPP_SubmittedNRIC": "wzepp_SubmitNIRC_Checkbox",
-      "ThirdPP_Name": "wzepp_ThirdPP_Name",
-      "ThirdPP_NIRC": "wzepp_ThirdPP_NIRC",
-      "ThirdPP_DOB_DD": "wzepp_ThirdPP_DOB_DD",
-      "ThirdPP_DOB_MM": "wzepp_ThirdPP_DOB_MM",
-      "ThirdPP_DOB_YYYY": "wzepp_ThirdPP_DOB_YYYY",
-      "ThirdPP_Nationality": "wzepp_ThirdPP_Nationality",
-      "ThirdPP_CorrespAdd_Line1": "wzepp_CC_Short_Address",
-      "ThirdPP_CorrrepAdd_Postcode": "wzepp_ThirdPP_Address_Postcode",
-      "ThirdPP_CorrespAdd_Country": "wzepp_ThirdPP_Address_Country",
-      "ThirdPP_Email": "wzepp_ThirdPP_Email",
-      "ThirdPP_Phone": "wzepp_ThirdPP_Mobile",
-      "ThirdPP_Occupation": "wzepp_ThirdPP_Occupation",
-      "ThirdPP_Employer": "wzepp_ThirdPP_Company",
-      "ThirdPP_NatureBusiness": "wzepp_ThirdPP_Business",
-      "ThirdPP_Income": "wzepp_ThirdPP_Income",
-      "ThirdPP_SourceFund_Self": "wzepp_Fund_Self",
-      "ThirdPP_SourceFund_Parent": "wzepp_Fund_Parents",
-      "ThirdPP_SourceFund_Spouse": "wzepp_Fund_Spouse",
-      "ThirdPP_SourceFund_Others": "wzepp_Fund_Others",
-      "ThirdPP_SourceFund_Others_Write": "wzepp_Fund_Others_Spec",
-      "ThirdPP_SourceWealth_EmployBus": "wzepp_Wealth_Employment",
-      "ThirdPP_SourceWealth_Invest": "wzepp_Wealth_Investment", // Fixed typo
-      "ThirdPP_SourceWealth_Inherit": "wzepp_Wealth_Inheritance",
-      "ThirdPP_SourceWealth_Savings": "wzepp_Wealth_Savings",
-      "ThirdPP_SourceWealth_Parents": "wzepp_Wealth_Parents",
-      "ThirdPP_SourceWealth_Spouse": "wzepp_Wealth_Spouse",
-      "ThirdPP_SourceWealth_Others": "wzepp_Wealth_Others",
-      "ThirdPP_SourceWealth_Others_Write": "wzepp_Wealth_Others_Spec",
-      "PDPA": "wzepp_PDPA_Checkbox",
-      "Sign_State": "wzepp_Sign_State",
-      "Sign_Date": "wzepp_Sign_Day",
-      "Sign_Month": "wzepp_Sign_Month",
-      "Sign_Year": "wzepp_Sign_Year",
+const PDF_MAPPING_LOGIC = {
+    // --- FORM 1: CREDIT CARD ENROLMENT ---
+    "Credit Card Enrolment Form_LF4092_200524_fillable.pdf": {
+        fields: {
+            "CCAgree": "wzepp_CCRequest_Checkbox",
+            "PolicyNo1": "wzepp_PolicyNo",
+            "Insured1": "wzepp_Insured_Name",
+            "Relationship1_Ownself": "wzepp_Card_Ownself",
+            "Relationship1_spouse": "wzepp_Card_Spouse",
+            "Relationship1_children": "wzepp_Card_Children",
+            "Relationship1_Parent": "wzepp_Card_Parents",
+            "Relationship1_Grandparent": "wzepp_Card_Grandparents",
+            "Relationship1_Sibling": "wzepp_Card_Siblings",
+            "Relationship1_Company": "wzepp_Card_Employer",
+            "CardName": "wzepp_Card_Name",
+            "CC_Tick": "wzepp_Card_Checkbox",
+            "Visa_Tick": "wzepp_Card_Visa",
+            "Master_Tick": "wzepp_Card_Master",
+            "CardNo_1": "wzepp_Card_No_1", "CardNo_2": "wzepp_Card_No_2",
+            "CardNo_3": "wzepp_Card_No_3", "CardNo_4": "wzepp_Card_No_4",
+            "CardNo_5": "wzepp_Card_No_5", "CardNo_6": "wzepp_Card_No_6",
+            "CardNo_7": "wzepp_Card_No_7", "CardNo_8": "wzepp_Card_No_8",
+            "CardNo_9": "wzepp_Card_No_9", "CardNo_10": "wzepp_Card_No_10",
+            "CardNo_11": "wzepp_Card_No_11", "CardNo_12": "wzepp_Card_No_12",
+            "CardNo_13": "wzepp_Card_No_13", "CardNo_14": "wzepp_Card_No_14",
+            "CardNo_15": "wzepp_Card_No_15", "CardNo_16": "wzepp_Card_No_16",
+            "CardExpry_M1": "wzepp_Card_Exp_M1", "CardExpry_M2": "wzepp_Card_Exp_M2",
+            "CardExpry_Y1": "wzepp_Card_Exp_Y1", "CardExpry_Y2": "wzepp_Card_Exp_Y2",
+            "CardBank": "wzepp_Card_Bank_Text",
+            "ThirdPP_Yes": "wzepp_ThirdPP_Checkbox",
+            "ThirdPP_SubmittedNRIC": "wzepp_SubmitNIRC_Checkbox",
+            "ThirdPP_Name": "wzepp_ThirdPP_Name",
+            "ThirdPP_NIRC": "wzepp_ThirdPP_NIRC",
+            "ThirdPP_DOB_DD": "wzepp_ThirdPP_DOB_DD",
+            "ThirdPP_DOB_MM": "wzepp_ThirdPP_DOB_MM",
+            "ThirdPP_DOB_YYYY": "wzepp_ThirdPP_DOB_YYYY",
+            "ThirdPP_Nationality": "wzepp_ThirdPP_Nationality",
+            "ThirdPP_CorrespAdd_Line1": "wzepp_CC_Short_Address",
+            "ThirdPP_CorrrepAdd_Postcode": "wzepp_ThirdPP_Address_Postcode",
+            "ThirdPP_CorrespAdd_Country": "wzepp_ThirdPP_Address_Country",
+            "ThirdPP_Email": "wzepp_ThirdPP_Email",
+            "ThirdPP_Phone": "wzepp_ThirdPP_Mobile",
+            "ThirdPP_Occupation": "wzepp_ThirdPP_Occupation",
+            "ThirdPP_Employer": "wzepp_ThirdPP_Company",
+            "ThirdPP_NatureBusiness": "wzepp_ThirdPP_Business",
+            "ThirdPP_Income": "wzepp_ThirdPP_Income",
+            "ThirdPP_SourceFund_Self": "wzepp_Fund_Self",
+            "ThirdPP_SourceFund_Parent": "wzepp_Fund_Parents",
+            "ThirdPP_SourceFund_Spouse": "wzepp_Fund_Spouse",
+            "ThirdPP_SourceFund_Others": "wzepp_Fund_Others",
+            "ThirdPP_SourceFund_Others_Write": "wzepp_Fund_Others_Spec",
+            "ThirdPP_SourceWealth_EmployBus": "wzepp_Wealth_Employment",
+            "ThirdPP_SourceWealth_Invest": "wzepp_Wealth_Investment",
+            "ThirdPP_SourceWealth_Inherit": "wzepp_Wealth_Inheritance",
+            "ThirdPP_SourceWealth_Savings": "wzepp_Wealth_Savings",
+            "ThirdPP_SourceWealth_Parents": "wzepp_Wealth_Parents",
+            "ThirdPP_SourceWealth_Spouse": "wzepp_Wealth_Spouse",
+            "ThirdPP_SourceWealth_Others": "wzepp_Wealth_Others",
+            "ThirdPP_SourceWealth_Others_Write": "wzepp_Wealth_Others_Spec",
+            "PDPA": "wzepp_PDPA_Checkbox",
+            "Sign_State": "wzepp_Sign_State",
+            "Sign_Date": "wzepp_Sign_Day",
+            "Sign_Month": "wzepp_Sign_Month",
+            "Sign_Year": "wzepp_Sign_Year"
+        },
+        conditionalFields: {
+            "ownself": {
+                "Sign_OwnerName": "wzepp_PO_Name",
+                "Sign_OwnerNIRC": "wzepp_PO_NIRC"
+            },
+            "third_party": {
+                "Sign_OwnerName": "wzepp_PO_Name",
+                "Sign_OwnerNIRC": "wzepp_PO_NIRC",
+                "Sign_PayorName": "wzepp_ThirdPP_Name",
+                "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
+            }
+        },
+        signatureLayouts: {
+            "ownself": [
+                { id: "wzepp_sig_cardholder", page: 2, posX: 50, posY: 490, factor: 0.40 }
+            ],
+            "third_party": [
+                { id: "wzepp_sig_owner", page: 2, posX: 50, posY: 490, factor: 0.40 },
+                { id: "wzepp_sig_cardholder", page: 2, posX: 370, posY: 490, factor: 0.40 }
+            ]
+        }
     },
-    // 2. Dynamic Text: Names/ICs that change boxes based on the scenario
-    conditionalFields: {
-      "ownself": {
-        "Sign_OwnerName": "wzepp_PO_Name", // Cardholder name goes in the Owner box
-        "Sign_OwnerNIRC": "wzepp_PO_NIRC"
-      },
-      "third_party": {
-        "Sign_OwnerName": "wzepp_PO_Name",    // PO name stays in Owner box
-        "Sign_OwnerNIRC": "wzepp_PO_NIRC",
-        "Sign_PayorName": "wzepp_ThirdPP_Name",  // Cardholder name goes in Payor box
-        "Sign_PayorNIRC": "wzepp_ThirdPP_NIRC"
-      }
-    },
- signatureLayouts: {
-      // Scenario A: Only Cardholder signs (is also the Owner)
-      "ownself": [
-        { id: "wzepp_sig_cardholder", page: 2, posX: 50, posY: 490, factor: 0.40 }
-      ],
-      // Scenario B: Owner and Third Party Payor (Cardholder) are different
-      "third_party": [
-        { id: "wzepp_sig_owner",      page: 2, posX: 50,  posY: 490, factor: 0.40 },
-        { id: "wzepp_sig_cardholder", page: 2, posX: 370, posY: 490, factor: 0.40 }
-      ]
+
+    // --- FORM 2: EPP PAYMENT FORM ---
+    "Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf": {
+        fields: {
+            "Payor_Name": "wzepp_Card_Name",
+            "Cardholder_NIRC": "wzepp_EPP_Payor_NIRC",
+            "Cardholder_MobileNo": "wzepp_EPP_Payor_Mobile",
+            "Payor_Full_Address": "wzepp_EPP_Full_Address_Line",
+            "Paymentfor_PolicyNo1": "wzepp_PolicyNo",
+            "Paymentfor_PolicyNo1_OwnerName": "wzepp_PO_Name",
+            "Paymentfor_PolicyNo1_Relationship": "wzepp_Relationship",
+            "Cardholder_Name": "wzepp_Card_Name",
+            "Visa": "wzepp_Card_Visa",
+            "Master": "wzepp_Card_Master",
+            "CC_Number": "wzepp_Card_Combine",
+            "CC_Expirydate": "wzepp_Card_Exp_Combine",
+            "CC_Bank_MBB": "wzepp_Card_MBB",
+            "CC_Bank_PBB": "wzepp_Card_PBB",
+            "CC_Bank_UOB": "wzepp_Card_UOB",
+            "CC_Bank_HSBC": "wzepp_Card_HSBC",
+            "CC_Bank_CIMB": "wzepp_Card_CIMB",
+            "CC_Bank_Alliance": "wzepp_Card_ALLIANCE",
+            "CC_Bank_HLB": "wzepp_Card_HLB",
+            "CC_Bank_StanChart": "wzepp_Card_STANDCHART",
+            "EPPTerm_6Months": "wzepp_Card_EppOption_6M",
+            "EPPTerm_12Months": "wzepp_Card_EppOption_12M",
+            "AfterEPP_Annually": "wzepp_Card_AfterEPP_Yearly",
+            "AfterEPP_Halfyearly": "wzepp_Card_AfterEPP_Halfyearly",
+            "AfterEPP_Quarterly": "wzepp_Card_AfterEPP_Quarterly",
+            "AfterEPP_Monthly": "wzepp_Card_AfterEPP_Monthly",  
+            "Paymentfor_PolicyNo1_FirstPremium": "wzepp_Payment_Premium",
+            "Sign_State": "wzepp_Sign_State",
+            "Sign_Date": "wzepp_Sign_Day",
+            "Sign_Month": "wzepp_Sign_Month",
+            "Sign_Year": "wzepp_Sign_Year",
+            "Witness_Name": "wzepp_Agent_Name",
+            "Witness_NRIC": "wzepp_Agent_NIRC"
+        },
+        // IMPORTANT: EPP signatures usually don't change based on Third Party status
+        signatureLayouts: {
+            "ownself": [
+                { id: "wzepp_sig_cardholder", page: 0, posX: 30, posY: 100, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 0, posX: 30, posY: 100, factor: 0.40 }
+            ],
+            "third_party": [
+                { id: "wzepp_sig_cardholder", page: 0, posX: 30, posY: 100, factor: 0.40 },
+                { id: "wzepp_sig_witness", page: 0, posX: 30, posY: 100, factor: 0.40 }
+            ]
+        }
     }
-  }
 };
+
 
   /* ---SAVE STATUS + LOCALSTORAGE (Text, Checkbox, Dropdown) ---------- */
 const saveStatusEl = document.getElementById("saveStatus");
@@ -1216,6 +1264,23 @@ document.addEventListener("DOMContentLoaded", () => {
         syncShortAddress(source);
     }
 
+    // --- EPP Form : Cardholder logic ---
+    function syncPayorData() {
+    const isThirdParty = document.getElementById("wzepp_ThirdPP_Checkbox").checked;
+    
+    // Determine the source for the Cardholder/Payor
+    const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
+
+    // 1. Get Values
+    const payorNIRC = localStorage.getItem(`${sourcePrefix}NIRC`);
+    const payorMobile = localStorage.getItem(`${sourcePrefix}Mobile`);
+    const payorEmail = localStorage.getItem(`${sourcePrefix}Email`);
+
+    // 2. Save to "Bridge Keys" specifically for the EPP Form
+    localStorage.setItem("wzepp_EPP_Payor_NIRC", payorNIRC || "");
+    localStorage.setItem("wzepp_EPP_Payor_Mobile", payorMobile || "");
+    localStorage.setItem("wzepp_EPP_Payor_Email", payorEmail || "");
+}
     /**
      * 2. Toggle 3rd Party Visibility
      */
