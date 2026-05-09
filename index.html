@@ -1169,20 +1169,6 @@ document.addEventListener("DOMContentLoaded", () => {
         a1: document.getElementById("wzepp_ThirdPP_Address1")
     };
 
-     // --- NEW FORMATTER LOGIC ---
-    function syncShortAddress(source) {
-        const parts = [
-            source.a1.value.trim(),
-            source.cy.value.trim(),
-            source.st.value.trim()
-        ].filter(part => part.length > 0);
-
-        const shortString = parts.join(", ").toUpperCase();
-        
-        // Save to a specific key for the Credit Card PDF mapping
-        localStorage.setItem("wzepp_CC_Short_Address", shortString);
-    }
-
     const EPP_ADDR_ID = "wzepp_EPP_Full_Address_Line";
 
     // 1. Build EPP string
@@ -1207,6 +1193,20 @@ document.addEventListener("DOMContentLoaded", () => {
         saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
     }
 }
+
+  // --- NEW FORMATTER LOGIC ---
+    function syncShortAddress(source) {
+        const parts = [
+            source.a1.value.trim(),
+            source.cy.value.trim(),
+            source.st.value.trim()
+        ].filter(part => part.length > 0);
+
+        const shortString = parts.join(", ").toUpperCase();
+        
+        // Save to a specific key for the Credit Card PDF mapping
+        localStorage.setItem("wzepp_CC_Short_Address", shortString);
+    }
 
     // 2. Toggle 3rd Party Visibility
     function toggleThirdPP() {
