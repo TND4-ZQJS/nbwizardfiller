@@ -1390,15 +1390,19 @@ document.addEventListener("DOMContentLoaded", () => {
     const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
     // 1. Get Values
-    const payorNIRC = localStorage.getItem(`${sourcePrefix}NIRC`);
-    const payorMobile = localStorage.getItem(`${sourcePrefix}Mobile`);
-    const payorEmail = localStorage.getItem(`${sourcePrefix}Email`);
+    const payorNIRC = localStorage.getItem(`${sourcePrefix}NIRC`) || "";
+    const payorMobile = localStorage.getItem(`${sourcePrefix}Mobile`) || "";
+    const payorEmail = localStorage.getItem(`${sourcePrefix}Email`) || "";
+    const payorAddress = localStorage.getItem("wzepp_EPP_Full_Address_Line") || "";
 
     // 2. Save to "Bridge Keys" specifically for the EPP Form
-    localStorage.setItem("wzepp_EPP_Payor_NIRC", payorNIRC || "");
-    localStorage.setItem("wzepp_EPP_Payor_Mobile", payorMobile || "");
-    localStorage.setItem("wzepp_EPP_Payor_Email", payorEmail || "");
-}
+    localStorage.setItem("wzepp_EPP_Payor_NIRC", payorNIRC);
+    localStorage.setItem("wzepp_EPP_Payor_Mobile", payorMobile);
+    localStorage.setItem("wzepp_EPP_Payor_Email", payorEmail);
+    localStorage.setItem("wzepp_EPP_Payor_Address", payorAddress);
+
+    console.log("EPP Sync Complete:", { payorNIRC, payorMobile, payorAddress });
+    }  
     /**
      * 2. Toggle 3rd Party Visibility
      */
