@@ -2188,6 +2188,68 @@ async function fillPDF(fileName, action = 'download') {
     }
 }
 
+//RESET BUTTON
+function resetAllData() {
+    // 1. Safety confirmation
+    if (!confirm("Are you sure you want to clear all data and signatures?")) {
+        return;
+    }
+
+    // 2. Wipe the "Filing Cabinet" (LocalStorage)
+    localStorage.clear();
+
+    // 3. Clear all visible text inputs, selects, and textareas
+    const inputs = document.querySelectorAll('input, select, textarea');
+    inputs.forEach(el => {
+        if (el.type === 'checkbox' || el.type === 'radio') {
+            el.checked = false;
+        } else {
+            el.value = '';
+        }
+        
+        // Remove "locked" styles from address syncing
+        el.readOnly = false;
+        el.classList.remove('locked');
+    });
+
+    // 4. Force clear the hidden EPP Bridge fields
+    const bridgeIds = [
+        "wzepp_EPP_Cardholder_Name",
+        "wzepp_EPP_Cardholder_NIRC",
+        "wzepp_EPP_Cardholder_Mobile",
+        "wzepp_EPP_Full_Address_Line",
+        "wzepp_CC_Short_Address"
+    ];
+    bridgeIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    // 5. Clear Signature Pads
+    // This assumes you have canvas elements for signatures
+    const canvases = document.querySelectorAll('canvas');
+    canvases.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    });
+
+    // 6. Reset the UI Step (Go back to Step 1)
+    // This looks for your wizard-step divs and shows only the first one
+    document.querySelectorAll('.wizard-step').forEach((step, index) => {
+        step.style.display = (index === 0) ? 'block' : 'none';
+        step.classList.remove('active');
+    });
+    
+    // Set the first step as active
+    const firstStep = document.querySelector('.wizard-step[data-step="1"]');
+    if (firstStep) {
+        firstStep.style.display = 'block';
+        firstStep.classList.add('active');
+    }
+
+    // 7. Total Refresh (The "Nuclear" option to ensure everything is factory-reset)
+    window.location.reload();
+}  
 /* ------------------ WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
