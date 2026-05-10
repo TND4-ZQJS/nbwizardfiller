@@ -2124,7 +2124,7 @@ async function fillPDF(fileName, action = 'download') {
 
         // 6. Output
         // Force refresh all appearances across the whole document
-        form.updateRawAppearanceValue(); 
+        //form.updateRawAppearanceValue(); 
         
         const pdfBytes = await pdfDoc.save();
         const policyNum = localStorage.getItem("wzepp_PolicyNo") || "NEW";
