@@ -1479,6 +1479,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    const liveCardFields = [
+        "wzepp_PO_NIRC", "wzepp_PO_Mobile", "wzepp_PO_Name",
+        "wzepp_ThirdPP_NIRC", "wzepp_ThirdPP_Mobile", "wzepp_ThirdPP_Name"
+    ];
+
+    liveCardFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener("input", () => {
+                // Manually update storage so the 'sync' function sees latest data
+                localStorage.setItem(id, el.value);
+                // Trigger the hidden bridge update
+                syncEPPAddress(); 
+            });
+        }
+    });
+  
     /* --- Initialization --- */
     toggleThirdPP(); 
 
