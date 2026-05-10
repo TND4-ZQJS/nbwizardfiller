@@ -2059,21 +2059,12 @@ async function fillPDF(fileName, action = 'download') {
             const storageKey = combinedFields[pdfFieldId];
             let value = localStorage.getItem(storageKey);
 
-            /* ---------- BRIDGE LOGIC (Dropdowns to Checkboxes) ---------- */
-            const currentRel  = localStorage.getItem("wzepp_Relationship");
+            // Your Original Bridge Logic
+            const currentRel = localStorage.getItem("wzepp_Relationship");
             const currentType = localStorage.getItem("wzepp_Card_Type");
             const currentBank = localStorage.getItem("wzepp_Card_Bank");
-            // New EPP Logic
-            const currentEpp  = localStorage.getItem("wzepp_Card_EppOption");
-            const currentFreq = localStorage.getItem("wzepp_Card_AfterEPP");
 
-            if (
-                currentRel === storageKey || 
-                currentType === storageKey || 
-                currentBank === storageKey ||
-                currentEpp === storageKey || 
-                currentFreq === storageKey
-            ) {
+            if (currentRel === storageKey || currentType === storageKey || currentBank === storageKey) {
                 value = "true";
             }
 
@@ -2088,12 +2079,8 @@ async function fillPDF(fileName, action = 'download') {
                 const field = form.getField(pdfFieldId);
                 if (field instanceof PDFLib.PDFTextField) {
                     field.setText(value || "");
-                    // Ensure text is rendered visually
-                    field.defaultUpdateAppearances(); 
                 } else if (field instanceof PDFLib.PDFCheckBox) {
                     (value === "true" || value === "on") ? field.check() : field.uncheck();
-                    // Ensure the 'tick' is rendered visually
-                    field.defaultUpdateAppearances();
                 }
             } catch (e) { /* Field might not exist in this specific form */ }
         });
@@ -2123,9 +2110,6 @@ async function fillPDF(fileName, action = 'download') {
         }
 
         // 6. Output
-        // Force refresh all appearances across the whole document
-        //form.updateRawAppearanceValue(); 
-        
         const pdfBytes = await pdfDoc.save();
         const policyNum = localStorage.getItem("wzepp_PolicyNo") || "NEW";
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
