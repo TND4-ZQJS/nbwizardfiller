@@ -2031,6 +2031,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /* ---------- UPDATED 3-IN-1 PDF GENERATOR ---------- */
 async function fillPDF(fileName, action = 'download') {
+    syncPayorData(); 
+    if (typeof syncEPPAddress === "function") syncEPPAddress();
+  
     try {
         // 1. Get Mapping
         const mapping = PDF_MAPPING_LOGIC[fileName];
@@ -2055,35 +2058,66 @@ async function fillPDF(fileName, action = 'download') {
         const combinedFields = { ...mapping.fields, ...conditionalFields };
 
         // 4. Fill Fields
-        Object.keys(combinedFields).forEach(pdfFieldId => {
-            const storageKey = combinedFields[pdfFieldId];
-            let value = localStorage.getItem(storageKey);
+Object.keys(combinedFields).forEach(pdfFieldId => {
+    const storageKey = combinedFields[pdfFieldId];
+    let value = localStorage.getItem(storageKey);
 
-            // Your Original Bridge Logic
-            const currentRel = localStorage.getItem("wzepp_Relationship");
-            const currentType = localStorage.getItem("wzepp_Card_Type");
-            const currentBank = localStorage.getItem("wzepp_Card_Bank");
+    // --- NEW BRIDGE LOGIC ---
 
-            if (currentRel === storageKey || currentType === storageKey || currentBank === storageKey) {
-                value = "true";
+    // FIX ISSUE #4: Relationship (Displays "SPOUSE" instead of "wzepp_Card_Spouse")
+    if (storageKey === "wzepp_Relationship") {
+        const relEl = document.getElementById("wzepp_Relationship");
+        if (relEl) {
+            value = relEl.options[relEl.selectedIndex].text.toUpperCase();
+        }
+    }
+
+    // FIX ISSUE #2 & #3: EPP Options & Frequency Checkboxes
+    // This checks if the current PDF mapping key is the one selected in your dropdowns
+    const currentRel = localStorage.getItem("wzepp_Relationship");
+    const currentType = localStorage.getItem("wzepp_Card_Type");
+    const currentBank = localStorage.getItem("wzepp_Card_Bank");
+    const selectedEpp = localStorage.getItem("wzepp_Card_EppOption");
+    const selectedFreq = localStorage.getItem("wzepp_Card_AfterEPP");
+
+    if (
+        storageKey === currentRel || 
+        storageKey === currentType || 
+        storageKey === currentBank || 
+        storageKey === selectedEpp || 
+        storageKey === selectedFreq
+    ) {
+        value = "true";
+    }
+
+    // UI Fallback (If not in localStorage, check the live DOM)
+    if (value === null || value === undefined) {
+        const el = document.getElementById(storageKey);
+        if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
+    }
+
+    // --- PDF INJECTION ---
+    try {
+        const field = form.getField(pdfFieldId);
+        if (field instanceof PDFLib.PDFTextField) {
+            // Force uppercase for everything except email
+            const textVal = (pdfFieldId.toLowerCase().includes("email")) ? (value || "") : (value || "").toUpperCase();
+            field.setText(textVal);
+            field.defaultUpdateAppearances(); 
+        } else if (field instanceof PDFLib.PDFCheckBox) {
+            // Handles "true", "Yes", or "on"
+            if (value === "true" || value === "Yes" || value === "on") {
+                field.check();
+            } else {
+                field.uncheck();
             }
-
-            // UI Fallback
-            if (value === null || value === undefined) {
-                const el = document.getElementById(storageKey);
-                if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
-            }
-
-            // Fill PDF Field
-            try {
-                const field = form.getField(pdfFieldId);
-                if (field instanceof PDFLib.PDFTextField) {
-                    field.setText(value || "");
-                } else if (field instanceof PDFLib.PDFCheckBox) {
-                    (value === "true" || value === "on") ? field.check() : field.uncheck();
-                }
-            } catch (e) { /* Field might not exist in this specific form */ }
-        });
+            field.defaultUpdateAppearances();
+        }
+    } catch (e) { 
+        /* Field mismatch skip */ 
+        console.warn(`Field ${pdfFieldId} not found in this PDF.`);
+    }
+});
 
         // 5. Signature Logic (Using your specific scaling)
         const activeLayout = mapping.signatureLayouts ? mapping.signatureLayouts[layoutKey] : null;
