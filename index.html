@@ -907,7 +907,6 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
 <div class="wizard-step" data-step="7"> 
   <section class="section">
    <div class="action-center">
-    <!-- PDF GENERATION CARDS -->
     <div class="pdf-grid">
         <!-- Form 1 -->
         <div class="doc-row">
@@ -916,8 +915,8 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
                 <span class="doc-sub">LF4092 · 3 Pages</span>
             </div>
             <div class="actions">
-                <button onclick="generateSinglePDF('Credit Card Enrolment...', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Credit Card Enrolment...', 'download')" class="btn-primary">Download</button>
+                <button onclick="fillPDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="fillPDF('Credit Card Enrolment Form_LF4092_200524_fillable.pdf', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
 
@@ -928,8 +927,8 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
                 <span class="doc-sub">LF1739 · 1 Page</span>
             </div>
             <div class="actions">
-                <button onclick="generateSinglePDF('Zero Interest...', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Zero Interest...', 'download')" class="btn-primary">Download</button>
+                <button onclick="fillPDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="fillPDF('Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
 
@@ -937,22 +936,19 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
         <div class="doc-row">
             <div class="doc-info">
                 <b class="doc-title">Amendment to Application</b>
-                <span class="doc-sub">LF1042 · 1 Page</span>
-            </div>
-            <div class="actions">
-                <button onclick="generateSinglePDF('Amendment...', 'view')" class="btn-secondary">View</button>
-                <button onclick="generateSinglePDF('Amendment...', 'download')" class="btn-primary">Download</button>
+                <span class="doc-sub">LF1042_fillable.pdf', 'view')" class="btn-secondary">View</button>
+                <button onclick="fillPDF('Amendment to Application_LF1042_fillable.pdf', 'download')" class="btn-primary">Download</button>
             </div>
         </div>
     </div>
 
-    <!-- RESET BUTTON -->
     <div class="reset-container">
         <button onclick="resetAllData()" class="btn-reset">Reset All Fields & Signatures</button>
     </div>
 </div>
   </section>
 </div>
+
 
 </div> <!-- end wizard -->
 
