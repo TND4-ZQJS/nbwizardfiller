@@ -1885,36 +1885,6 @@ function syncExpiryFormats() {
   }
 });  
 
-/* ---------- EPP CHECKBOX LOGIC ---------- */
-
-function bindDropdownToCheckboxes(dropdownId) {
-    const dropdown = document.getElementById(dropdownId);
-    if (!dropdown) return;
-
-    dropdown.addEventListener("change", (e) => {
-        const selectedPdfField = e.target.value; 
-        
-        // 1. Clear all checkboxes in this group
-        // This prevents multiple boxes being checked if the user changes selection
-        Array.from(dropdown.options).forEach(opt => {
-            if (opt.value && typeof saveElValue === "function") {
-                saveElValue({ id: opt.value, value: "Off" });
-            }
-        });
-
-        // 2. Tick the selected PDF checkbox
-        if (selectedPdfField && typeof saveElValue === "function") {
-            saveElValue({ id: selectedPdfField, value: "Yes" });
-        }
-
-        // 3. Save the dropdown itself (for page reload persistence)
-        if (typeof saveElValue === "function") saveElValue(e.target);
-    });
-}
-
-// Initialize for both your specific dropdowns
-bindDropdownToCheckboxes("wzepp_Card_EppOption");
-bindDropdownToCheckboxes("wzepp_Card_AfterEPP");  
 
 /* ---------- SIGNATURE MODAL LOGIC ---------- */
 // Helper for selectors (assuming you use this based on your snippet)
@@ -2059,12 +2029,21 @@ async function fillPDF(fileName, action = 'download') {
             const storageKey = combinedFields[pdfFieldId];
             let value = localStorage.getItem(storageKey);
 
-            // Your Original Bridge Logic
-            const currentRel = localStorage.getItem("wzepp_Relationship");
+            /* ---------- BRIDGE LOGIC (Dropdowns to Checkboxes) ---------- */
+            const currentRel  = localStorage.getItem("wzepp_Relationship");
             const currentType = localStorage.getItem("wzepp_Card_Type");
             const currentBank = localStorage.getItem("wzepp_Card_Bank");
+            // New EPP Logic
+            const currentEpp  = localStorage.getItem("wzepp_Card_EppOption");
+            const currentFreq = localStorage.getItem("wzepp_Card_AfterEPP");
 
-            if (currentRel === storageKey || currentType === storageKey || currentBank === storageKey) {
+            if (
+                currentRel === storageKey || 
+                currentType === storageKey || 
+                currentBank === storageKey ||
+                currentEpp === storageKey || 
+                currentFreq === storageKey
+            ) {
                 value = "true";
             }
 
@@ -2079,8 +2058,12 @@ async function fillPDF(fileName, action = 'download') {
                 const field = form.getField(pdfFieldId);
                 if (field instanceof PDFLib.PDFTextField) {
                     field.setText(value || "");
+                    // Ensure text is rendered visually
+                    field.defaultUpdateAppearances(); 
                 } else if (field instanceof PDFLib.PDFCheckBox) {
                     (value === "true" || value === "on") ? field.check() : field.uncheck();
+                    // Ensure the 'tick' is rendered visually
+                    field.defaultUpdateAppearances();
                 }
             } catch (e) { /* Field might not exist in this specific form */ }
         });
@@ -2110,6 +2093,9 @@ async function fillPDF(fileName, action = 'download') {
         }
 
         // 6. Output
+        // Force refresh all appearances across the whole document
+        form.updateRawAppearanceValue(); 
+        
         const pdfBytes = await pdfDoc.save();
         const policyNum = localStorage.getItem("wzepp_PolicyNo") || "NEW";
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
