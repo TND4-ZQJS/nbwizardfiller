@@ -2032,33 +2032,34 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ---------- UPDATED 3-IN-1 PDF GENERATOR ---------- */
 async function fillPDF(fileName, action = 'download') {
     try {
-        // 1. Setup UI feedback
+        // 1. Get Mapping
         const mapping = PDF_MAPPING_LOGIC[fileName];
-        if (!mapping) throw new Error("Mapping logic not found for: " + fileName);
+        if (!mapping) {
+            alert("Error: Mapping logic not found for this file. Check if the filename in HTML matches the logic object exactly.");
+            return;
+        }
 
-        // 2. Load the template from your templates folder
-        const res = await fetch(`./templates/${fileName}`);
-        if (!res.ok) throw new Error("Cannot load PDF template: " + fileName);
+        // 2. Load PDF
+        const res = await fetch(fileName);
+        if (!res.ok) throw new Error("Could not find file: " + fileName);
         
         const bytes = await res.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(bytes);
         const form = pdfDoc.getForm();
         const pages = pdfDoc.getPages();
 
-        // 3. Identify the Scenario (Ownself vs Third Party)
+        // 3. Scenario Logic
         const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
         const layoutKey = isThirdParty ? "third_party" : "ownself";
-
-        // 4. Merge Fields (Standard + Conditional)
         const conditionalFields = mapping.conditionalFields ? mapping.conditionalFields[layoutKey] : {};
         const combinedFields = { ...mapping.fields, ...conditionalFields };
 
-        // 5. Populate Fields
+        // 4. Fill Fields
         Object.keys(combinedFields).forEach(pdfFieldId => {
             const storageKey = combinedFields[pdfFieldId];
             let value = localStorage.getItem(storageKey);
 
-            // Special Checkbox/Dropdown Logic (from your pasted code)
+            // Your Original Bridge Logic
             const currentRel = localStorage.getItem("wzepp_Relationship");
             const currentType = localStorage.getItem("wzepp_Card_Type");
             const currentBank = localStorage.getItem("wzepp_Card_Bank");
@@ -2067,13 +2068,13 @@ async function fillPDF(fileName, action = 'download') {
                 value = "true";
             }
 
-            // Fallback to Element Value
+            // UI Fallback
             if (value === null || value === undefined) {
                 const el = document.getElementById(storageKey);
                 if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
             }
 
-            // Apply to PDF
+            // Fill PDF Field
             try {
                 const field = form.getField(pdfFieldId);
                 if (field instanceof PDFLib.PDFTextField) {
@@ -2081,12 +2082,10 @@ async function fillPDF(fileName, action = 'download') {
                 } else if (field instanceof PDFLib.PDFCheckBox) {
                     (value === "true" || value === "on") ? field.check() : field.uncheck();
                 }
-            } catch (e) {
-                console.warn(`Field ${pdfFieldId} not found in this PDF.`);
-            }
+            } catch (e) { /* Field might not exist in this specific form */ }
         });
 
-        // 6. Embed Signatures (using your specific scale logic)
+        // 5. Signature Logic (Using your specific scaling)
         const activeLayout = mapping.signatureLayouts ? mapping.signatureLayouts[layoutKey] : null;
         if (activeLayout) {
             for (const sig of activeLayout) {
@@ -2095,31 +2094,24 @@ async function fillPDF(fileName, action = 'download') {
                     const img = await pdfDoc.embedPng(sigDataUri);
                     const originalSize = img.size();
                     const scaleFactor = sig.factor || 0.40;
-                    
                     const baseWidth = 250; 
                     const aspectRatio = originalSize.width / originalSize.height;
-                    const finalWidth = baseWidth * scaleFactor;
-                    const finalHeight = (baseWidth / aspectRatio) * scaleFactor;
 
                     const targetPage = pages[sig.page];
                     if (targetPage) {
                         targetPage.drawImage(img, {
                             x: sig.posX, y: sig.posY,
-                            width: finalWidth, height: finalHeight
+                            width: baseWidth * scaleFactor,
+                            height: (baseWidth / aspectRatio) * scaleFactor
                         });
                     }
                 }
             }
         }
 
-        // 7. Save and Output
+        // 6. Output
         const pdfBytes = await pdfDoc.save();
         const policyNum = localStorage.getItem("wzepp_PolicyNo") || "NEW";
-        
-        // Dynamic Naming based on the file clicked
-        const shortName = fileName.split('_')[0]; 
-        const finalFileName = `${policyNum.replace(/[^a-z0-9]/gi, '_')}_${shortName}.pdf`;
-
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
 
@@ -2128,15 +2120,16 @@ async function fillPDF(fileName, action = 'download') {
         } else {
             const a = document.createElement("a");
             a.href = url;
-            a.download = finalFileName;
+            a.download = `${policyNum}_${fileName}`;
             a.click();
         }
 
     } catch (err) {
-        alert("Action failed: " + err.message);
+        alert("PDF Error: " + err.message);
         console.error(err);
     }
 }
+
 /* ------------------ WIZARD NAV LOGIC ------------------ */
 (function initWizard(){
   const steps = Array.from(document.querySelectorAll(".wizard-step"));
