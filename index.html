@@ -1365,15 +1365,17 @@ document.addEventListener("DOMContentLoaded", () => {
      * 1. Build Full EPP Address, Sync Cardholder Details, and trigger Short Address
      */
     function syncEPPAddress() {
-        const isThirdParty = thirdPPCheckbox.checked;
-        const isDifferentPPAddress = isThirdParty && !thirdPPAddrChk.checked;
-        
-        // Determine sources based on whether it's Third Party or Policy Owner
-        const source = isDifferentPPAddress ? ppAddr : poAddr;
-        const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
+    const isThirdParty = thirdPPCheckbox.checked;
+    const isDifferentPPAddress = isThirdParty && !thirdPPAddrChk.checked;
+    
+    // Determine sources based on whether it's Third Party or Policy Owner
+    const source = isDifferentPPAddress ? ppAddr : poAddr;
+    const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
-        // --- NEW: SYNC CARDHOLDER DETAILS ---
-        const nircEl = document.getElementById(`${sourcePrefix}NIRC`);
+    // --- FIXED: SYNC CARDHOLDER DETAILS (GRABBING LIVE VALUES) ---
+    
+    // 1. Get the actual HTML elements first
+    const nircEl = document.getElementById(`${sourcePrefix}NIRC`);
     const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
     const nameEl = document.getElementById(`${sourcePrefix}Name`);
 
@@ -1389,7 +1391,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
     if (hiddenMob) { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
     if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
-
         // --- EXISTING: HANDLE ADDRESS ---
         const parts = [
             source.a1.value.trim(),
