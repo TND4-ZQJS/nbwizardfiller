@@ -798,6 +798,12 @@ accordance with the Company’s Notice on Personal Data and Privacy as set out i
   </div>
      </div>
 
+  <div style="display: none;">
+    <input type="text" id="wzepp_EPP_Cardholder_Name">
+    <input type="text" id="wzepp_EPP_Cardholder_NIRC">
+    <input type="text" id="wzepp_EPP_Cardholder_Mobile">
+</div>  
+
   </section>    
 </div> 
 
@@ -1085,8 +1091,8 @@ const PDF_MAPPING_LOGIC = {
     "Zero Interest Easy Payment Plan Form_LF1739_fillable.pdf": {
         fields: {
             "Payor_Name": "wzepp_Card_Name",
-            "Cardholder_NIRC": "wzepp_EPP_Payor_NIRC",
-            "Cardholder_MobileNo": "wzepp_EPP_Payor_Mobile",
+            "Cardholder_NIRC": "wzepp_EPP_Cardholder_NIRC",
+            "Cardholder_MobileNo": "wzepp_EPP_Cardholder_Mobile",
             "Cardholder_MailingAdd_Line1": "wzepp_EPP_Full_Address_Line",
             "Paymentfor_PolicyNo1": "wzepp_PolicyNo",
             "Paymentfor_PolicyNo1_OwnerName": "wzepp_PO_Name",
@@ -1355,14 +1361,31 @@ document.addEventListener("DOMContentLoaded", () => {
         return shortString;
     }
 
-    /**
-     * 1. Build Full EPP Address and trigger Short Address
+   /**
+     * 1. Build Full EPP Address, Sync Cardholder Details, and trigger Short Address
      */
     function syncEPPAddress() {
-        const isDifferentPPAddress = thirdPPCheckbox.checked && !thirdPPAddrChk.checked;
+        const isThirdParty = thirdPPCheckbox.checked;
+        const isDifferentPPAddress = isThirdParty && !thirdPPAddrChk.checked;
+        
+        // Determine sources based on whether it's Third Party or Policy Owner
         const source = isDifferentPPAddress ? ppAddr : poAddr;
+        const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
-        // Build Full String for EPP Form
+        // --- NEW: SYNC CARDHOLDER DETAILS ---
+        const nircVal = localStorage.getItem(`${sourcePrefix}NIRC`) || "";
+        const mobileVal = localStorage.getItem(`${sourcePrefix}Mobile`) || "";
+        const nameVal = localStorage.getItem(`${sourcePrefix}Name`) || "";
+
+        const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
+        const hiddenMob = document.getElementById("wzepp_EPP_Cardholder_Mobile");
+        const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
+
+        if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
+        if (hiddenMob) { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
+        if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
+
+        // --- EXISTING: HANDLE ADDRESS ---
         const parts = [
             source.a1.value.trim(),
             `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
@@ -1372,40 +1395,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const combinedString = parts.join(", ").toUpperCase();
 
-        // Save Full Address
         if (typeof saveElValue === "function") {
             saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
         }
+        // Also save to the EPP specific bridge key for the mapping
+        localStorage.setItem("wzepp_EPP_Payor_Address", combinedString);
 
-        // --- TRIGGER SHORT ADDRESS ---
-        // This ensures the Credit Card specific address is also generated
         syncShortAddress(source);
     }
 
-    // --- EPP Form : Cardholder logic ---
-    function syncPayorData() {
-    const isThirdParty = document.getElementById("wzepp_ThirdPP_Checkbox").checked;
-    
-    // Determine the source for the Cardholder/Payor
-    const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
-
-    // 1. Get Values
-    const payorNIRC = localStorage.getItem(`${sourcePrefix}NIRC`) || "";
-    const payorMobile = localStorage.getItem(`${sourcePrefix}Mobile`) || "";
-    const payorEmail = localStorage.getItem(`${sourcePrefix}Email`) || "";
-    const payorAddress = localStorage.getItem("wzepp_EPP_Full_Address_Line") || "";
-
-    // 2. Save to "Bridge Keys" specifically for the EPP Form
-    localStorage.setItem("wzepp_EPP_Payor_NIRC", payorNIRC);
-    localStorage.setItem("wzepp_EPP_Payor_Mobile", payorMobile);
-    localStorage.setItem("wzepp_EPP_Payor_Email", payorEmail);
-    localStorage.setItem("wzepp_EPP_Payor_Address", payorAddress);
-
-    console.log("EPP Sync Complete:", { payorNIRC, payorMobile, payorAddress });
-    }  
-    /**
-     * 2. Toggle 3rd Party Visibility
-     */
+    /** 2. Toggle 3rd Party Visibility*/
     function toggleThirdPP() {
         if (thirdPPCheckbox.checked) {
             thirdPPInfoSec.style.display = "block";
