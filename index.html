@@ -1373,17 +1373,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
         // --- NEW: SYNC CARDHOLDER DETAILS ---
-        const nircVal = localStorage.getItem(`${sourcePrefix}NIRC`) || "";
-        const mobileVal = localStorage.getItem(`${sourcePrefix}Mobile`) || "";
-        const nameVal = localStorage.getItem(`${sourcePrefix}Name`) || "";
+        const nircEl = document.getElementById(`${sourcePrefix}NIRC`);
+    const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
+    const nameEl = document.getElementById(`${sourcePrefix}Name`);
 
-        const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
-        const hiddenMob = document.getElementById("wzepp_EPP_Cardholder_Mobile");
-        const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
+    // 2. Use the live .value if the element exists, otherwise fallback to storage
+    const nircVal = nircEl ? nircEl.value.trim() : (localStorage.getItem(`${sourcePrefix}NIRC`) || "");
+    const mobileVal = mobileEl ? mobileEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Mobile`) || "");
+    const nameVal = nameEl ? nameEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Name`) || "");
 
-        if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
-        if (hiddenMob) { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
-        if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
+    const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
+    const hiddenMob = document.getElementById("wzepp_EPP_Cardholder_Mobile");
+    const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
+
+    if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
+    if (hiddenMob) { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
+    if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
 
         // --- EXISTING: HANDLE ADDRESS ---
         const parts = [
