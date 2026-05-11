@@ -242,84 +242,32 @@ width: 40px !important;
 
 #SecSigPO {display: none;}  
 
-    /* Container Fix */
-.action-center {
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px; /* Provides consistent side-spacing on mobile */
-    box-sizing: border-box;
-}
-
-.pdf-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.doc-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #ffffff;
-    padding: 16px;
-    border-radius: 14px;
-    border: 1px solid #d2d2d7;
-    box-sizing: border-box;
-}
-
-.doc-info {
-    display: flex;
-    flex-direction: column;
-}
-
+    /* Generate PDF Page*/
+.action-center {max-width: 800px;margin: 40px auto;padding: 0 20px; /* Provides consistent side-spacing on mobile */box-sizing: border-box;}
+.pdf-grid {display: flex;flex-direction: column;gap: 12px;}
+.doc-row {display: flex;align-items: center;justify-content: space-between;background: #ffffff;padding: 16px;border-radius: 14px;border: 1px solid #d2d2d7;box-sizing: border-box;}
+.doc-info {display: flex;flex-direction: column;}
 .doc-title { font-size: 15px; color: #1d1d1f; }
 .doc-sub { font-size: 12px; color: #86868b; }
 
-/* Button Styles */
+/* Generate PDF Button Styles */
 .btn-primary { background: #0071e3; color: #fff; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; }
 .btn-secondary { background: #f5f5f7; color: #0071e3; border: none; padding: 8px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; margin-right: 4px; }
 .btn-reset { background: none; color: #ff3b30; border: 1px solid #ff3b30; padding: 12px 24px; border-radius: 22px; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; max-width: 300px; }
-.btn-secondary:focus {
-    outline: none; /* Removes the blue browser ring */
-    background: #f5f5f7; /* Keeps the original Apple-grey background */
-    color: #0071e3;
-}
+.btn-secondary:focus {outline: none;background: #f5f5f7; /* Keeps the original Apple-grey background */color: #0071e3;}
 
 /* Optional: Slight darken effect ONLY while the mouse is actually held down */
-.btn-secondary:active {
-    background: #e8e8ed; 
-    transition: 0.1s;
-}
+.btn-secondary:active {background: #e8e8ed; transition: 0.1s;}
 
 /* Hover effect for better UX */
-.btn-secondary:hover {
-    background: #ebebed;
-}
-.reset-container {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #d2d2d7;
-}
+.btn-secondary:hover {background: #ebebed;}
+.reset-container {text-align: center;margin-top: 40px;padding-top: 20px;border-top: 1px solid #d2d2d7;}
 
 /* MOBILE ALIGNMENT FIX */
 @media (max-width: 600px) {
-    .doc-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    
-    .actions {
-        width: 100%;
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .actions button {
-        flex: 1; /* Makes buttons equal width on mobile */
-        text-align: center;
-    }
+  .doc-row {flex-direction: column;align-items: flex-start;gap: 15px;}
+  .actions {width: 100%;display: flex;justify-content: space-between;}
+  .actions button {flex: 1;text-align: center;}
 }
 </style>
 
