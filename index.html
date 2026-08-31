@@ -2109,68 +2109,73 @@ async function fillPDF(fileName, action = 'download') {
     }
 }
 
-//RESET BUTTON
+/* ---------- RESET ALL DATA ---------- */
 function resetAllData() {
-    // 1. Safety confirmation
-    if (!confirm("Are you sure you want to clear all data and signatures?")) {
-        return;
+  if (!confirm("Are you sure you want to clear all data and signatures from this workspace?")) return;
+
+  // 1. Reset input DOM elements and remove corresponding localStorage keys
+  document.querySelectorAll("input, select, textarea").forEach(el => {
+    if (el.id) {
+      localStorage.removeItem(el.id);
     }
 
-    // 2. Wipe the "Filing Cabinet" (LocalStorage)
-    localStorage.clear();
-
-    // 3. Clear all visible text inputs, selects, and textareas
-    const inputs = document.querySelectorAll('input, select, textarea');
-    inputs.forEach(el => {
-        if (el.type === 'checkbox' || el.type === 'radio') {
-            el.checked = false;
-        } else {
-            el.value = '';
-        }
-        
-        // Remove "locked" styles from address syncing
-        el.readOnly = false;
-        el.classList.remove('locked');
-    });
-
-    // 4. Force clear the hidden EPP Bridge fields
-    const bridgeIds = [
-        "wzepp_EPP_Cardholder_Name",
-        "wzepp_EPP_Cardholder_NIRC",
-        "wzepp_EPP_Cardholder_Mobile",
-        "wzepp_EPP_Full_Address_Line",
-        "wzepp_CC_Short_Address"
-    ];
-    bridgeIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
-    });
-
-    // 5. Clear Signature Pads
-    // This assumes you have canvas elements for signatures
-    const canvases = document.querySelectorAll('canvas');
-    canvases.forEach(canvas => {
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
-
-    // 6. Reset the UI Step (Go back to Step 1)
-    // This looks for your wizard-step divs and shows only the first one
-    document.querySelectorAll('.wizard-step').forEach((step, index) => {
-        step.style.display = (index === 0) ? 'block' : 'none';
-        step.classList.remove('active');
-    });
-    
-    // Set the first step as active
-    const firstStep = document.querySelector('.wizard-step[data-step="1"]');
-    if (firstStep) {
-        firstStep.style.display = 'block';
-        firstStep.classList.add('active');
+    if (el.type === "checkbox" || el.type === "radio") {
+      el.checked = false;
+    } else {
+      el.value = "";
     }
+    el.readOnly = false;
+    el.classList.remove("locked");
+  });
 
-    // 7. Total Refresh (The "Nuclear" option to ensure everything is factory-reset)
-    window.location.reload();
-}  
+  // 2. Wipe all wzepp_ application keys dynamically from localStorage
+  Object.keys(localStorage).forEach(key => {
+    if (key.startsWith("wzepp_")) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // 3. Clear non-prefixed selection/bridge option keys
+  const rawBridgeOptionKeys = [
+    "VISA", "MASTER", "MBB", "PBB", "UOB", "HSBC", 
+    "CIMB", "ALLIANCE", "HLB", "STANDCHART", 
+    "OWNSELF", "SPOUSE", "CHILDREN", "PARENTS", "GRANDPARENTS", "SIBLINGS", "EMPLOYER"
+  ];
+  rawBridgeOptionKeys.forEach(key => localStorage.removeItem(key));
+
+  // 4. Reset Signature Pads & Canvas Contexts
+  if (typeof signaturePad !== "undefined" && signaturePad) {
+    signaturePad.clear();
+  }
+
+  document.querySelectorAll("canvas").forEach(canvas => {
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // 5. Reset Signature Preview Boxes
+  const displayNames = {
+    'cardholder': 'Card Holder',
+    'owner': 'Policy Owner',
+    'witness': 'Witness'
+  };
+
+  ['cardholder', 'owner', 'witness'].forEach(role => {
+    const previewEl = document.getElementById("preview_" + role);
+    if (previewEl) {
+      const label = displayNames[role] || role;
+      previewEl.innerHTML = `<span>Tap to Sign (${label})</span>`;
+    }
+  });
+
+  // 6. Reset Wizard Navigation back to Step 1
+  if (typeof navigateTo === "function") {
+    navigateTo(0);
+  }
+
+  // 7. Clean workspace reload
+  window.location.reload();
+}
   
 //WIZARD TRACKER LOGIC
 const steps = document.querySelectorAll(".wizard-step");
