@@ -1252,13 +1252,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync (PDF STALE DATA FIX) ---------- */
+/* ---------- 3RD Party Payor, Address Sync & Relationship Logic (COMPLETE MASTER SCRIPT) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
+    // --- DOM Elements ---
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
     const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
     const submitNIRCChk   = document.getElementById("wzepp_SubmitNIRC_Checkbox");
     const secSigPO        = document.getElementById("SecSigPO");
+
+    // Relationship UI Controls
+    const relDropdown     = document.getElementById("wzepp_Relationship");
+    const relText         = document.getElementById("wzepp_Relationship_Text");
 
     // Mapping for Policy Owner (PO)
     const poAddr = {
@@ -1279,7 +1284,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /**
-     * Helper: Sets or purges wzepp_CC_Short_Address across DOM, Storage, and framework states
+     * Helper: Sets or purges wzepp_CC_Short_Address across DOM, Storage, and PDF framework states
      */
     function setShortAddressValue(value) {
         const shortAddrEl = document.getElementById("wzepp_CC_Short_Address");
@@ -1291,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("wzepp_CC_Short_Address", value);
         } else {
             localStorage.removeItem("wzepp_CC_Short_Address");
-            localStorage.setItem("wzepp_CC_Short_Address", ""); // Overwrite stale cached values for PDF engine
+            localStorage.setItem("wzepp_CC_Short_Address", ""); // Force overwrite stale cached string for PDF engine
         }
 
         if (typeof saveElValue === "function") {
@@ -1420,11 +1425,10 @@ document.addEventListener("DOMContentLoaded", () => {
             saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: isThirdParty ? "true" : "false" });
         }
 
-        // IF 3RD PARTY IS OFF: Strictly clear short address & wipe cardholder inputs
+        // IF 3RD PARTY IS OFF: Strictly clear short address & reset cardholder inputs back to PO
         if (!isThirdParty) {
             setShortAddressValue("");
 
-            // Default cardholder info back to Policy Owner
             const poNirc   = document.getElementById("wzepp_PO_NIRC")?.value.trim() || "";
             const poMobile = document.getElementById("wzepp_PO_Mobile")?.value.trim() || "";
             const poName   = document.getElementById("wzepp_PO_Name")?.value.trim() || "";
@@ -1437,7 +1441,6 @@ document.addEventListener("DOMContentLoaded", () => {
             if (hiddenMob)  { hiddenMob.value = poMobile; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", poMobile); }
             if (hiddenName) { hiddenName.value = poName; localStorage.setItem("wzepp_EPP_Cardholder_Name", poName); }
 
-            // Address string for PO
             const poParts = [
                 poAddr.a1 && poAddr.a1.value ? poAddr.a1.value.trim() : "",
                 `${poAddr.pc && poAddr.pc.value ? poAddr.pc.value.trim() : ""} ${poAddr.cy && poAddr.cy.value ? poAddr.cy.value.trim() : ""}`.trim(),
@@ -1521,6 +1524,9 @@ document.addEventListener("DOMContentLoaded", () => {
             clearThirdPartyData();
             syncEPPAddress();
         }
+
+        // Lock / Unlock Relationship options concurrently
+        handleRelationshipLock();
     }
 
     /**
@@ -1558,14 +1564,111 @@ document.addEventListener("DOMContentLoaded", () => {
         syncEPPAddress();
     }
 
+    /**
+     * 4. Credit Card Relationship Lock & PDF Text Sync
+     */
+    function handleRelationshipLock() {
+        if (!thirdPPCheckbox) return;
+
+        const isThirdParty = thirdPPCheckbox.checked;
+        const relInputs   = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
+
+        if (!isThirdParty) {
+            // A. Handle Select Dropdown
+            if (relDropdown && relDropdown.tagName === "SELECT") {
+                let ownselfOpt = Array.from(relDropdown.options).find(
+                    opt => opt.value === "wzepp_Card_Ownself" || 
+                           opt.value.toUpperCase() === "OWNSELF" || 
+                           opt.text.toUpperCase().includes("SELF")
+                );
+
+                if (ownselfOpt) relDropdown.value = ownselfOpt.value;
+
+                Array.from(relDropdown.options).forEach(opt => {
+                    if (ownselfOpt && opt.value !== ownselfOpt.value && opt.value !== "") {
+                        opt.disabled = true;
+                    }
+                });
+
+                // Pass human-readable string "OWNSELF" to saveElValue for PDF printing
+                if (typeof saveElValue === "function") {
+                    saveElValue({ id: "wzepp_Relationship", value: "OWNSELF" });
+                }
+            }
+
+            // B. Handle Checkbox / Radio Inputs
+            if (relInputs && relInputs.length > 0) {
+                relInputs.forEach(input => {
+                    const isOwnself = input.value === "wzepp_Card_Ownself" || 
+                                      input.value.toUpperCase() === "OWNSELF" || 
+                                      input.id.includes("Ownself");
+                    if (isOwnself) {
+                        input.checked = true;
+                        input.disabled = false;
+                    } else {
+                        input.checked = false;
+                        input.disabled = true;
+                    }
+                    if (input.checked && typeof saveElValue === "function") {
+                        saveElValue({ id: input.id || "wzepp_Relationship", value: "OWNSELF" });
+                    }
+                });
+            }
+
+            // C. Handle Direct PDF Text Fields
+            if (relText) {
+                relText.value = "OWNSELF";
+                relText.readOnly = true;
+                if (typeof saveElValue === "function") {
+                    saveElValue({ id: "wzepp_Relationship_Text", value: "OWNSELF" });
+                }
+            }
+
+            localStorage.setItem("wzepp_Relationship", "OWNSELF");
+
+        } else {
+            // Re-enable controls when 3rd Party Payor is checked
+            if (relDropdown && relDropdown.tagName === "SELECT") {
+                Array.from(relDropdown.options).forEach(opt => { opt.disabled = false; });
+                if (typeof saveElValue === "function") saveElValue(relDropdown);
+            }
+
+            if (relInputs && relInputs.length > 0) {
+                relInputs.forEach(input => { input.disabled = false; });
+            }
+
+            if (relText) {
+                relText.value = "";
+                relText.readOnly = false;
+                if (typeof saveElValue === "function") {
+                    saveElValue({ id: "wzepp_Relationship_Text", value: "" });
+                }
+            }
+        }
+    }
+
     /* --- Event Listeners --- */
     if (thirdPPCheckbox) {
         thirdPPCheckbox.addEventListener("change", toggleThirdPP);
+        thirdPPCheckbox.addEventListener("click", toggleThirdPP);
     }
 
     if (thirdPPAddrChk) {
         thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
     }
+
+    if (relDropdown) {
+        relDropdown.addEventListener("change", (e) => {
+            if (typeof saveElValue === "function") saveElValue(e.target);
+        });
+    }
+
+    const relInputs = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
+    relInputs.forEach(input => {
+        input.addEventListener("change", (e) => {
+            if (typeof saveElValue === "function") saveElValue(e.target);
+        });
+    });
 
     [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
         if (!input) return;
