@@ -1252,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync (FULLY UPDATED & SYNCHRONIZED) ---------- */
+/* ---------- 3RD Party Payor & Address Sync (DYNAMICAL PURGE FIX) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
@@ -1297,75 +1297,63 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Helper: Completely purges 3rd Party DOM values, memory references, LocalStorage, and framework states
+     * Helper: DYNAMICALLY purges ALL third-party keys from DOM, Memory, LocalStorage, and framework states
      */
     function clearThirdPartyData() {
         if (!thirdPPInfoSec) return;
 
-        // 1. Uncheck sub-checkboxes explicitly
-        if (thirdPPAddrChk) {
-            thirdPPAddrChk.checked = false;
-            localStorage.removeItem("wzepp_ThirdPP_Address");
-            if (typeof saveElValue === "function") {
-                saveElValue({ id: "wzepp_ThirdPP_Address", value: "false" });
-            }
-        }
+        // 1. Uncheck sub-checkboxes
+        if (thirdPPAddrChk) thirdPPAddrChk.checked = false;
+        if (submitNIRCChk) submitNIRCChk.checked = false;
 
-        const submitChk = document.getElementById("wzepp_SubmitNIRC_Checkbox");
-        if (submitChk) {
-            submitChk.checked = false;
-            localStorage.removeItem("wzepp_SubmitNIRC_Checkbox");
-            if (typeof saveElValue === "function") {
-                saveElValue({ id: "wzepp_SubmitNIRC_Checkbox", value: "false" });
+        // 2. DYNAMIC DOM CLEANUP: Query ALL form elements inside the 3rd party container
+        const allThirdPPElements = thirdPPInfoSec.querySelectorAll("input, select, textarea");
+        allThirdPPElements.forEach(el => {
+            if (el.type === "checkbox" || el.type === "radio") {
+                el.checked = false;
+            } else {
+                el.value = "";
             }
-        }
+            el.readOnly = false;
+            el.classList.remove("locked");
+            el.removeAttribute("required");
 
-        // 2. Clear all input fields inside section & remove 'required' attribute
-        const inputs = thirdPPInfoSec.querySelectorAll("input, select, textarea");
-        inputs.forEach(input => {
-            input.value = "";
-            input.readOnly = false;
-            input.classList.remove("locked");
-            input.removeAttribute("required");
-            
-            localStorage.removeItem(input.id);
-            if (typeof saveElValue === "function") {
-                saveElValue({ id: input.id, value: "" });
+            if (el.id) {
+                localStorage.removeItem(el.id);
+                if (typeof saveElValue === "function") {
+                    saveElValue({ id: el.id, value: "" });
+                }
             }
         });
 
-        // 3. Clear JS memory object references
+        // 3. CLEAR JS MEMORY REFERENCES directly
         if (ppAddr) {
             Object.keys(ppAddr).forEach(k => {
                 if (ppAddr[k]) ppAddr[k].value = "";
             });
         }
 
-        // 4. HARD PURGE all LocalStorage keys associated with 3rd party
-        const thirdPartyKeys = [
-            "wzepp_ThirdPP_Address1", 
-            "wzepp_ThirdPP_Address_Country", 
-            "wzepp_ThirdPP_Address_State", 
-            "wzepp_ThirdPP_Address_City", 
-            "wzepp_ThirdPP_Address_Postcode",
-            "wzepp_ThirdPP_NIRC",
-            "wzepp_ThirdPP_Mobile",
-            "wzepp_ThirdPP_Name",
-            "wzepp_SubmitNIRC_Checkbox",
-            "wzepp_ThirdPP_Address"
-        ];
-        
-        thirdPartyKeys.forEach(key => {
+        // 4. DYNAMIC LOCALSTORAGE SWEEP: Scan ALL keys in LocalStorage starting with 3rd Party prefixes
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith("wzepp_ThirdPP_") || key === "wzepp_SubmitNIRC_Checkbox")) {
+                keysToRemove.push(key);
+            }
+        }
+
+        // Perform removal safely outside iteration loop
+        keysToRemove.forEach(key => {
             localStorage.removeItem(key);
             if (typeof saveElValue === "function") {
                 saveElValue({ id: key, value: "" });
             }
         });
 
-        // 5. Force short address fallback directly to Policy Owner
+        // 5. Force short address and full address back to Policy Owner
         syncShortAddress(poAddr);
 
-        // 6. Clear signature if applicable
+        // 6. Clear signature if present
         if (typeof clearSpecificSig === "function") {
             clearSpecificSig('owner');
         }
@@ -1384,13 +1372,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function syncEPPAddress() {
         const isThirdParty = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
         
-        // Save Third Party Checkbox state reliably
         localStorage.setItem("wzepp_ThirdPP_Checkbox", isThirdParty ? "true" : "false");
         if (typeof saveElValue === "function") {
             saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: isThirdParty ? "true" : "false" });
         }
 
-        // HARD ENFORCE: If 3rd Party checkbox is false, FORCE source to poAddr strictly
+        // HARD ENFORCE: If 3rd Party checkbox is unchecked, strictly force source to poAddr
         const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
         const source = (isThirdParty && isDifferentPPAddress) ? ppAddr : poAddr;
         const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
@@ -1454,7 +1441,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: "false" });
             }
 
-            // Purge data FIRST, then trigger address synchronization
+            // DYNAMIC PURGE RUN FIRST
             clearThirdPartyData();
             syncEPPAddress();
         }
@@ -1527,7 +1514,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
   
-    /* --- Robust Initialization --- */
+    /* --- Initialization --- */
     const savedThirdPP = localStorage.getItem("wzepp_ThirdPP_Checkbox");
     if (savedThirdPP === "true" && thirdPPCheckbox) {
         thirdPPCheckbox.checked = true;
@@ -1542,6 +1529,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleThirdPP();
 });
+
 
 
 
