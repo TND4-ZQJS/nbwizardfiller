@@ -1314,7 +1314,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const parts = [
-            source.a1.value ? source.a1.value.trim() : "",
+            source.a1 && source.a1.value ? source.a1.value.trim() : "",
             source.cy && source.cy.value ? source.cy.value.trim() : "",
             source.st && source.st.value ? source.st.value.trim() : ""
         ].filter(part => part.length > 0);
@@ -1403,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 6. Clear signature if present
         if (typeof clearSpecificSig === "function") {
-            clearSpecificSig('owner');
+            clearSpecificSig("owner");
         }
     }
 
@@ -1571,7 +1571,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!thirdPPCheckbox) return;
 
         const isThirdParty = thirdPPCheckbox.checked;
-        const relInputs   = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
+        const relInputs    = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
 
         if (!isThirdParty) {
             // A. Handle Select Dropdown
@@ -1650,7 +1650,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /* --- Event Listeners --- */
     if (thirdPPCheckbox) {
         thirdPPCheckbox.addEventListener("change", toggleThirdPP);
-        thirdPPCheckbox.addEventListener("click", toggleThirdPP);
     }
 
     if (thirdPPAddrChk) {
@@ -1697,7 +1696,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
     });
-  
+
     /* --- Initialization --- */
     const savedThirdPP = localStorage.getItem("wzepp_ThirdPP_Checkbox");
     if (savedThirdPP === "true" && thirdPPCheckbox) {
@@ -1713,7 +1712,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleThirdPP();
 });
-
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
