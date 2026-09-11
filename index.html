@@ -1257,7 +1257,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
     const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
-    const secSigPO = document.getElementById("SecSigPO");
+    const secSigPO        = document.getElementById("SecSigPO");
 
     // Mapping for Policy Owner (PO)
     const poAddr = {
@@ -1297,42 +1297,40 @@ document.addEventListener("DOMContentLoaded", () => {
         return shortString;
     }
 
-   /**
+    /**
      * 1. Build Full EPP Address, Sync Cardholder Details, and trigger Short Address
      */
     function syncEPPAddress() {
-    const isThirdParty = thirdPPCheckbox.checked;
-    const isDifferentPPAddress = isThirdParty && !thirdPPAddrChk.checked;
-    
-    // Determine sources based on whether it's Third Party or Policy Owner
-    const source = isDifferentPPAddress ? ppAddr : poAddr;
-    const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
+        const isThirdParty = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
+        const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
+        
+        // Determine sources based on whether it's Third Party or Policy Owner
+        const source = isDifferentPPAddress ? ppAddr : poAddr;
+        const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
-    // --- FIXED: SYNC CARDHOLDER DETAILS (GRABBING LIVE VALUES) ---
-    
-    // 1. Get the actual HTML elements first
-    const nircEl = document.getElementById(`${sourcePrefix}NIRC`);
-    const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
-    const nameEl = document.getElementById(`${sourcePrefix}Name`);
+        // --- SYNC CARDHOLDER DETAILS (GRABBING LIVE VALUES) ---
+        const nircEl   = document.getElementById(`${sourcePrefix}NIRC`);
+        const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
+        const nameEl   = document.getElementById(`${sourcePrefix}Name`);
 
-    // 2. Use the live .value if the element exists, otherwise fallback to storage
-    const nircVal = nircEl ? nircEl.value.trim() : (localStorage.getItem(`${sourcePrefix}NIRC`) || "");
-    const mobileVal = mobileEl ? mobileEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Mobile`) || "");
-    const nameVal = nameEl ? nameEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Name`) || "");
+        const nircVal   = nircEl ? nircEl.value.trim() : (localStorage.getItem(`${sourcePrefix}NIRC`) || "");
+        const mobileVal = mobileEl ? mobileEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Mobile`) || "");
+        const nameVal   = nameEl ? nameEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Name`) || "");
 
-    const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
-    const hiddenMob = document.getElementById("wzepp_EPP_Cardholder_Mobile");
-    const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
+        const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
+        const hiddenMob  = document.getElementById("wzepp_EPP_Cardholder_Mobile");
+        const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
 
-    if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
-    if (hiddenMob) { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
-    if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
-        // --- EXISTING: HANDLE ADDRESS ---
+        if (hiddenNirc) { hiddenNirc.value = nircVal; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", nircVal); }
+        if (hiddenMob)  { hiddenMob.value = mobileVal; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", mobileVal); }
+        if (hiddenName) { hiddenName.value = nameVal; localStorage.setItem("wzepp_EPP_Cardholder_Name", nameVal); }
+
+        // --- HANDLE ADDRESS ---
         const parts = [
-            source.a1.value.trim(),
-            `${source.pc.value.trim()} ${source.cy.value.trim()}`.trim(),
-            source.st.value.trim(),
-            source.ct.value.trim()
+            source.a1 && source.a1.value ? source.a1.value.trim() : "",
+            `${source.pc && source.pc.value ? source.pc.value.trim() : ""} ${source.cy && source.cy.value ? source.cy.value.trim() : ""}`.trim(),
+            source.st && source.st.value ? source.st.value.trim() : "",
+            source.ct && source.ct.value ? source.ct.value.trim() : ""
         ].filter(part => part.length > 0);
 
         const combinedString = parts.join(", ").toUpperCase();
@@ -1340,14 +1338,17 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof saveElValue === "function") {
             saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedString });
         }
-        // Also save to the EPP specific bridge key for the mapping
         localStorage.setItem("wzepp_EPP_Payor_Address", combinedString);
 
         syncShortAddress(source);
     }
 
-    /** 2. Toggle 3rd Party Visibility*/
+    /** 
+     * 2. Toggle 3rd Party Visibility & Purge Stale Inputs 
+     */
     function toggleThirdPP() {
+        if (!thirdPPCheckbox || !thirdPPInfoSec) return;
+
         if (thirdPPCheckbox.checked) {
             thirdPPInfoSec.style.display = "block";
             if (secSigPO) secSigPO.style.display = "block";  
@@ -1355,13 +1356,17 @@ document.addEventListener("DOMContentLoaded", () => {
             thirdPPInfoSec.style.display = "none";
             if (secSigPO) secSigPO.style.display = "none";
 
-            thirdPPInfoSec.querySelectorAll("input").forEach(i => {
-                i.value = "";
-                i.readOnly = false;
-                i.classList.remove("locked");
-                localStorage.removeItem(i.id);
+            // Uncheck standard and address checkboxes inside 3rd PP context
+            if (thirdPPAddrChk) thirdPPAddrChk.checked = false;
+
+            // Clear all input and select elements in the 3rd Party section
+            thirdPPInfoSec.querySelectorAll("input, select").forEach(input => {
+                input.value = "";
+                input.readOnly = false;
+                input.classList.remove("locked");
+                localStorage.removeItem(input.id);
+                if (typeof saveElValue === "function") saveElValue(input);
             });
-            thirdPPAddrChk.checked = false;
             
             if (typeof clearSpecificSig === "function") {
                 clearSpecificSig('owner');
@@ -1371,14 +1376,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * 3. Copy and Lock Address (Same as Insured Logic)
+     * 3. Copy and Lock Address
      */
     function toggleThirdPPAddress() {
+        if (!thirdPPAddrChk) return;
+        
         const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
         const isLocked = thirdPPAddrChk.checked;
         
         keys.forEach(key => {
-            const input = ppAddr[key];
+            const input  = ppAddr[key];
             const source = poAddr[key];
             if (!input || !source) return;
 
@@ -1399,15 +1406,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* --- Event Listeners --- */
-    thirdPPCheckbox.addEventListener("change", toggleThirdPP);
-    thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+    if (thirdPPCheckbox) thirdPPCheckbox.addEventListener("change", toggleThirdPP);
+    if (thirdPPAddrChk)  thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
 
     // Listen for input on ALL address fields for live-sync
     [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
         if (!input) return;
         input.addEventListener("input", (e) => {
-            // Auto-sync if "Same Address" is checked
-            if (thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
+            if (thirdPPAddrChk && thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
                 toggleThirdPPAddress(); 
             }
             if (typeof saveElValue === "function") saveElValue(input);
@@ -1424,9 +1430,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const el = document.getElementById(id);
         if (el) {
             el.addEventListener("input", () => {
-                // Manually update storage so the 'sync' function sees latest data
                 localStorage.setItem(id, el.value);
-                // Trigger the hidden bridge update
                 syncEPPAddress(); 
             });
         }
@@ -1435,18 +1439,20 @@ document.addEventListener("DOMContentLoaded", () => {
     /* --- Initialization --- */
     toggleThirdPP(); 
 
-    // Restore saved 3rd party address if it exists
-    if (localStorage.getItem(ppAddr.a1.id)) {
+    // Only restore 3rd party address state if 3rd Party Payor is explicitly checked
+    if (thirdPPCheckbox && thirdPPCheckbox.checked && ppAddr.a1 && localStorage.getItem(ppAddr.a1.id)) {
         Object.values(ppAddr).forEach(input => {
+            if (!input) return;
             const savedVal = localStorage.getItem(input.id);
             if (savedVal) input.value = savedVal;
             input.readOnly = true;
             input.classList.add("locked");
         });
-        thirdPPAddrChk.checked = true;
+        if (thirdPPAddrChk) thirdPPAddrChk.checked = true;
         syncEPPAddress();
     }
 });
+
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
