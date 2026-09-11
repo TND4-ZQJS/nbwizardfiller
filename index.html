@@ -1252,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync (COMPLETE SCRIPT) ---------- */
+/* ---------- 3RD Party Payor & Address Sync (FIXED wzepp_CC_Short_Address) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
@@ -1269,7 +1269,7 @@ document.addEventListener("DOMContentLoaded", () => {
         a1: document.getElementById("wzepp_PO_Address1")
     };
 
-    // Mapping for 3rd Party Payor (PP) - includes wzepp_ThirdPP_Address1
+    // Mapping for 3rd Party Payor (PP)
     const ppAddr = {
         ct: document.getElementById("wzepp_ThirdPP_Address_Country"),
         st: document.getElementById("wzepp_ThirdPP_Address_State"),
@@ -1282,7 +1282,10 @@ document.addEventListener("DOMContentLoaded", () => {
      * Helper: Creates the shortened address (Line 1, City, State)
      */
     function syncShortAddress(source) {
-        if (!source || !source.a1) return "";
+        if (!source || !source.a1) {
+            localStorage.setItem("wzepp_CC_Short_Address", "");
+            return "";
+        }
 
         const parts = [
             source.a1.value ? source.a1.value.trim() : "",
@@ -1293,6 +1296,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const shortString = parts.join(", ").toUpperCase();
         
         localStorage.setItem("wzepp_CC_Short_Address", shortString);
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: "wzepp_CC_Short_Address", value: shortString });
+        }
         return shortString;
     }
 
@@ -1319,7 +1325,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // 2. Clear JS Memory & DOM input values specifically for 3rd Party Address
+        // 2. Clear JS Memory & DOM input values for 3rd Party Address
         if (ppAddr) {
             Object.keys(ppAddr).forEach(k => {
                 if (ppAddr[k]) {
@@ -1366,7 +1372,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        // 5. Force short address back to Policy Owner
+        // 5. Force short address strictly back to Policy Owner (PO)
         syncShortAddress(poAddr);
 
         // 6. Clear signature if present
@@ -1393,9 +1399,13 @@ document.addEventListener("DOMContentLoaded", () => {
             saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: isThirdParty ? "true" : "false" });
         }
 
-        // HARD ENFORCE: If 3rd Party checkbox is unchecked, strictly force source to poAddr
-        const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
-        const source = (isThirdParty && isDifferentPPAddress) ? ppAddr : poAddr;
+        // STRICT SOURCE DETERMINATION
+        let source = poAddr;
+        if (isThirdParty) {
+            const isAddressSame = thirdPPAddrChk && thirdPPAddrChk.checked;
+            source = isAddressSame ? poAddr : ppAddr;
+        }
+
         const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
         // --- SYNC CARDHOLDER DETAILS ---
@@ -1430,7 +1440,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.setItem("wzepp_EPP_Payor_Address", combinedString);
 
-        // Always sync short address using verified source
+        // Synchronize short address with determined source
         syncShortAddress(source);
     }
 
@@ -1457,19 +1467,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: "false" });
             }
 
-            // DYNAMIC PURGE RUN FIRST
             clearThirdPartyData();
             syncEPPAddress();
         }
     }
 
     /**
-     * 3. Copy and Lock Address (Guarded against copying when 3rd Party mode is OFF)
+     * 3. Copy and Lock Address
      */
     function toggleThirdPPAddress() {
         if (!thirdPPAddrChk) return;
 
-        // GUARD: Stop execution completely if 3rd Party Mode is turned off
         const isThirdPartyActive = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
         if (!isThirdPartyActive) return;
 
@@ -1477,8 +1485,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const isLocked = thirdPPAddrChk.checked;
         
         keys.forEach(key => {
-            const input  = ppAddr[key];   // Contains wzepp_ThirdPP_Address1 when key is 'a1'
-            const source = poAddr[key];   // Contains wzepp_PO_Address1 when key is 'a1'
+            const input  = ppAddr[key];
+            const source = poAddr[key];
             if (!input || !source) return;
 
             if (isLocked) {
@@ -1513,7 +1521,6 @@ document.addEventListener("DOMContentLoaded", () => {
         input.addEventListener("input", (e) => {
             const isThirdPartyActive = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
 
-            // STRICT GUARD: Only auto-copy PO address if 3rd Party mode is actively enabled
             if (isThirdPartyActive && thirdPPAddrChk && thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
                 toggleThirdPPAddress(); 
             }
@@ -1552,8 +1559,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleThirdPP();
 });
-
-
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
