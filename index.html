@@ -1252,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync ---------- */  
+/* ---------- 3RD Party Payor & Address Sync (FIXED) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
@@ -1292,12 +1292,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const shortString = parts.join(", ").toUpperCase();
         
         localStorage.setItem("wzepp_CC_Short_Address", shortString);
-        console.log("Debug - Short Address Updated:", shortString); 
         return shortString;
     }
 
     /**
-     * Helper: Completely purges 3rd Party DOM values, local storage, and framework states
+     * Helper: Purges 3rd Party DOM values, local storage, and framework states
      */
     function clearThirdPartyData() {
         if (!thirdPPInfoSec) return;
@@ -1324,7 +1323,8 @@ document.addEventListener("DOMContentLoaded", () => {
             "wzepp_ThirdPP_Address_Postcode",
             "wzepp_ThirdPP_NIRC",
             "wzepp_ThirdPP_Mobile",
-            "wzepp_ThirdPP_Name"
+            "wzepp_ThirdPP_Name",
+            "wzepp_ThirdPP_Address"
         ];
         
         thirdPartyKeys.forEach(key => {
@@ -1342,9 +1342,15 @@ document.addEventListener("DOMContentLoaded", () => {
      */
     function syncEPPAddress() {
         const isThirdParty = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
-        const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
         
-        const source = isDifferentPPAddress ? ppAddr : poAddr;
+        // Save Third Party Checkbox state reliably
+        localStorage.setItem("wzepp_ThirdPP_Checkbox", isThirdParty ? "true" : "false");
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: isThirdParty ? "true" : "false" });
+        }
+
+        const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
+        const source = (isThirdParty && isDifferentPPAddress) ? ppAddr : poAddr;
         const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
         // --- SYNC CARDHOLDER DETAILS ---
@@ -1391,9 +1397,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (thirdPPCheckbox.checked) {
             thirdPPInfoSec.style.display = "block";
             if (secSigPO) secSigPO.style.display = "block";  
+            localStorage.setItem("wzepp_ThirdPP_Checkbox", "true");
         } else {
             thirdPPInfoSec.style.display = "none";
             if (secSigPO) secSigPO.style.display = "none";
+            localStorage.setItem("wzepp_ThirdPP_Checkbox", "false");
 
             clearThirdPartyData();
         }
@@ -1427,18 +1435,21 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (typeof saveElValue === "function") saveElValue(input);
         });
+        
+        localStorage.setItem("wzepp_ThirdPP_Address", isLocked ? "true" : "false");
         syncEPPAddress();
     }
 
     /* --- Event Listeners --- */
     if (thirdPPCheckbox) {
-        thirdPPCheckbox.addEventListener("change", (e) => {
-            localStorage.setItem("wzepp_ThirdPP_Checkbox", e.target.checked ? "true" : "false");
+        thirdPPCheckbox.addEventListener("change", () => {
             toggleThirdPP();
         });
     }
 
-    if (thirdPPAddrChk) thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+    if (thirdPPAddrChk) {
+        thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+    }
 
     [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
         if (!input) return;
@@ -1466,21 +1477,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
   
-    /* --- Initialization --- */
-    toggleThirdPP(); 
+    /* --- Robust Initialization --- */
+    const savedThirdPP = localStorage.getItem("wzepp_ThirdPP_Checkbox");
+    if (savedThirdPP === "true" && thirdPPCheckbox) {
+        thirdPPCheckbox.checked = true;
+    } else if (thirdPPCheckbox) {
+        thirdPPCheckbox.checked = false;
+    }
 
-    if (thirdPPCheckbox && thirdPPCheckbox.checked && ppAddr.a1 && localStorage.getItem(ppAddr.a1.id)) {
-        Object.values(ppAddr).forEach(input => {
-            if (!input) return;
-            const savedVal = localStorage.getItem(input.id);
-            if (savedVal) input.value = savedVal;
-            input.readOnly = true;
-            input.classList.add("locked");
-        });
-        if (thirdPPAddrChk) thirdPPAddrChk.checked = true;
-        syncEPPAddress();
+    const savedThirdPPAddr = localStorage.getItem("wzepp_ThirdPP_Address");
+    if (savedThirdPPAddr === "true" && thirdPPAddrChk) {
+        thirdPPAddrChk.checked = true;
+    }
+
+    toggleThirdPP();
+
+    if (thirdPPCheckbox && thirdPPCheckbox.checked && thirdPPAddrChk && thirdPPAddrChk.checked) {
+        toggleThirdPPAddress();
     }
 });
+
 
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
