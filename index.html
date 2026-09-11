@@ -2042,11 +2042,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* ---------- PDF Generator ---------- */
+/* ---------- PDF Generator (FIXED & SYNCHRONIZED) ---------- */
 async function fillPDF(fileName, action = 'download') {
-    if (typeof syncPayorData === "function") syncPayorData(); 
+    // 1. Force data synchronization prior to generation
     if (typeof syncEPPAddress === "function") syncEPPAddress();
-  
+
     try {
         const mapping = PDF_MAPPING_LOGIC[fileName];
         if (!mapping) {
@@ -2055,25 +2055,28 @@ async function fillPDF(fileName, action = 'download') {
         }
 
         const res = await fetch(fileName);
-        if (!res.ok) throw new Error("Could not find file: " + fileName);
+        if (!res.ok) throw new Error("Could not find PDF file: " + fileName);
         
         const bytes = await res.arrayBuffer();
         const pdfDoc = await PDFLib.PDFDocument.load(bytes);
         const form = pdfDoc.getForm();
         const pages = pdfDoc.getPages();
 
+        // 2. Check 3rd Party State dynamically
         const thirdPPChkEl = document.getElementById("wzepp_ThirdPP_Checkbox");
         const isThirdParty = thirdPPChkEl ? thirdPPChkEl.checked : (localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true");
-        
         const layoutKey = isThirdParty ? "third_party" : "ownself";
+
+        // 3. Resolve conditional and direct mappings
         const conditionalFields = mapping.conditionalFields ? mapping.conditionalFields[layoutKey] : {};
         const combinedFields = { ...mapping.fields, ...conditionalFields };
 
-        // Fill Fields
+        // 4. Fill Fields safely
         Object.keys(combinedFields).forEach(pdfFieldId => {
             const storageKey = combinedFields[pdfFieldId];
             if (!storageKey) return; 
 
+            // Clear 3rd Party specific fields when in "ownself" mode
             if (!isThirdParty && storageKey.startsWith("wzepp_ThirdPP_")) {
                 try {
                     const field = form.getField(pdfFieldId);
@@ -2085,6 +2088,15 @@ async function fillPDF(fileName, action = 'download') {
 
             let value = localStorage.getItem(storageKey);
 
+            // Dynamic Option/Radio Bridge Check (e.g., Relationship, Card Types, Banks)
+            if (value === null || value === undefined) {
+                const el = document.getElementById(storageKey);
+                if (el) {
+                    value = (el.type === "checkbox" || el.type === "radio") ? el.checked.toString() : el.value;
+                }
+            }
+
+            // Relationship Special Handling for Select Elements
             if (storageKey === "wzepp_Relationship") {
                 const relEl = document.getElementById("wzepp_Relationship");
                 if (relEl && relEl.selectedIndex !== -1) {
@@ -2092,37 +2104,17 @@ async function fillPDF(fileName, action = 'download') {
                 }
             }
 
-            const bridgeKeys = [
-                localStorage.getItem("wzepp_Relationship"),
-                localStorage.getItem("wzepp_Card_Type"),
-                localStorage.getItem("wzepp_Card_Bank"),
-                localStorage.getItem("wzepp_Card_EppOption"),
-                localStorage.getItem("wzepp_Card_AfterEPP")
-            ];
-
-            if (bridgeKeys.includes(storageKey)) {
-                value = "true";
+            // Radio/Bridge Group Fallback for dynamic options stored directly
+            const selectedRadio = localStorage.getItem(storageKey);
+            if (selectedRadio) {
+                value = selectedRadio;
             }
 
-            if (value === null || value === undefined) {
-                const el = document.getElementById(storageKey);
-                if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
-            }
-
-            try {
-                const field = form.getField(pdfFieldId);
-                if (field instanceof PDFLib.PDFTextField) {
-                    const textVal = (pdfFieldId.toLowerCase().includes("email")) ? (value || "") : (value || "").toUpperCase();
-                    field.setText(textVal);
-                } else if (field instanceof PDFLib.PDFCheckBox) {
-                    (value === "true" || value === "Yes" || value === "on") ? field.check() : field.uncheck();
-                }
-            } catch (e) { 
-                console.warn("Field missing:", pdfFieldId); 
-            }
+            // Write value to PDF using safeSetField
+            safeSetField(form, pdfFieldId, value);
         });
 
-        // Signature Layout Handler
+        // 5. Signature Layout Handler
         const activeLayout = mapping.signatureLayouts ? mapping.signatureLayouts[layoutKey] : null;
         if (activeLayout) {
             for (const sig of activeLayout) {
@@ -2137,7 +2129,8 @@ async function fillPDF(fileName, action = 'download') {
                     const targetPage = pages[sig.page];
                     if (targetPage) {
                         targetPage.drawImage(img, {
-                            x: sig.posX, y: sig.posY,
+                            x: sig.posX, 
+                            y: sig.posY,
                             width: baseWidth * scaleFactor,
                             height: (baseWidth / aspectRatio) * scaleFactor
                         });
@@ -2146,6 +2139,7 @@ async function fillPDF(fileName, action = 'download') {
             }
         }
 
+        // 6. Output PDF
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
@@ -2167,6 +2161,7 @@ async function fillPDF(fileName, action = 'download') {
         alert("PDF Error: " + err.message);
     }
 }
+
 
 
 /* ---------- Workspace Reset ---------- */
