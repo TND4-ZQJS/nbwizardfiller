@@ -1418,34 +1418,57 @@ document.addEventListener("DOMContentLoaded", () => {
         syncShortAddress(source);
     }
 
-    /** 
-     * 2. Toggle 3rd Party Visibility & Purge Data
+    /**
+     * 3. Copy and Lock Address (Updated to guard against unchecked ThirdPP mode)
      */
-    function toggleThirdPP() {
-        if (!thirdPPCheckbox || !thirdPPInfoSec) return;
+    function toggleThirdPPAddress() {
+        if (!thirdPPAddrChk) return;
+        
+        // GUARD: If 3rd Party Payor mode is OFF, do NOT sync address!
+        const isThirdPartyActive = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
+        if (!isThirdPartyActive) return;
 
-        if (thirdPPCheckbox.checked) {
-            thirdPPInfoSec.style.display = "block";
-            if (secSigPO) secSigPO.style.display = "block";  
-            localStorage.setItem("wzepp_ThirdPP_Checkbox", "true");
-            if (typeof saveElValue === "function") {
-                saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: "true" });
-            }
-            restoreRequiredFields();
-            syncEPPAddress();
-        } else {
-            thirdPPInfoSec.style.display = "none";
-            if (secSigPO) secSigPO.style.display = "none";
-            localStorage.setItem("wzepp_ThirdPP_Checkbox", "false");
-            if (typeof saveElValue === "function") {
-                saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: "false" });
-            }
+        const keys = ['ct', 'st', 'cy', 'pc', 'a1'];
+        const isLocked = thirdPPAddrChk.checked;
+        
+        keys.forEach(key => {
+            const input  = ppAddr[key];
+            const source = poAddr[key];
+            if (!input || !source) return;
 
-            // DYNAMIC PURGE RUN FIRST
-            clearThirdPartyData();
-            syncEPPAddress();
-        }
+            if (isLocked) {
+                input.value = source.value;
+                input.readOnly = true;
+                input.classList.add("locked");
+                localStorage.setItem(input.id, input.value);
+            } else {
+                input.value = "";
+                input.readOnly = false;
+                input.classList.remove("locked");
+                localStorage.removeItem(input.id);
+            }
+            if (typeof saveElValue === "function") saveElValue(input);
+        });
+        
+        localStorage.setItem("wzepp_ThirdPP_Address", isLocked ? "true" : "false");
+        syncEPPAddress();
     }
+
+    /* --- Event Listeners --- */
+    [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
+        if (!input) return;
+        input.addEventListener("input", (e) => {
+            // Updated Guard: Only sync PO address to 3rd Party if 3rd Party Payor is ACTIVE
+            const isThirdPartyActive = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
+            
+            if (isThirdPartyActive && thirdPPAddrChk && thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
+                toggleThirdPPAddress(); 
+            }
+            if (typeof saveElValue === "function") saveElValue(input);
+            syncEPPAddress();
+        });
+    });
+
 
     /**
      * 3. Copy and Lock Address
