@@ -1296,7 +1296,7 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("wzepp_CC_Short_Address", value);
         } else {
             localStorage.removeItem("wzepp_CC_Short_Address");
-            localStorage.setItem("wzepp_CC_Short_Address", ""); // Force overwrite stale cached string for PDF engine
+            localStorage.setItem("wzepp_CC_Short_Address", "");
         }
 
         if (typeof saveElValue === "function") {
@@ -1374,7 +1374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (el.id) {
                 localStorage.removeItem(el.id);
-                localStorage.setItem(el.id, ""); // Hard wipe string for PDF readers
+                localStorage.setItem(el.id, "");
                 if (typeof saveElValue === "function") {
                     saveElValue({ id: el.id, value: "" });
                 }
@@ -1403,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 6. Clear signature if present
         if (typeof clearSpecificSig === "function") {
-            clearSpecificSig("owner");
+            clearSpecificSig('owner');
         }
     }
 
@@ -1557,7 +1557,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 input.classList.remove("locked");
                 localStorage.removeItem(input.id);
             }
-            if (typeof saveElValue === "function") saveElValue(input);
+            if (typeof saveElValue === "function") saveElValue({ id: input.id, value: input.value });
         });
         
         localStorage.setItem("wzepp_ThirdPP_Address", isLocked ? "true" : "false");
@@ -1565,13 +1565,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * 4. Credit Card Relationship Lock & PDF Text Sync
+     * 4. Credit Card Relationship Lock & PDF Text Sync (FIXED)
      */
     function handleRelationshipLock() {
         if (!thirdPPCheckbox) return;
 
         const isThirdParty = thirdPPCheckbox.checked;
-        const relInputs    = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
+        const relInputs = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
 
         if (!isThirdParty) {
             // A. Handle Select Dropdown
@@ -1582,18 +1582,18 @@ document.addEventListener("DOMContentLoaded", () => {
                            opt.text.toUpperCase().includes("SELF")
                 );
 
-                if (ownselfOpt) relDropdown.value = ownselfOpt.value;
+                if (ownselfOpt) {
+                    relDropdown.value = ownselfOpt.value;
+                } else if (relDropdown.options.length > 0) {
+                    relDropdown.selectedIndex = 0;
+                }
 
                 Array.from(relDropdown.options).forEach(opt => {
                     if (ownselfOpt && opt.value !== ownselfOpt.value && opt.value !== "") {
                         opt.disabled = true;
                     }
                 });
-
-                // Pass human-readable string "OWNSELF" to saveElValue for PDF printing
-                if (typeof saveElValue === "function") {
-                    saveElValue({ id: "wzepp_Relationship", value: "OWNSELF" });
-                }
+                relDropdown.disabled = true;
             }
 
             // B. Handle Checkbox / Radio Inputs
@@ -1609,28 +1609,27 @@ document.addEventListener("DOMContentLoaded", () => {
                         input.checked = false;
                         input.disabled = true;
                     }
-                    if (input.checked && typeof saveElValue === "function") {
-                        saveElValue({ id: input.id || "wzepp_Relationship", value: "OWNSELF" });
-                    }
                 });
             }
 
-            // C. Handle Direct PDF Text Fields
+            // C. Handle Direct Text Display & Storage
             if (relText) {
                 relText.value = "OWNSELF";
                 relText.readOnly = true;
-                if (typeof saveElValue === "function") {
-                    saveElValue({ id: "wzepp_Relationship_Text", value: "OWNSELF" });
-                }
             }
 
             localStorage.setItem("wzepp_Relationship", "OWNSELF");
 
+            if (typeof saveElValue === "function") {
+                saveElValue({ id: "wzepp_Relationship", value: "OWNSELF" });
+                saveElValue({ id: "wzepp_Relationship_Text", value: "OWNSELF" });
+            }
+
         } else {
             // Re-enable controls when 3rd Party Payor is checked
             if (relDropdown && relDropdown.tagName === "SELECT") {
+                relDropdown.disabled = false;
                 Array.from(relDropdown.options).forEach(opt => { opt.disabled = false; });
-                if (typeof saveElValue === "function") saveElValue(relDropdown);
             }
 
             if (relInputs && relInputs.length > 0) {
@@ -1638,12 +1637,41 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (relText) {
-                relText.value = "";
                 relText.readOnly = false;
-                if (typeof saveElValue === "function") {
-                    saveElValue({ id: "wzepp_Relationship_Text", value: "" });
-                }
             }
+
+            // Sync current manual selection back to PDF text
+            syncRelationshipSelection();
+        }
+    }
+
+    /**
+     * Helper: Listens to manual user inputs on Relationship controls and updates PDF state
+     */
+    function syncRelationshipSelection() {
+        if (!thirdPPCheckbox || !thirdPPCheckbox.checked) return;
+
+        let selectedVal = "";
+
+        if (relDropdown && relDropdown.tagName === "SELECT") {
+            selectedVal = relDropdown.options[relDropdown.selectedIndex]?.text || relDropdown.value;
+        } else {
+            const relInputs = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
+            const checkedOpt = Array.from(relInputs).find(i => i.checked);
+            if (checkedOpt) {
+                selectedVal = checkedOpt.value;
+            }
+        }
+
+        if (relText) {
+            relText.value = selectedVal;
+        }
+
+        localStorage.setItem("wzepp_Relationship", selectedVal);
+
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: "wzepp_Relationship", value: selectedVal });
+            saveElValue({ id: "wzepp_Relationship_Text", value: selectedVal });
         }
     }
 
@@ -1657,15 +1685,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (relDropdown) {
-        relDropdown.addEventListener("change", (e) => {
-            if (typeof saveElValue === "function") saveElValue(e.target);
+        relDropdown.addEventListener("change", () => {
+            syncRelationshipSelection();
         });
     }
 
     const relInputs = document.querySelectorAll('input[name="wzepp_Relationship"], .wzepp_Relationship_Option');
     relInputs.forEach(input => {
-        input.addEventListener("change", (e) => {
-            if (typeof saveElValue === "function") saveElValue(e.target);
+        input.addEventListener("change", () => {
+            syncRelationshipSelection();
         });
     });
 
@@ -1677,7 +1705,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isThirdPartyActive && thirdPPAddrChk && thirdPPAddrChk.checked && e.target.id.includes("PO_Address")) {
                 toggleThirdPPAddress(); 
             }
-            if (typeof saveElValue === "function") saveElValue(input);
+            if (typeof saveElValue === "function") saveElValue({ id: input.id, value: input.value });
             syncEPPAddress();
         });
     });
@@ -1712,7 +1740,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleThirdPP();
 });
-
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
     document.getElementById("wzepp_ThirdPP_DOB_MM_UI"),
