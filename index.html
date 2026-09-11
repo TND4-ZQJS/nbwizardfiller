@@ -1252,11 +1252,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync (FIXED) ---------- */
+/* ---------- 3RD Party Payor & Address Sync (FIXED FOR UNCHECK) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
     const thirdPPAddrChk  = document.getElementById("wzepp_ThirdPP_Address");
+    const submitNIRCChk  = document.getElementById("wzepp_SubmitNIRC_Checkbox");
     const secSigPO        = document.getElementById("SecSigPO");
 
     // Mapping for Policy Owner (PO)
@@ -1296,18 +1297,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /**
-     * Helper: Purges 3rd Party DOM values, local storage, and framework states
+     * Helper: Completely purges 3rd Party DOM values, local storage, and framework states
      */
     function clearThirdPartyData() {
         if (!thirdPPInfoSec) return;
 
-        if (thirdPPAddrChk) thirdPPAddrChk.checked = false;
+        // 1. Uncheck sub-checkboxes and remove from LocalStorage
+        if (thirdPPAddrChk) {
+            thirdPPAddrChk.checked = false;
+            localStorage.removeItem("wzepp_ThirdPP_Address");
+            if (typeof saveElValue === "function") saveElValue(thirdPPAddrChk);
+        }
 
+        if (submitNIRCChk) {
+            submitNIRCChk.checked = false;
+            localStorage.removeItem("wzepp_SubmitNIRC_Checkbox");
+            if (typeof saveElValue === "function") saveElValue(submitNIRCChk);
+        }
+
+        // 2. Clear all input fields inside section & handle `required` attribute
         const inputs = thirdPPInfoSec.querySelectorAll("input, select, textarea");
         inputs.forEach(input => {
             input.value = "";
             input.readOnly = false;
             input.classList.remove("locked");
+            
+            // Remove 'required' when hidden so browser doesn't block submission
+            input.removeAttribute("required");
             
             localStorage.removeItem(input.id);
             if (typeof saveElValue === "function") {
@@ -1315,6 +1331,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
+        // 3. Explicitly purge known keys from LocalStorage
         const thirdPartyKeys = [
             "wzepp_ThirdPP_Address1", 
             "wzepp_ThirdPP_Address_Country", 
@@ -1324,6 +1341,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "wzepp_ThirdPP_NIRC",
             "wzepp_ThirdPP_Mobile",
             "wzepp_ThirdPP_Name",
+            "wzepp_SubmitNIRC_Checkbox",
             "wzepp_ThirdPP_Address"
         ];
         
@@ -1332,9 +1350,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (typeof saveElValue === "function") saveElValue({ id: key, value: "" });
         });
 
+        // 4. Clear signature if applicable
         if (typeof clearSpecificSig === "function") {
             clearSpecificSig('owner');
         }
+    }
+
+    /**
+     * Helper: Restores 'required' attributes when 3rd Party is turned back ON
+     */
+    function restoreRequiredFields() {
+        if (ppAddr.a1) ppAddr.a1.setAttribute("required", "required");
     }
 
     /**
@@ -1398,6 +1424,7 @@ document.addEventListener("DOMContentLoaded", () => {
             thirdPPInfoSec.style.display = "block";
             if (secSigPO) secSigPO.style.display = "block";  
             localStorage.setItem("wzepp_ThirdPP_Checkbox", "true");
+            restoreRequiredFields();
         } else {
             thirdPPInfoSec.style.display = "none";
             if (secSigPO) secSigPO.style.display = "none";
@@ -1491,10 +1518,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     toggleThirdPP();
-
-    if (thirdPPCheckbox && thirdPPCheckbox.checked && thirdPPAddrChk && thirdPPAddrChk.checked) {
-        toggleThirdPPAddress();
-    }
 });
 
 
