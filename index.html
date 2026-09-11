@@ -1252,7 +1252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
   
 
-/* ---------- 3RD Party Payor & Address Sync (FIXED wzepp_CC_Short_Address) ---------- */
+/* ---------- 3RD Party Payor & Address Sync (PDF STALE DATA FIX) ---------- */
 document.addEventListener("DOMContentLoaded", () => {
     const thirdPPCheckbox = document.getElementById("wzepp_ThirdPP_Checkbox");
     const thirdPPInfoSec  = document.getElementById("ThirdPP_Info_Sec");
@@ -1279,11 +1279,32 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     /**
+     * Helper: Sets or purges wzepp_CC_Short_Address across DOM, Storage, and framework states
+     */
+    function setShortAddressValue(value) {
+        const shortAddrEl = document.getElementById("wzepp_CC_Short_Address");
+        if (shortAddrEl) {
+            shortAddrEl.value = value;
+        }
+
+        if (value) {
+            localStorage.setItem("wzepp_CC_Short_Address", value);
+        } else {
+            localStorage.removeItem("wzepp_CC_Short_Address");
+            localStorage.setItem("wzepp_CC_Short_Address", ""); // Overwrite stale cached values for PDF engine
+        }
+
+        if (typeof saveElValue === "function") {
+            saveElValue({ id: "wzepp_CC_Short_Address", value: value });
+        }
+    }
+
+    /**
      * Helper: Creates the shortened address (Line 1, City, State)
      */
     function syncShortAddress(source) {
-        if (!source || !source.a1) {
-            localStorage.setItem("wzepp_CC_Short_Address", "");
+        if (!source || !source.a1 || !source.a1.value) {
+            setShortAddressValue("");
             return "";
         }
 
@@ -1294,16 +1315,12 @@ document.addEventListener("DOMContentLoaded", () => {
         ].filter(part => part.length > 0);
 
         const shortString = parts.join(", ").toUpperCase();
-        
-        localStorage.setItem("wzepp_CC_Short_Address", shortString);
-        if (typeof saveElValue === "function") {
-            saveElValue({ id: "wzepp_CC_Short_Address", value: shortString });
-        }
+        setShortAddressValue(shortString);
         return shortString;
     }
 
     /**
-     * Helper: DYNAMICALLY purges ALL third-party keys from DOM, Memory, LocalStorage, and framework states
+     * Helper: DYNAMICALLY purges ALL third-party keys from DOM, Memory, LocalStorage, and PDF mapping states
      */
     function clearThirdPartyData() {
         if (!thirdPPInfoSec) return;
@@ -1312,6 +1329,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (thirdPPAddrChk) {
             thirdPPAddrChk.checked = false;
             localStorage.removeItem("wzepp_ThirdPP_Address");
+            localStorage.setItem("wzepp_ThirdPP_Address", "false");
             if (typeof saveElValue === "function") {
                 saveElValue({ id: "wzepp_ThirdPP_Address", value: "false" });
             }
@@ -1320,6 +1338,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (submitNIRCChk) {
             submitNIRCChk.checked = false;
             localStorage.removeItem("wzepp_SubmitNIRC_Checkbox");
+            localStorage.setItem("wzepp_SubmitNIRC_Checkbox", "false");
             if (typeof saveElValue === "function") {
                 saveElValue({ id: "wzepp_SubmitNIRC_Checkbox", value: "false" });
             }
@@ -1350,6 +1369,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (el.id) {
                 localStorage.removeItem(el.id);
+                localStorage.setItem(el.id, ""); // Hard wipe string for PDF readers
                 if (typeof saveElValue === "function") {
                     saveElValue({ id: el.id, value: "" });
                 }
@@ -1367,13 +1387,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         keysToRemove.forEach(key => {
             localStorage.removeItem(key);
+            localStorage.setItem(key, "");
             if (typeof saveElValue === "function") {
                 saveElValue({ id: key, value: "" });
             }
         });
 
-        // 5. Force short address strictly back to Policy Owner (PO)
-        syncShortAddress(poAddr);
+        // 5. Hard purge wzepp_CC_Short_Address when 3rd party is OFF
+        setShortAddressValue("");
 
         // 6. Clear signature if present
         if (typeof clearSpecificSig === "function") {
@@ -1399,23 +1420,53 @@ document.addEventListener("DOMContentLoaded", () => {
             saveElValue({ id: "wzepp_ThirdPP_Checkbox", value: isThirdParty ? "true" : "false" });
         }
 
-        // STRICT SOURCE DETERMINATION
-        let source = poAddr;
-        if (isThirdParty) {
-            const isAddressSame = thirdPPAddrChk && thirdPPAddrChk.checked;
-            source = isAddressSame ? poAddr : ppAddr;
+        // IF 3RD PARTY IS OFF: Strictly clear short address & wipe cardholder inputs
+        if (!isThirdParty) {
+            setShortAddressValue("");
+
+            // Default cardholder info back to Policy Owner
+            const poNirc   = document.getElementById("wzepp_PO_NIRC")?.value.trim() || "";
+            const poMobile = document.getElementById("wzepp_PO_Mobile")?.value.trim() || "";
+            const poName   = document.getElementById("wzepp_PO_Name")?.value.trim() || "";
+
+            const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
+            const hiddenMob  = document.getElementById("wzepp_EPP_Cardholder_Mobile");
+            const hiddenName = document.getElementById("wzepp_EPP_Cardholder_Name");
+
+            if (hiddenNirc) { hiddenNirc.value = poNirc; localStorage.setItem("wzepp_EPP_Cardholder_NIRC", poNirc); }
+            if (hiddenMob)  { hiddenMob.value = poMobile; localStorage.setItem("wzepp_EPP_Cardholder_Mobile", poMobile); }
+            if (hiddenName) { hiddenName.value = poName; localStorage.setItem("wzepp_EPP_Cardholder_Name", poName); }
+
+            // Address string for PO
+            const poParts = [
+                poAddr.a1 && poAddr.a1.value ? poAddr.a1.value.trim() : "",
+                `${poAddr.pc && poAddr.pc.value ? poAddr.pc.value.trim() : ""} ${poAddr.cy && poAddr.cy.value ? poAddr.cy.value.trim() : ""}`.trim(),
+                poAddr.st && poAddr.st.value ? poAddr.st.value.trim() : "",
+                poAddr.ct && poAddr.ct.value ? poAddr.ct.value.trim() : ""
+            ].filter(part => part.length > 0);
+
+            const combinedPOString = poParts.join(", ").toUpperCase();
+
+            if (typeof saveElValue === "function") {
+                saveElValue({ id: "wzepp_EPP_Full_Address_Line", value: combinedPOString });
+            }
+            localStorage.setItem("wzepp_EPP_Payor_Address", combinedPOString);
+            return;
         }
 
-        const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
+        // IF 3RD PARTY IS ON: Resolve source based on "Same address" checkbox
+        const isAddressSame = thirdPPAddrChk && thirdPPAddrChk.checked;
+        const source = isAddressSame ? poAddr : ppAddr;
+        const sourcePrefix = "wzepp_ThirdPP_";
 
         // --- SYNC CARDHOLDER DETAILS ---
         const nircEl   = document.getElementById(`${sourcePrefix}NIRC`);
         const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
         const nameEl   = document.getElementById(`${sourcePrefix}Name`);
 
-        const nircVal   = isThirdParty ? (nircEl ? nircEl.value.trim() : "") : (document.getElementById("wzepp_PO_NIRC")?.value.trim() || "");
-        const mobileVal = isThirdParty ? (mobileEl ? mobileEl.value.trim() : "") : (document.getElementById("wzepp_PO_Mobile")?.value.trim() || "");
-        const nameVal   = isThirdParty ? (nameEl ? nameEl.value.trim() : "") : (document.getElementById("wzepp_PO_Name")?.value.trim() || "");
+        const nircVal   = nircEl ? nircEl.value.trim() : "";
+        const mobileVal = mobileEl ? mobileEl.value.trim() : "";
+        const nameVal   = nameEl ? nameEl.value.trim() : "";
 
         const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
         const hiddenMob  = document.getElementById("wzepp_EPP_Cardholder_Mobile");
@@ -1440,7 +1491,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         localStorage.setItem("wzepp_EPP_Payor_Address", combinedString);
 
-        // Synchronize short address with determined source
+        // Sync short address only when 3rd party is active
         syncShortAddress(source);
     }
 
@@ -1559,6 +1610,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toggleThirdPP();
 });
+
 
 /* ---------- DOB MULTI-INPUT LOGIC ---------- */
 const dobUIFields = [
