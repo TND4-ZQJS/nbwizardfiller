@@ -1285,16 +1285,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const parts = [
             source.a1.value ? source.a1.value.trim() : "",
-            source.cy.value ? source.cy.value.trim() : "",
-            source.st.value ? source.st.value.trim() : ""
+            source.cy && source.cy.value ? source.cy.value.trim() : "",
+            source.st && source.st.value ? source.st.value.trim() : ""
         ].filter(part => part.length > 0);
 
         const shortString = parts.join(", ").toUpperCase();
         
-        // This key is used in your PDF_MAPPING_LOGIC
         localStorage.setItem("wzepp_CC_Short_Address", shortString);
         console.log("Debug - Short Address Updated:", shortString); 
         return shortString;
+    }
+
+    /**
+     * Helper: Completely purges 3rd Party DOM values, local storage, and framework states
+     */
+    function clearThirdPartyData() {
+        if (!thirdPPInfoSec) return;
+
+        if (thirdPPAddrChk) thirdPPAddrChk.checked = false;
+
+        const inputs = thirdPPInfoSec.querySelectorAll("input, select, textarea");
+        inputs.forEach(input => {
+            input.value = "";
+            input.readOnly = false;
+            input.classList.remove("locked");
+            
+            localStorage.removeItem(input.id);
+            if (typeof saveElValue === "function") {
+                saveElValue({ id: input.id, value: "" });
+            }
+        });
+
+        const thirdPartyKeys = [
+            "wzepp_ThirdPP_Address1", 
+            "wzepp_ThirdPP_Address_Country", 
+            "wzepp_ThirdPP_Address_State", 
+            "wzepp_ThirdPP_Address_City", 
+            "wzepp_ThirdPP_Address_Postcode",
+            "wzepp_ThirdPP_NIRC",
+            "wzepp_ThirdPP_Mobile",
+            "wzepp_ThirdPP_Name"
+        ];
+        
+        thirdPartyKeys.forEach(key => {
+            localStorage.removeItem(key);
+            if (typeof saveElValue === "function") saveElValue({ id: key, value: "" });
+        });
+
+        if (typeof clearSpecificSig === "function") {
+            clearSpecificSig('owner');
+        }
     }
 
     /**
@@ -1304,18 +1344,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const isThirdParty = thirdPPCheckbox ? thirdPPCheckbox.checked : false;
         const isDifferentPPAddress = isThirdParty && thirdPPAddrChk && !thirdPPAddrChk.checked;
         
-        // Determine sources based on whether it's Third Party or Policy Owner
         const source = isDifferentPPAddress ? ppAddr : poAddr;
         const sourcePrefix = isThirdParty ? "wzepp_ThirdPP_" : "wzepp_PO_";
 
-        // --- SYNC CARDHOLDER DETAILS (GRABBING LIVE VALUES) ---
+        // --- SYNC CARDHOLDER DETAILS ---
         const nircEl   = document.getElementById(`${sourcePrefix}NIRC`);
         const mobileEl = document.getElementById(`${sourcePrefix}Mobile`);
         const nameEl   = document.getElementById(`${sourcePrefix}Name`);
 
-        const nircVal   = nircEl ? nircEl.value.trim() : (localStorage.getItem(`${sourcePrefix}NIRC`) || "");
-        const mobileVal = mobileEl ? mobileEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Mobile`) || "");
-        const nameVal   = nameEl ? nameEl.value.trim() : (localStorage.getItem(`${sourcePrefix}Name`) || "");
+        const nircVal   = isThirdParty ? (nircEl ? nircEl.value.trim() : "") : (document.getElementById("wzepp_PO_NIRC")?.value.trim() || "");
+        const mobileVal = isThirdParty ? (mobileEl ? mobileEl.value.trim() : "") : (document.getElementById("wzepp_PO_Mobile")?.value.trim() || "");
+        const nameVal   = isThirdParty ? (nameEl ? nameEl.value.trim() : "") : (document.getElementById("wzepp_PO_Name")?.value.trim() || "");
 
         const hiddenNirc = document.getElementById("wzepp_EPP_Cardholder_NIRC");
         const hiddenMob  = document.getElementById("wzepp_EPP_Cardholder_Mobile");
@@ -1344,7 +1383,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /** 
-     * 2. Toggle 3rd Party Visibility & Purge Stale Inputs 
+     * 2. Toggle 3rd Party Visibility & Purge Data
      */
     function toggleThirdPP() {
         if (!thirdPPCheckbox || !thirdPPInfoSec) return;
@@ -1356,21 +1395,7 @@ document.addEventListener("DOMContentLoaded", () => {
             thirdPPInfoSec.style.display = "none";
             if (secSigPO) secSigPO.style.display = "none";
 
-            // Uncheck standard and address checkboxes inside 3rd PP context
-            if (thirdPPAddrChk) thirdPPAddrChk.checked = false;
-
-            // Clear all input and select elements in the 3rd Party section
-            thirdPPInfoSec.querySelectorAll("input, select").forEach(input => {
-                input.value = "";
-                input.readOnly = false;
-                input.classList.remove("locked");
-                localStorage.removeItem(input.id);
-                if (typeof saveElValue === "function") saveElValue(input);
-            });
-            
-            if (typeof clearSpecificSig === "function") {
-                clearSpecificSig('owner');
-            }
+            clearThirdPartyData();
         }
         syncEPPAddress();
     }
@@ -1406,10 +1431,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     /* --- Event Listeners --- */
-    if (thirdPPCheckbox) thirdPPCheckbox.addEventListener("change", toggleThirdPP);
-    if (thirdPPAddrChk)  thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+    if (thirdPPCheckbox) {
+        thirdPPCheckbox.addEventListener("change", (e) => {
+            localStorage.setItem("wzepp_ThirdPP_Checkbox", e.target.checked ? "true" : "false");
+            toggleThirdPP();
+        });
+    }
 
-    // Listen for input on ALL address fields for live-sync
+    if (thirdPPAddrChk) thirdPPAddrChk.addEventListener("change", toggleThirdPPAddress);
+
     [...Object.values(poAddr), ...Object.values(ppAddr)].forEach(input => {
         if (!input) return;
         input.addEventListener("input", (e) => {
@@ -1439,7 +1469,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /* --- Initialization --- */
     toggleThirdPP(); 
 
-    // Only restore 3rd party address state if 3rd Party Payor is explicitly checked
     if (thirdPPCheckbox && thirdPPCheckbox.checked && ppAddr.a1 && localStorage.getItem(ppAddr.a1.id)) {
         Object.values(ppAddr).forEach(input => {
             if (!input) return;
@@ -1997,8 +2026,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/* ---------- PDF Generator ---------- */
 async function fillPDF(fileName, action = 'download') {
-    // 0. Prep Data
     if (typeof syncPayorData === "function") syncPayorData(); 
     if (typeof syncEPPAddress === "function") syncEPPAddress();
   
@@ -2013,24 +2042,33 @@ async function fillPDF(fileName, action = 'download') {
         if (!res.ok) throw new Error("Could not find file: " + fileName);
         
         const bytes = await res.arrayBuffer();
-        // NOTE: Ensure PDFLib is loaded in your HTML <script> tags
         const pdfDoc = await PDFLib.PDFDocument.load(bytes);
         const form = pdfDoc.getForm();
         const pages = pdfDoc.getPages();
 
-        const isThirdParty = localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true";
+        const thirdPPChkEl = document.getElementById("wzepp_ThirdPP_Checkbox");
+        const isThirdParty = thirdPPChkEl ? thirdPPChkEl.checked : (localStorage.getItem("wzepp_ThirdPP_Checkbox") === "true");
+        
         const layoutKey = isThirdParty ? "third_party" : "ownself";
         const conditionalFields = mapping.conditionalFields ? mapping.conditionalFields[layoutKey] : {};
         const combinedFields = { ...mapping.fields, ...conditionalFields };
 
-        // 4. Fill Fields
+        // Fill Fields
         Object.keys(combinedFields).forEach(pdfFieldId => {
             const storageKey = combinedFields[pdfFieldId];
-            if (!storageKey) return; // Skip if mapping is empty
+            if (!storageKey) return; 
+
+            if (!isThirdParty && storageKey.startsWith("wzepp_ThirdPP_")) {
+                try {
+                    const field = form.getField(pdfFieldId);
+                    if (field instanceof PDFLib.PDFTextField) field.setText("");
+                    if (field instanceof PDFLib.PDFCheckBox) field.uncheck();
+                } catch (e) { }
+                return;
+            }
 
             let value = localStorage.getItem(storageKey);
 
-            // FIX ISSUE #4: Relationship Text
             if (storageKey === "wzepp_Relationship") {
                 const relEl = document.getElementById("wzepp_Relationship");
                 if (relEl && relEl.selectedIndex !== -1) {
@@ -2038,7 +2076,6 @@ async function fillPDF(fileName, action = 'download') {
                 }
             }
 
-            // BRIDGE LOGIC for Checkboxes
             const bridgeKeys = [
                 localStorage.getItem("wzepp_Relationship"),
                 localStorage.getItem("wzepp_Card_Type"),
@@ -2051,7 +2088,6 @@ async function fillPDF(fileName, action = 'download') {
                 value = "true";
             }
 
-            // Fallback to DOM if still empty
             if (value === null || value === undefined) {
                 const el = document.getElementById(storageKey);
                 if (el) value = el.type === "checkbox" ? el.checked.toString() : el.value;
@@ -2065,10 +2101,12 @@ async function fillPDF(fileName, action = 'download') {
                 } else if (field instanceof PDFLib.PDFCheckBox) {
                     (value === "true" || value === "Yes" || value === "on") ? field.check() : field.uncheck();
                 }
-            } catch (e) { console.warn("Field missing:", pdfFieldId); }
+            } catch (e) { 
+                console.warn("Field missing:", pdfFieldId); 
+            }
         });
 
-        // 5. Signature Logic
+        // Signature Layout Handler
         const activeLayout = mapping.signatureLayouts ? mapping.signatureLayouts[layoutKey] : null;
         if (activeLayout) {
             for (const sig of activeLayout) {
@@ -2092,7 +2130,6 @@ async function fillPDF(fileName, action = 'download') {
             }
         }
 
-        // 6. Final Output
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
@@ -2104,7 +2141,7 @@ async function fillPDF(fileName, action = 'download') {
             const a = document.createElement("a");
             a.href = url;
             a.download = `${policyNum}_${fileName}`;
-            document.body.appendChild(a); // Needed for some browsers
+            document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
         }
@@ -2115,11 +2152,11 @@ async function fillPDF(fileName, action = 'download') {
     }
 }
 
-/* ---------- RESET ALL DATA ---------- */
+
+/* ---------- Workspace Reset ---------- */
 function resetAllData() {
   if (!confirm("Are you sure you want to clear all data and signatures from this workspace?")) return;
 
-  // 1. Reset input DOM elements and remove corresponding localStorage keys
   document.querySelectorAll("input, select, textarea").forEach(el => {
     if (el.id) {
       localStorage.removeItem(el.id);
@@ -2134,14 +2171,12 @@ function resetAllData() {
     el.classList.remove("locked");
   });
 
-  // 2. Wipe all wzepp_ application keys dynamically from localStorage
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith("wzepp_")) {
       localStorage.removeItem(key);
     }
   });
 
-  // 3. Clear non-prefixed selection/bridge option keys
   const rawBridgeOptionKeys = [
     "VISA", "MASTER", "MBB", "PBB", "UOB", "HSBC", 
     "CIMB", "ALLIANCE", "HLB", "STANDCHART", 
@@ -2149,7 +2184,6 @@ function resetAllData() {
   ];
   rawBridgeOptionKeys.forEach(key => localStorage.removeItem(key));
 
-  // 4. Reset Signature Pads & Canvas Contexts
   if (typeof signaturePad !== "undefined" && signaturePad) {
     signaturePad.clear();
   }
@@ -2159,7 +2193,6 @@ function resetAllData() {
     if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  // 5. Reset Signature Preview Boxes
   const displayNames = {
     'cardholder': 'Card Holder',
     'owner': 'Policy Owner',
@@ -2174,14 +2207,13 @@ function resetAllData() {
     }
   });
 
-  // 6. Reset Wizard Navigation back to Step 1
   if (typeof navigateTo === "function") {
     navigateTo(0);
   }
 
-  // 7. Clean workspace reload
   window.location.reload();
 }
+
   
 //WIZARD TRACKER LOGIC
 const steps = document.querySelectorAll(".wizard-step");
